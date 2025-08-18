@@ -1,6 +1,6 @@
 from twisted.web import resource, server, static
-from cgi import escape
-from urllib import urlencode
+from html import escape
+from urllib.parse import urlencode
 import config, copy, time
 
 HEADER = """
@@ -99,12 +99,12 @@ class AdminEngine(resource.Resource):
     def brescape(text):
       return escape(text).replace("\n", "<br/>")
       
-    for engine, obj in self.__services.items():
+    for engine, obj in list(self.__services.items()):
       if not hasattr(obj, "adminEngine"):
         continue
       add_text(engine, "h2")
       
-      for heading, obj2 in obj.adminEngine.items():
+      for heading, obj2 in list(obj.adminEngine.items()):
         add_text(heading, "h3")
 
         for pos, obj3 in enumerate(obj2):

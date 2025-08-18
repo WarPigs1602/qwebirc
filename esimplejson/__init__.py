@@ -109,8 +109,8 @@ if __name__ == '__main__':
     from esimplejson.decoder import JSONDecoder
     from esimplejson.encoder import JSONEncoder
 else:
-    from decoder import JSONDecoder
-    from encoder import JSONEncoder
+    from .decoder import JSONDecoder
+    from .encoder import JSONEncoder
 
 _default_encoder = JSONEncoder(
     skipkeys=False,
@@ -390,7 +390,7 @@ def main():
         raise SystemExit("%s [infile [outfile]]" % (sys.argv[0],))
     try:
         obj = load(infile)
-    except ValueError, e:
+    except ValueError as e:
         raise SystemExit(e)
     dump(obj, outfile, sort_keys=True, indent=4)
     outfile.write('\n')

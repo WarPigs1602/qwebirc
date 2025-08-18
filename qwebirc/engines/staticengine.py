@@ -1,7 +1,8 @@
 from twisted.web import resource, server, static, error
+from twisted.web.resource import ForbiddenResource
 import qwebirc.util as util
 import pprint
-from adminengine import AdminEngineAction
+from .adminengine import AdminEngineAction
 try:
   from twisted.web.server import GzipEncoderFactory
   GZIP_ENCODER = GzipEncoderFactory()
@@ -40,4 +41,5 @@ class StaticEngine(static.File):
     }
 
   def directoryListing(self):
-    return error.ForbiddenResource()
+    # Immer static/qui.html ausliefern, egal welches Verzeichnis
+    return self.getChild("qui.html", None)

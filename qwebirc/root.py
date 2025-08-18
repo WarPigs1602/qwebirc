@@ -1,16 +1,17 @@
 from twisted.protocols.policies import TimeoutMixin
 from twisted.web import resource, server, static, http
 from twisted.internet import error, reactor
-import engines
+from . import engines
 import mimetypes
 import config
-import sigdebug
+from . import sigdebug
 import re
 
 class RootResource(resource.Resource):
   def getChild(self, name, request):
+    # Leerer Pfad wird intern wie /qui.html behandelt (keine Weiterleitung, sondern echte Verknüpfung)
     if name == "":
-      name = "qui.html"
+      return self.primaryChild.getChild("qui.html", request)
     return self.primaryChild.getChild(name, request)
 
 class WrappedRequest(server.Request):
@@ -76,9 +77,13 @@ class RootSite(server.Site):
     services["StaticEngine"] = root.primaryChild = engines.StaticEngine(path)
 
     def register(service, path, *args, **kwargs):
-      sobj = service("/" + path, *args, **kwargs)
+      if isinstance(path, str):
+        path_bytes = path.encode("utf-8")
+      else:
+        path_bytes = path
+      sobj = service(b"/" + path_bytes, *args, **kwargs)
       services[service.__name__] = sobj
-      root.putChild(path, sobj)
+      root.putChild(path_bytes, sobj)
       
     register(engines.AJAXEngine, "e")
     try:

@@ -6,11 +6,11 @@ import subprocess
 import os
 
 def fail(*message):
-  print >>sys.stderr, "\n".join(message)
+  print("\n".join(message), file=sys.stderr)
   sys.exit(1)
   
 def warn(*message):
-  print >>sys.stderr, "warning:", "\nwarning: ".join(message), "\n"
+  print("warning:", "\nwarning: ".join(message), "\n", file=sys.stderr)
 
 def check_dependencies():
   i = 0
@@ -23,12 +23,12 @@ def check_dependencies():
   i+=check_java()
   i+=check_git()
   
-  print "0 errors, %d warnings." % i
+  print("0 errors, %d warnings." % i)
   
   if i == 0:
-    print "looks like you've got everything you need to run qwebirc!"
+    print("looks like you've got everything you need to run qwebirc!")
   else:
-    print "you can run qwebirc despite these."
+    print("you can run qwebirc despite these.")
 
   f = open(".checked", "w")
   f.close()
@@ -143,5 +143,5 @@ def check_autobahn():
   return 1
 
 if __name__ == "__main__":
-  import dependencies
+  from . import dependencies
   dependencies.check_dependencies()

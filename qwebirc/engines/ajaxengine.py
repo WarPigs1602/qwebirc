@@ -1,14 +1,14 @@
 from twisted.web import resource, server, static, error as http_error
 from twisted.names import client
 from twisted.internet import reactor, error
-from authgateengine import login_optional, getSessionData
-import md5, sys, os, time, config, qwebirc.config_options as config_options, traceback, socket
+from .authgateengine import login_optional, getSessionData
+import hashlib, sys, os, time, config, qwebirc.config_options as config_options, traceback, socket
 import qwebirc.ircclient as ircclient
-from adminengine import AdminEngineAction
+from .adminengine import AdminEngineAction
 from qwebirc.util import HitCounter
 import qwebirc.dns as qdns
 import qwebirc.util.qjson as json
-import urlparse
+import urllib.parse
 import qwebirc.util.autobahn_check as autobahn_check
 
 TRANSPORTS = ["longpoll"]
@@ -25,17 +25,18 @@ elif autobahn_status == False:
   # they've been warned already
   pass
 else:
-  print >>sys.stderr, "WARNING:"
-  print >>sys.stderr, "  %s" % autobahn_status
-  print >>sys.stderr, "  as a result websocket support is disabled."
-  print >>sys.stderr, "  upgrade your version of autobahn from http://autobahn.ws/python/getstarted/"
+  print("WARNING:", file=sys.stderr)
+  print("  %s" % autobahn_status, file=sys.stderr)
+  print("  as a result websocket support is disabled.", file=sys.stderr)
+  print("  upgrade your version of autobahn from http://autobahn.ws/python/getstarted/", file=sys.stderr)
 
 BAD_SESSION_MESSAGE = "Invalid session, this most likely means the server has restarted; close this dialog and then try refreshing the page."
 MAX_SEQNO = 9223372036854775807  # 2**63 - 1... yeah it doesn't wrap
 Sessions = {}
 
+
 def get_session_id():
-  return md5.md5(os.urandom(16)).hexdigest()
+  return hashlib.md5(os.urandom(16)).hexdigest()
 
 class BufferOverflowException(Exception):
   pass
@@ -195,24 +196,32 @@ class AJAXEngine(resource.Resource):
     
   def render_POST(self, request):
     path = request.path[len(self.prefix):]
-    if path[0] == "/":
-      handler = self.COMMANDS.get(path[1:])
+    print(f"[DEBUG] AJAXEngine.render_POST: path={path!r}")
+    if path and path[0] == ord("/"):
+      handler_name = path[1:]
+      if isinstance(handler_name, bytes):
+        handler_name = handler_name.decode("utf-8")
+      print(f"[DEBUG] AJAXEngine.render_POST: handler_name={handler_name!r}")
+      handler = self.COMMANDS.get(handler_name)
+      print(f"[DEBUG] AJAXEngine.render_POST: handler={handler}")
       if handler is not None:
         try:
           return handler(self, request)
-        except AJAXException, e:
-          return json.dumps((False, e[0]))
-
-    return "404" ## TODO: tidy up
+        except AJAXException as e:
+          return json.dumps((False, str(e))).encode("utf-8")
+    print("[DEBUG] AJAXEngine.render_POST: returning 404")
+    return b"404" ## TODO: tidy up
 
   def newConnection(self, request):
     ticket = login_optional(request)
     
     ip = request.getClientIP()
 
-    nick = request.args.get("nick")
+
+    print(f"[DEBUG] newConnection: request.args={request.args}")
+    nick = request.args.get("nick") or request.args.get(b"nick")
     if not nick:
-      raise AJAXException, "Nickname not supplied."
+      raise AJAXException("Nickname not supplied.")
     nick = ircclient.irc_decode(nick[0])
 
     password = request.args.get("password")
@@ -266,19 +275,18 @@ class AJAXEngine(resource.Resource):
       qdns.lookupAndVerifyPTR(ip, timeout=[config.DNS_TIMEOUT]).addCallbacks(callback, errback)
 
     Sessions[id] = session
-    
-    return json.dumps((True, id, TRANSPORTS))
+    return json.dumps((True, id, TRANSPORTS)).encode("utf-8")
 
   def getSession(self, request):
     bad_session_message = "Invalid session, this most likely means the server has restarted; close this dialog and then try refreshing the page."
     
     sessionid = request.args.get("s")
     if sessionid is None:
-      raise AJAXException, bad_session_message
+      raise AJAXException(bad_session_message)
       
     session = Sessions.get(sessionid[0])
     if not session:
-      raise AJAXException, bad_session_message
+      raise AJAXException(bad_session_message)
     return session
     
   def subscribe(self, request):
@@ -295,7 +303,7 @@ class AJAXEngine(resource.Resource):
         if seq_no < 0 or seq_no > MAX_SEQNO:
           raise ValueError
     except ValueError:
-      raise AJAXEngine, "Bad sequence number"
+      raise AJAXEngine("Bad sequence number")
 
     session.subscribe(channel, seq_no)
 
@@ -312,7 +320,7 @@ class AJAXEngine(resource.Resource):
   def push(self, request):
     command = request.args.get("c")
     if command is None:
-      raise AJAXException, "No command specified."
+      raise AJAXException("No command specified.")
     self.__total_hit()
 
     seq_no = request.args.get("n")
@@ -329,11 +337,11 @@ class AJAXEngine(resource.Resource):
       session.push(ircclient.irc_decode(command[0]), seq_no)
     except AttributeError: # occurs when we haven't noticed an error
       session.disconnect()
-      raise AJAXException, "Connection closed by server; try reconnecting by reloading the page."
-    except Exception, e: # catch all
+      raise AJAXException("Connection closed by server; try reconnecting by reloading the page.")
+    except Exception as e: # catch all
       session.disconnect()        
       traceback.print_exc(file=sys.stderr)
-      raise AJAXException, "Unknown error."
+      raise AJAXException("Unknown error.")
   
     return json.dumps((True, True))
   
@@ -346,7 +354,7 @@ class AJAXEngine(resource.Resource):
   @property
   def adminEngine(self):
     return {
-      "Sessions": [(str(v.client.client), AdminEngineAction("close", self.closeById, k)) for k, v in Sessions.iteritems() if not v.closed],
+      "Sessions": [(str(v.client.client), AdminEngineAction("close", self.closeById, k)) for k, v in Sessions.items() if not v.closed],
       "Connections": [(self.__connect_hit,)],
       "Total hits": [(self.__total_hit,)],
     }
@@ -385,13 +393,17 @@ if has_websocket:
         self.__session = None
 
     def onMessage(self, msg, isBinary):
-      # we don't bother checking the Origin header, as if you can auth then you've been able to pass the browser's
-      # normal origin handling (POSTed the new connection request and managed to get the session id)
+      # Debug logging for WebSocket protocol troubleshooting
+      print(f"[DEBUG] WebSocketEngineProtocol.onMessage: raw msg={msg!r} isBinary={isBinary}")
       state = self.__state
       message_type, message = msg[:1], msg[1:]
+      if isinstance(message, bytes):
+        message = message.decode("utf-8", "replace")
+      print(f"[DEBUG] WebSocketEngineProtocol.onMessage: state={state} message_type={message_type!r} message={message!r}")
       if state == self.AWAITING_AUTH:
-        if message_type == "s":  # subscribe
+        if message_type == b"s":  # subscribe
           tokens = message.split(",", 1)
+          print(f"[DEBUG] WebSocketEngineProtocol.onMessage: tokens={tokens}")
           if len(tokens) != 2:
             self.close("Bad tokens")
             return
@@ -417,8 +429,9 @@ if has_websocket:
           session.subscribe(self.__channel, seq_no)
           return
       elif state == self.AUTHED:
-        if message_type == "p":  # push
+        if message_type == b"p":  # push
           tokens = message.split(",", 1)
+          print(f"[DEBUG] WebSocketEngineProtocol.onMessage: tokens={tokens}")
           if len(tokens) != 2:
             self.close("Bad tokens")
             return
@@ -433,6 +446,7 @@ if has_websocket:
           self.__session.push(ircclient.irc_decode(message))
           return
 
+      print("[DEBUG] WebSocketEngineProtocol.onMessage: closing with Bad message type")
       self.close("Bad message type")
 
     def __cancelTimeout(self):
@@ -446,7 +460,7 @@ if has_websocket:
     def close(self, reason=None):
       self.__cancelTimeout()
       if reason:
-        self.sendClose(4999, unicode(reason))
+        self.sendClose(4999, str(reason))
       else:
         self.sendClose(4998)
 
@@ -455,6 +469,10 @@ if has_websocket:
         self.__session = None
 
     def send(self, message_type, message):
+      if isinstance(message_type, str):
+        message_type = message_type.encode("utf-8")
+      if isinstance(message, str):
+        message = message.encode("utf-8")
       self.sendMessage(message_type + message)
 
   class WebSocketResource(autobahn.twisted.resource.WebSocketResource):
@@ -466,7 +484,7 @@ if has_websocket:
     factory = autobahn.twisted.websocket.WebSocketServerFactory("ws://localhost")
     factory.externalPort = None
     factory.protocol = WebSocketEngineProtocol
-    factory.setProtocolOptions(maxMessagePayloadSize=512, maxFramePayloadSize=512, tcpNoDelay=False)
+    factory.setProtocolOptions(maxMessagePayloadSize=65536, maxFramePayloadSize=65536, tcpNoDelay=False)
     resource = WebSocketResource(factory)
     return resource
 

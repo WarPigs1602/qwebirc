@@ -54,7 +54,7 @@ def remove_python(dest, ignore=[]):
         
 def main():
   if len(sys.argv) < 2:
-    print >>sys.stderr, "syntax: %s [destination directory]" % sys.argv[0]
+    print("syntax: %s [destination directory]" % sys.argv[0], file=sys.stderr)
     sys.exit(0)
   DEST = sys.argv[1]
   
@@ -71,7 +71,7 @@ def main():
   for x in pages.JS_EXTRA:
     copy(os.path.join("static", "js", x + ".js"), DEST)
     
-  for x in pages.UIs.values():
+  for x in list(pages.UIs.values()):
     e = x.get("extrajs")
     if e is None:
       continue
@@ -95,7 +95,7 @@ def main():
   copy("config.py.example", DEST)
   
   if os.path.exists("config.py"):
-    print "NOT copying current config.py!"
+    print("NOT copying current config.py!")
     #copy("config.py", DEST)
   
 if __name__ == "__main__":

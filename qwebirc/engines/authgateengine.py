@@ -1,5 +1,5 @@
 from twisted.web import resource, server, static
-import config, urlparse, urllib, hashlib, re
+import config, urllib.parse, urllib.request, urllib.parse, urllib.error, hashlib, re
 import qwebirc.util.rijndael, qwebirc.util.ciphers
 import qwebirc.util
 import qwebirc.util.qjson as json
@@ -24,7 +24,7 @@ class AuthgateEngine(resource.Resource):
     a = authgate(request, config.AUTHGATEDOMAIN)
     try:
       ticket = a.login_required(accepting=lambda x: True)
-    except a.redirect_exception, e:
+    except a.redirect_exception as e:
       pass
     else:
       # only used for informational purposes, the backend stores this seperately
@@ -45,8 +45,8 @@ class AuthgateEngine(resource.Resource):
         location = "/"
       else:
         self.deleteCookie(request, "redirect")
-        _, _, path, params, query, _ = urlparse.urlparse(urllib.unquote(location))
-        location = urlparse.urlunparse(("", "", path, params, query, ""))
+        _, _, path, params, query, _ = urllib.parse.urlparse(urllib.parse.unquote(location))
+        location = urllib.parse.urlunparse(("", "", path, params, query, ""))
 
       request.redirect(location)
       request.finish()
@@ -57,7 +57,7 @@ class AuthgateEngine(resource.Resource):
   def adminEngine(self):
     return dict(Logins=((self.__hit,),))
     
-def decodeQTicket(qticket, p=re.compile("\x00*$"), cipher=qwebirc.util.rijndael.rijndael(hashlib.sha256(config.QTICKETKEY).digest()[:16])):
+def decodeQTicket(qticket, p=re.compile("\x00*$"), cipher=qwebirc.util.rijndael.rijndael(hashlib.sha256(config.QTICKETKEY.encode("utf-8")).digest()[:16])):
   def decrypt(data):
     l = len(data)
     if l < BLOCK_SIZE * 2 or l % BLOCK_SIZE != 0:
@@ -68,7 +68,7 @@ def decodeQTicket(qticket, p=re.compile("\x00*$"), cipher=qwebirc.util.rijndael.
   
     # technically this is a flawed padding algorithm as it allows chopping at BLOCK_SIZE, we don't
     # care about that though!
-    b = range(0, l-BLOCK_SIZE, BLOCK_SIZE)
+    b = list(range(0, l-BLOCK_SIZE, BLOCK_SIZE))
     for i, v in enumerate(b):
       q = cbc.decrypt(data[v:v+BLOCK_SIZE])
       if i == len(b) - 1:
