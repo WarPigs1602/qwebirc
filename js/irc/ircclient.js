@@ -34,6 +34,12 @@ qwebirc.irc.IRCClient = new Class({
     this.parent();
     this.newServerInfoLine("CONNECTING", "");
   },
+
+  onCapabilities: function(caps) {
+  // Zeige die verfügbaren CAPs im Statusfenster an
+  // Nutze GENERICMESSAGE als Theme-Typ, damit immer ein String verwendet wird
+  this.newServerLine("GENERICMESSAGE", {m: "Available capabilities: " + caps.join(", ")});
+  },
   newLine: function(window, type, data) {
     if(!data)
       data = {};

@@ -51,8 +51,6 @@ qwebirc.ui.BaseUI = new Class({
 
     qwebirc.util.__log = function(x) {
       if(QWEBIRC_DEBUG) {
-        if(typeof console != "undefined")
-          console.log(x);
         this.getActiveWindow().addLine(null, x);
       }
     }.bind(this);
@@ -215,8 +213,19 @@ qwebirc.ui.BaseUI = new Class({
   loginBox: function(callback, initialNickname, initialChannels, autoConnect, autoNick) {
     this.postInitialize();
 
+    // Wrapper-Callback, der SASL-Felder in die Optionen übernimmt
+    var self = this;
+    var wrappedCallback = function(data) {
+      // SASL-Felder in die Optionen übernehmen, falls vorhanden
+      if (data && typeof data === 'object') {
+        if ('sasl_username' in data) self.options.sasl_username = data.sasl_username;
+        if ('sasl_password' in data) self.options.sasl_password = data.sasl_password;
+      }
+      callback(data);
+    };
+
     this.addCustomWindow("Connect", qwebirc.ui.ConnectPane, "connectpane", {
-      initialNickname: initialNickname, initialChannels: initialChannels, autoConnect: autoConnect, callback: callback, autoNick: autoNick,
+      initialNickname: initialNickname, initialChannels: initialChannels, autoConnect: autoConnect, callback: wrappedCallback, autoNick: autoNick,
       uiOptions: this.options
     }, qwebirc.ui.WINDOW_CONNECT);
   },

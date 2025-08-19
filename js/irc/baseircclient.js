@@ -36,7 +36,9 @@ qwebirc.irc.BaseIRCClient = new Class({
     this.connection = new qwebirc.irc.IRCConnection({
       initialNickname: this.nickname,
       onRecv: this.dispatch.bind(this),
-      serverPassword: this.options.serverPassword
+      serverPassword: this.options.serverPassword,
+      sasl_username: this.options.sasl_username || null,
+      sasl_password: this.options.sasl_password || null
     });
   
     this.send = this.connection.send.bind(this.connection);
@@ -60,23 +62,23 @@ qwebirc.irc.BaseIRCClient = new Class({
       this.disconnect();
     } else if(message == "c") {
       var command = data[1].toUpperCase();
-       
       var prefix = data[2];
       var sl = data[3];
       var n = qwebirc.irc.Numerics.get(command);
-      
       var x = n;
       if(!n)
-        n = command;  
-
+        n = command;
       var o = this["irc_" + n];
-      
       if(o) {
         var r = o.run([prefix, sl], this);
         if(!r)
           this.rawNumeric(command, prefix, sl);
       } else {
         this.rawNumeric(command, prefix, sl);
+      }
+    } else if(message == "capabilities") {
+      if(this.onCapabilities) {
+        this.onCapabilities(data[1]);
       }
     }
   },
@@ -304,6 +306,9 @@ qwebirc.irc.BaseIRCClient = new Class({
     if(target == this.nickname) {
       this.userMode(args);
     } else {
+      if(typeof args[0] !== 'string') {
+        return;
+      }
       var modes = args[0].split("");
       var xargs = args.slice(1);
       
@@ -354,9 +359,11 @@ qwebirc.irc.BaseIRCClient = new Class({
   irc_RPL_NAMREPLY: function(prefix, params) {
     var channel = params[2];    
     var names = params[3];
-    
+    if(typeof names !== 'string') {
+      this.channelNames(channel, []);
+      return true;
+    }
     this.channelNames(channel, names.split(" "));
-    
     return true;
   },
   irc_RPL_ENDOFNAMES: function(prefix, params) {

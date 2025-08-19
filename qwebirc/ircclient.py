@@ -1,3 +1,4 @@
+CAP_END = "CAP END"
 import twisted, sys, codecs, traceback
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol, abstract
@@ -38,6 +39,13 @@ class QWebIRCClient(basic.LineReceiver):
   delimiter = b"\n"
   def __init__(self, *args, **kwargs):
     self.__nickname = "(unregistered)"
+    self._cap_active = False
+    self._cap_sasl = False
+    self._cap_end_sent = False
+    self._sasl_authenticating = False
+    self._sasl_username = None
+    self._sasl_password = None
+    self._capabilities = set()
     
   def dataReceived(self, data):
     basic.LineReceiver.dataReceived(self, data.replace(b"\r", b""))
@@ -46,18 +54,55 @@ class QWebIRCClient(basic.LineReceiver):
     if isinstance(line, bytes):
       line = line.decode("utf-8", "replace")
     line = irc_decode(irc.lowDequote(line))
-    
+
     try:
       prefix, command, params = irc.parsemsg(line)
       self.handleCommand(command, prefix, params)
     except irc.IRCBadMessage:
-      # emit and ignore
       traceback.print_exc()
       return
 
+    # CAP negotiation
+    if command == "CAP":
+      subcmd = params[1].upper() if len(params) > 1 else ""
+      if subcmd == "LS":
+        caps = set(params[-1].split())
+        self._capabilities = caps
+        # Event an das Frontend senden
+        self("capabilities", list(caps))
+        if self._sasl_username and self._sasl_password and "sasl" in caps:
+          self.write("CAP REQ :sasl")
+        else:
+          self.write(CAP_END)
+          self._cap_end_sent = True
+      elif subcmd == "ACK" and "sasl" in params[-1]:
+        self._cap_sasl = True
+        self._sasl_authenticating = True
+        self.write("AUTHENTICATE PLAIN")
+      elif subcmd == "NAK":
+        self.write(CAP_END)
+        self._cap_end_sent = True
+      elif subcmd == "END":
+        self._cap_active = False
+      return
+    elif command == "AUTHENTICATE" and self._sasl_authenticating:
+      if params[0] == "+":
+        import base64
+        authzid = self._sasl_username
+        authcid = self._sasl_username
+        passwd = self._sasl_password
+        msg = f"{authzid}\0{authcid}\0{passwd}"
+        b64msg = base64.b64encode(msg.encode("utf-8")).decode("ascii")
+        self.write(f"AUTHENTICATE {b64msg}")
+      return
+    elif command in ("903", "904", "905", "906", "907"):  # SASL success or fail
+      self._sasl_authenticating = False
+      if not self._cap_end_sent:
+        self.write(CAP_END)
+        self._cap_end_sent = True
+      return
     if command == "001":
       self.__nickname = params[0]
-      
       if self.__perform is not None:
         for x in self.__perform:
           self.write(x)
@@ -78,13 +123,22 @@ class QWebIRCClient(basic.LineReceiver):
       
   def connectionMade(self):
     basic.LineReceiver.connectionMade(self)
-    
     self.lastError = None
     f = self.factory.ircinit
     nick, ident, ip, realname, hostname, pass_ = f["nick"], f["ident"], f["ip"], f["realname"], f["hostname"], f.get("password")
     self.__nickname = nick
     self.__perform = f.get("perform")
+    self._sasl_username = f.get("sasl_username")
+    self._sasl_password = f.get("sasl_password")
 
+    print(f"[DEBUG] IRCClient.connectionMade: sasl_username={self._sasl_username!r} sasl_password={'***' if self._sasl_password else None}")
+
+    # Begin CAP negotiation if SASL gewünscht
+    if self._sasl_username and self._sasl_password:
+      print("[DEBUG] IRCClient: Starte CAP/SASL-Negotiation (CAP LS)")
+      self._cap_active = True
+      self.write("CAP LS")
+    # Normaler Verbindungsaufbau wie bisher
     if not hasattr(config, "WEBIRC_MODE"):
       self.write("USER %s bleh bleh %s :%s" % (ident, ip, realname))
     elif config.WEBIRC_MODE == "hmac":
@@ -96,18 +150,17 @@ class QWebIRCClient(basic.LineReceiver):
     elif config.WEBIRC_MODE == "cgiirc":
       self.write("PASS %s_%s_%s" % (config.CGIIRC_STRING, ip, hostname))
       self.write("USER %s bleh %s :%s" % (ident, ip, realname))
-    elif config.WEBIRC_MODE == config_options.WEBIRC_REALNAME or config.WEBIRC_MODE is None: # last bit is legacy
+    elif config.WEBIRC_MODE == config_options.WEBIRC_REALNAME or config.WEBIRC_MODE is None:
       if ip == hostname:
         dispip = ip
       else:
         dispip = "%s/%s" % (hostname, ip)
-
       self.write("USER %s bleh bleh :%s - %s" % (ident, dispip, realname))
 
     if pass_ is not None:
       self.write("PASS :%s" % pass_)
     self.write("NICK %s" % nick)
-    
+
     self.factory.client = self
     self("connect")
 
@@ -149,13 +202,12 @@ class QWebIRCFactory(protocol.ClientFactory):
     self.publisher.event(["disconnect", "Connection to IRC server failed."])
     self.publisher.disconnect()
 
-def createIRC(*args, **kwargs):
+def create_irc(*args, **kwargs):
   f = QWebIRCFactory(*args, **kwargs)
-  
   tcpkwargs = {}
   if hasattr(config, "OUTGOING_IP"):
     tcpkwargs["bindAddress"] = (config.OUTGOING_IP, 0)
-  
+
   if CONNECTION_RESOLVER is None:
     if hasattr(config, "SSLPORT"):
       from twisted.internet import ssl
@@ -168,12 +220,12 @@ def createIRC(*args, **kwargs):
     name, port = random.choice(sorted((str(x.payload.target), x.payload.port) for x in result[0]))
     reactor.connectTCP(name, port, f, **tcpkwargs)
   def errback(err):
-    f.clientConnectionFailed(None, err) # None?!
+    f.clientConnectionFailed(None, err)
 
   d = CONNECTION_RESOLVER.lookupService(config.IRCSERVER, (1, 3, 11))
   d.addCallbacks(callback, errback)
   return f
 
 if __name__ == "__main__":
-  e = createIRC(lambda x: 2, nick="slug__moo", ident="mooslug", ip="1.2.3.6", realname="mooooo", hostname="1.2.3.4")
+  e = create_irc(lambda x: 2, nick="slug__moo", ident="mooslug", ip="1.2.3.6", realname="mooooo", hostname="1.2.3.4")
   reactor.run()

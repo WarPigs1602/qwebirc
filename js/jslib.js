@@ -385,7 +385,7 @@ qwebirc.util.__log = function(x) {
     if(typeof console == "undefined") {
       alert("log: " + x);
     } else {
-      console.log(x);
+  // Debug-Ausgabe entfernt
     }
   }
 };

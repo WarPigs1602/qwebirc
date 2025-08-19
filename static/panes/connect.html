@@ -27,6 +27,14 @@
                   <td><label for="loginchannels">Channels:</label></td>
                   <td><input type="text" name="channels" id="loginchannels" /></td>
                 </tr>
+                <tr class="sasl-row" style="display:none">
+                  <td><label for="sasl_username">SASL Username:</label></td>
+                  <td><input type="text" name="sasl_username" id="sasl_username" placeholder="SASL Username" /></td>
+                </tr>
+                <tr class="sasl-row" style="display:none">
+                  <td><label for="sasl_password">SASL Password:</label></td>
+                  <td><input type="password" name="sasl_password" id="sasl_password" placeholder="SASL Password" /></td>
+                </tr>
                 <tr name="connectbutton" style="display: none">
                   <td></td>
                   <td>
@@ -39,16 +47,26 @@
         </tr>
         <tr class="tr2" name="confirmbox" style="display: none">
           <td>
-            <table class="qwebirc-loginbox tr1">
-              <tr>
-                <td>
-                  To connect to <span name="networkname"></span> IRC and join <span name="prettychannels"></span><span name="nickselected" style="display: none"> as <b name="nickname"></b></span> click 'Join chat'.
-                </td>
-              </tr>
-              <tr class="tr2" name="connectbutton" style="display: none">
-                <td><input type="submit" value="Join chat" name="connect" /></td>
-              </tr>
-            </table>
+            <form>
+              <table class="qwebirc-loginbox tr1">
+                <tr>
+                  <td colspan="2">
+                    To connect to <span name="networkname"></span> IRC and join <span name="prettychannels"></span><span name="nickselected" style="display: none"> as <b name="nickname"></b></span> click 'Join chat'.
+                  </td>
+                </tr>
+                <tr class="sasl-row" style="display:none">
+                  <td><label for="confirm_sasl_username">SASL Username:</label></td>
+                  <td><input type="text" name="sasl_username" id="confirm_sasl_username" placeholder="SASL Username" /></td>
+                </tr>
+                <tr class="sasl-row" style="display:none">
+                  <td><label for="confirm_sasl_password">SASL Password:</label></td>
+                  <td><input type="password" name="sasl_password" id="confirm_sasl_password" placeholder="SASL Password" /></td>
+                </tr>
+                <tr class="tr2" name="connectbutton" style="display: none">
+                  <td colspan="2"><input type="submit" value="Join chat" name="connect" /></td>
+                </tr>
+              </table>
+            </form>
           </td>
         </tr>
       </table>

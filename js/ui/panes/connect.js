@@ -10,18 +10,38 @@ qwebirc.ui.ConnectPane = new Class({
     var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
     var cb = delayfn.delay(500);
 
-    var r = qwebirc.ui.RequestTransformHTML({url: qwebirc.global.staticBaseURL + "panes/connect.html", update: parent, onSuccess: function() {
-      $clear(cb);
+    var r = qwebirc.ui.RequestTransformHTML({
+      url: qwebirc.global.staticBaseURL + "panes/connect.html",
+      update: parent,
+      onSuccess: function() {
 
-      var rootElement = parent.getElement("[name=connectroot]");
-      this.rootElement = rootElement;
-      
-      this.util.exec = function(n, x) { rootElement.getElements(n).each(x); };
-      var util = this.util;
-      var exec = util.exec;
+        // SASL-Felder erst nach Laden des HTML und Setzen des Flags einblenden
+        if(window.SASL_LOGIN_ENABLED === true) {
+          parent.getElements('.sasl-row').setStyle('display', '');
+        }
+        $clear(cb);
 
-      var box = (autoConnect ? "confirm" : "login");
-      exec("[name=" + box + "box]", util.setVisible(true));
+        var rootElement = parent.getElement("[name=connectroot]");
+        this.rootElement = rootElement;
+
+        this.util.exec = function(n, x) { rootElement.getElements(n).each(x); };
+        var util = this.util;
+        var exec = util.exec;
+
+        var box = (autoConnect ? "confirm" : "login");
+        exec("[name=" + box + "box]", util.setVisible(true));
+
+        // SASL-Felder beim Umschalten auf Confirm explizit übernehmen
+        if (autoConnect) {
+          // Login-Formular suchen (immer das erste)
+          var loginUser = rootElement.getElements("input[name=sasl_username]")[0];
+          var loginPass = rootElement.getElements("input[name=sasl_password]")[0];
+          // Confirm-Dialog-Felder (immer das zweite)
+          var confirmUser = rootElement.getElements("input[name=sasl_username]")[1];
+          var confirmPass = rootElement.getElements("input[name=sasl_password]")[1];
+          if (loginUser && confirmUser) confirmUser.value = loginUser.value;
+          if (loginPass && confirmPass) confirmPass.value = loginPass.value;
+        }
 
       if(!autoConnect) {
         if($defined(uiOptions.logoURL)) {
@@ -86,6 +106,8 @@ qwebirc.ui.ConnectPane = new Class({
         }
       }
 
+  // ...SASL-Login-Felder werden jetzt rein im HTML verwaltet...
+
       if(window == window.top) /* don't focus when we're iframe'd */
         exec("[name=" + focus + "]", util.focus);
       exec("[name=connect]", util.attachClick(this.__connect.bind(this)));
@@ -117,6 +139,8 @@ qwebirc.ui.ConnectPane = new Class({
   __connect: function(e) {
     new Event(e).stop();
     var data = this.validate();
+    // Debug-Ausgabe der SASL-Felder
+  // Debug-Ausgabe entfernt
     if(data === false)
       return;
 
@@ -216,22 +240,30 @@ qwebirc.ui.ConnectPane = new Class({
     this.util.exec("[name=" + calleename + "]", this.util.setVisible(false));
   },
   __validateConfirmData: function() {
-    return {nickname: this.options.initialNickname, autojoin: this.options.initialChannels};
+    // Immer das sichtbare SASL-Feld verwenden (z.B. im Confirm-Dialog)
+    var saslUser = Array.from(this.rootElement.querySelectorAll('input[name="sasl_username"]')).find(function(el) {
+      return el.offsetParent !== null;
+    });
+    var saslPass = Array.from(this.rootElement.querySelectorAll('input[name="sasl_password"]')).find(function(el) {
+      return el.offsetParent !== null;
+    });
+    return {
+      nickname: this.options.initialNickname,
+      autojoin: this.options.initialChannels,
+      sasl_username: saslUser ? saslUser.value : "",
+      sasl_password: saslPass ? saslPass.value : ""
+    };
   },
   __validateLoginData: function() {
     var nick = this.rootElement.getElement("input[name=nickname]"), chan = this.rootElement.getElement("input[name=channels]");
-
     var nickname = nick.value;
     var chans = chan.value;
-    if(chans == "#") /* sorry channel "#" :P */
-      chans = "";
-
+    if(chans == "#") chans = "";
     if(!nickname) {
       alert("You must supply a nickname.");
       nick.focus();
       return false;
     }
-
     var stripped = qwebirc.global.nicknameValidator.validate(nickname);
     if(stripped != nickname) {
       nick.value = stripped;
@@ -239,8 +271,16 @@ qwebirc.ui.ConnectPane = new Class({
       nick.focus();
       return false;
     }
-    
     var data = {nickname: nickname, autojoin: chans};
+    // Immer das sichtbare SASL-Feld verwenden (z.B. im Login-Dialog)
+    var saslUser = Array.from(this.rootElement.querySelectorAll('input[name="sasl_username"]')).find(function(el) {
+      return el.offsetParent !== null;
+    });
+    var saslPass = Array.from(this.rootElement.querySelectorAll('input[name="sasl_password"]')).find(function(el) {
+      return el.offsetParent !== null;
+    });
+    data["sasl_username"] = saslUser ? saslUser.value : "";
+    data["sasl_password"] = saslPass ? saslPass.value : "";
     return data;
   },
   __buildPrettyChannels: function(node, channels) {

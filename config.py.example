@@ -140,7 +140,7 @@ NICKNAME_VALIDATE = True
 #         a nickname.
 #         Default is as in RFC1459.
 import string
-NICKNAME_VALID_FIRST_CHAR = string.letters + "_[]{}`^\\|"
+NICKNAME_VALID_FIRST_CHAR = string.ascii_letters + "_[]{}`^\\|"
 
 # OPTION: NICKNAME_VALID_SUBSEQUENT_CHAR
 #         A string containing valid characters for the rest of the
@@ -156,6 +156,12 @@ NICKNAME_MINIMUM_LENGTH = 2
 #         Ideally we'd extract this from the ircd, but we need to know
 #         before we connect.
 NICKNAME_MAXIMUM_LENGTH = 15
+
+# OPTION: SASL_LOGIN_ENABLED
+#         Show SASL login fields in the login form and allow authentication via SASL-PLAIN.
+#         If set to True, users can enter SASL credentials during login. If set to False, the SASL fields are hidden and SASL authentication is disabled in the UI.
+#         Default: False
+SASL_LOGIN_ENABLED = False
 
 # ADMIN ENGINE OPTIONS
 # ---------------------------------------------------------------------

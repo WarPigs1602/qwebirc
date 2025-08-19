@@ -120,13 +120,14 @@ qwebirc.ui.Theme = new Class({
   },
   __dollarSubstitute: function(x, h, mapper) {
     var msg = [];
-
+    if(typeof x !== 'string') {
+      return '';
+    }
     var n = x.split("");
     for(var i=0;i<n.length;i++) {
       var c = n[i];
       if(c == "$" && (i <= n.length - 1)) {
         var c2 = n[++i];
-
         var o = mapper[c2];
         if(!o)
           o = h[c2];
@@ -136,7 +137,6 @@ qwebirc.ui.Theme = new Class({
         msg.push(c);
       }
     }
-    
     return msg.join("");
   },
   message: function(type, data, hilight) {

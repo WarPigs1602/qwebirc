@@ -39,7 +39,7 @@ qwebirc.irc.IgnoreController = new Class({
     var mask = this.toIRCLower(nick + "!" + host);
 
     return this.ignored.each(function(k, v) {
-//      console.log(k + " (" + v[0] + ")" + " matched against " + mask);
+// Debug-Ausgabe entfernt
       if(mask.match(v[1]))
         return true;
     }) === true;

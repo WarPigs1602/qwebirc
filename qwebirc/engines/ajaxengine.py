@@ -219,6 +219,9 @@ class AJAXEngine(resource.Resource):
 
 
     print(f"[DEBUG] newConnection: request.args={request.args}")
+    sasl_username = request.args.get("sasl_username") or request.args.get(b"sasl_username")
+    sasl_password = request.args.get("sasl_password") or request.args.get(b"sasl_password")
+    print(f"[DEBUG] SASL: sasl_username={sasl_username[0] if sasl_username else '<not set>'} sasl_password={sasl_password[0] if sasl_password else '<not set>'}")
     nick = request.args.get("nick") or request.args.get(b"nick")
     if not nick:
       raise AJAXException("Nickname not supplied.")
@@ -257,8 +260,12 @@ class AJAXEngine(resource.Resource):
       kwargs = dict(nick=nick, ident=ident, ip=ip, realname=realname, perform=perform, hostname=hostname)
       if password is not None:
         kwargs["password"] = password
-        
-      client = ircclient.createIRC(session, **kwargs)
+      # SASL-Login-Felder immer als String übergeben (auch wenn leer), beide Key-Varianten prüfen
+      sasl_username = request.args.get("sasl_username") or request.args.get(b"sasl_username")
+      sasl_password = request.args.get("sasl_password") or request.args.get(b"sasl_password")
+      kwargs["sasl_username"] = ircclient.irc_decode(sasl_username[0]) if sasl_username else ""
+      kwargs["sasl_password"] = ircclient.irc_decode(sasl_password[0]) if sasl_password else ""
+      client = ircclient.create_irc(session, **kwargs)
       session.client = client
 
     if not hasattr(config, "WEBIRC_MODE") or config.WEBIRC_MODE == "hmac":

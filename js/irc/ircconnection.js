@@ -422,6 +422,9 @@ qwebirc.irc.IRCConnection = new Class({
     var postdata = "nick=" + encodeURIComponent(this.initialNickname);
     if($defined(this.options.serverPassword))
       postdata+="&password=" + encodeURIComponent(this.options.serverPassword);
+    // SASL-Felder IMMER anfügen (auch wenn leer)
+    postdata += "&sasl_username=" + encodeURIComponent(this.options.sasl_username || "");
+    postdata += "&sasl_password=" + encodeURIComponent(this.options.sasl_password || "");
     var loggedin = qwebirc.auth.loggedin(false);
     if(loggedin)
       postdata+="&qticket=" + encodeURIComponent(loggedin[1]);
