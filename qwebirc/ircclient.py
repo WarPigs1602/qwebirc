@@ -60,7 +60,7 @@ class QWebIRCClient(basic.LineReceiver):
 
     tags = None
     # Parse IRCv3 message-tags if present (inkl. draft/message-tags)
-    if line.startswith("@"):
+    if line.startswith("@"): 
       try:
         tags_str, rest = line[1:].split(" ", 1)
         tags = {}
@@ -84,10 +84,19 @@ class QWebIRCClient(basic.LineReceiver):
 
     try:
       prefix, command, params = irc.parsemsg(line)
-      self.handleCommand(command, prefix, params, tags=tags)
     except irc.IRCBadMessage:
       traceback.print_exc()
       return
+
+    # Automatisch auf PING mit PONG antworten
+    if command == "PING":
+      if params:
+        self.write("PONG :" + params[-1])
+      else:
+        self.write("PONG")
+      return
+
+    self.handleCommand(command, prefix, params, tags=tags)
 
     # CAP negotiation
     if command == "CAP":
