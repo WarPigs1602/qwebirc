@@ -64,13 +64,19 @@ qwebirc.irc.BaseIRCClient = new Class({
       var command = data[1].toUpperCase();
       var prefix = data[2];
       var sl = data[3];
+      var tags = data.length > 4 ? data[4] : undefined;
       var n = qwebirc.irc.Numerics.get(command);
       var x = n;
       if(!n)
         n = command;
       var o = this["irc_" + n];
       if(o) {
-        var r = o.run([prefix, sl], this);
+        // Für TAGMSG (und ggf. andere Kommandos mit Tags) tags als drittes Argument übergeben
+        if(n === "TAGMSG") {
+          var r = o.run([prefix, sl, tags], this);
+        } else {
+          var r = o.run([prefix, sl], this);
+        }
         if(!r)
           this.rawNumeric(command, prefix, sl);
       } else {
@@ -262,7 +268,26 @@ qwebirc.irc.BaseIRCClient = new Class({
     }
     
     return true;
-  },
+    },
+
+    irc_TAGMSG: function(prefix, params, tags) {
+      // params: [target], tags: IRCv3 message tags
+      if(window.console) window.console.log('[irc_TAGMSG] called', prefix, params, tags);
+      // Komplett ignorieren, wenn kein typing-Tag vorhanden ist (verhindert leere Zeilen)
+      if(!(tags && tags.typing)) {
+        if(window.console) window.console.log('[irc_TAGMSG] kein typing-tag:', tags);
+        return undefined;
+      }
+      var user = prefix;
+      var target = params[0];
+      if(this.ui && this.ui.onTagmsg) {
+        if(window.console) window.console.log('[irc_TAGMSG] onTagmsg aufrufen', user, target, tags);
+        this.ui.onTagmsg({user: user, target: target, tags: tags});
+      } else {
+        if(window.console) window.console.warn('[irc_TAGMSG] kein this.ui.onTagmsg vorhanden!');
+      }
+      return true;
+    },
   irc_NOTICE: function(prefix, params) {
     var user = prefix;
     var target = params[0];

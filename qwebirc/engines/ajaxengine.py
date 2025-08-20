@@ -196,20 +196,16 @@ class AJAXEngine(resource.Resource):
     
   def render_POST(self, request):
     path = request.path[len(self.prefix):]
-    print(f"[DEBUG] AJAXEngine.render_POST: path={path!r}")
     if path and path[0] == ord("/"):
       handler_name = path[1:]
       if isinstance(handler_name, bytes):
         handler_name = handler_name.decode("utf-8")
-      print(f"[DEBUG] AJAXEngine.render_POST: handler_name={handler_name!r}")
       handler = self.COMMANDS.get(handler_name)
-      print(f"[DEBUG] AJAXEngine.render_POST: handler={handler}")
       if handler is not None:
         try:
           return handler(self, request)
         except AJAXException as e:
           return json.dumps((False, str(e))).encode("utf-8")
-    print("[DEBUG] AJAXEngine.render_POST: returning 404")
     return b"404" ## TODO: tidy up
 
   def newConnection(self, request):
@@ -218,10 +214,8 @@ class AJAXEngine(resource.Resource):
     ip = request.getClientIP()
 
 
-    print(f"[DEBUG] newConnection: request.args={request.args}")
     sasl_username = request.args.get("sasl_username") or request.args.get(b"sasl_username")
     sasl_password = request.args.get("sasl_password") or request.args.get(b"sasl_password")
-    print(f"[DEBUG] SASL: sasl_username={sasl_username[0] if sasl_username else '<not set>'} sasl_password={sasl_password[0] if sasl_password else '<not set>'}")
     nick = request.args.get("nick") or request.args.get(b"nick")
     if not nick:
       raise AJAXException("Nickname not supplied.")
@@ -401,16 +395,13 @@ if has_websocket:
 
     def onMessage(self, msg, isBinary):
       # Debug logging for WebSocket protocol troubleshooting
-      print(f"[DEBUG] WebSocketEngineProtocol.onMessage: raw msg={msg!r} isBinary={isBinary}")
       state = self.__state
       message_type, message = msg[:1], msg[1:]
       if isinstance(message, bytes):
         message = message.decode("utf-8", "replace")
-      print(f"[DEBUG] WebSocketEngineProtocol.onMessage: state={state} message_type={message_type!r} message={message!r}")
       if state == self.AWAITING_AUTH:
         if message_type == b"s":  # subscribe
           tokens = message.split(",", 1)
-          print(f"[DEBUG] WebSocketEngineProtocol.onMessage: tokens={tokens}")
           if len(tokens) != 2:
             self.close("Bad tokens")
             return
@@ -438,7 +429,6 @@ if has_websocket:
       elif state == self.AUTHED:
         if message_type == b"p":  # push
           tokens = message.split(",", 1)
-          print(f"[DEBUG] WebSocketEngineProtocol.onMessage: tokens={tokens}")
           if len(tokens) != 2:
             self.close("Bad tokens")
             return
@@ -453,7 +443,6 @@ if has_websocket:
           self.__session.push(ircclient.irc_decode(message))
           return
 
-      print("[DEBUG] WebSocketEngineProtocol.onMessage: closing with Bad message type")
       self.close("Bad message type")
 
     def __cancelTimeout(self):

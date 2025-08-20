@@ -5,6 +5,7 @@ qwebirc.ui.QUI = new Class({
     this.theme = theme;
     this.parentElement = parentElement;
     this.setModifiableStylesheet("qui");
+  this.client = null; // Referenz auf IRC-Client für Typing
   },
   postInitialize: function() {
     this.qjsui = new qwebirc.ui.QUI.JSUI("qwebirc-qui", this.parentElement);
@@ -153,16 +154,70 @@ qwebirc.ui.QUI = new Class({
     form.appendChild(inputbox);
     this.inputbox = inputbox;
     this.inputbox.maxLength = 470;
+    // Setze IRC-Client-Referenz beim ersten connect
+    this.addEvent("signedOn", function(client) {
+      this.client = client;
+    });
 
     var sendInput = function() {
       if(inputbox.value == "")
         return;
-        
       this.resetTabComplete();
       this.getActiveWindow().historyExec(inputbox.value);
       inputbox.value = "";
       inputbox.placeholder = "";
+      // Sende "done"-Status nach dem Senden
+      this.sendTypingTagmsg("done");
     }.bind(this);
+
+    // Hilfsfunktion: Sende TAGMSG mit typing-Status
+    this.sendTypingTagmsg = function(state) {
+      var win = this.getActiveWindow();
+      if(!win) return;
+      var target = win.name;
+      // Nur Channel oder Query unterstützen
+      if(win.type == qwebirc.ui.WINDOW_CHANNEL || win.type == qwebirc.ui.WINDOW_QUERY) {
+        if(this.client && this.client.send) {
+          this.client.send("@+typing=" + state + " TAGMSG " + target);
+        } else {
+        }
+      }
+    };
+
+    // Typing-Status-Logik
+    var typingTimeout = null;
+  var lastActiveSent = 0;
+  var ACTIVE_DELAY = 500; // ms
+    var lastTypingState = "done";
+    var typingHandler = function(e) {
+      var win = this.getActiveWindow();
+      if(!win || (win.type != qwebirc.ui.WINDOW_CHANNEL && win.type != qwebirc.ui.WINDOW_QUERY)) {
+        return;
+      }
+      if(inputbox.value.length > 0) {
+        // "active" nur alle ACTIVE_DELAY ms senden
+        var now = Date.now();
+        if(lastTypingState !== "active" || (now - lastActiveSent) > ACTIVE_DELAY) {
+          this.sendTypingTagmsg("active");
+          lastActiveSent = now;
+          lastTypingState = "active";
+        }
+        if(typingTimeout) clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(function() {
+          this.sendTypingTagmsg("paused");
+          lastTypingState = "paused";
+        }.bind(this), 2000);
+      } else {
+        if(lastTypingState !== "done") {
+          this.sendTypingTagmsg("done");
+          lastTypingState = "done";
+        }
+        if(typingTimeout) clearTimeout(typingTimeout);
+      }
+    }.bind(this);
+    inputbox.addEvent("input", typingHandler);
+  inputbox.addEvent("keydown", typingHandler);
+  inputbox.addEvent("keyup", typingHandler);
 
     if(!qwebirc.util.deviceHasKeyboard()) {
       inputbox.addClass("mobile-input");
@@ -393,6 +448,59 @@ qwebirc.ui.QUI.Window = new Class({
   
   initialize: function(parentObject, client, type, name, identifier) {
     this.parent(parentObject, client, type, name, identifier);
+
+    // Typing-Bar für Channel- und Query-Fenster
+    if(type == qwebirc.ui.WINDOW_CHANNEL || type == qwebirc.ui.WINDOW_QUERY) {
+      this._typingBar = null;
+      this.showTypingBar = function(event) {
+        if(window.console) window.console.log('[showTypingBar] called', event, 'window:', this.name);
+        if (!event.tags || !event.tags.typing) {
+          if(window.console) window.console.log('[showTypingBar] kein typing-tag:', event.tags);
+          return;
+        }
+        if (!this._typingBar) {
+          var inputForm = $$('.input form')[0];
+          if(window.console) window.console.log('[showTypingBar] inputForm:', inputForm);
+          if (inputForm) {
+            var typingBar = new Element("div", {
+              'class': 'qwebirc-typing-bar',
+              'styles': {
+                'border': '1px solid #b3d4fc',
+                'background': '#eaf6ff',
+                'padding': '3px 8px',
+                'margin': '0 0 4px 0',
+                'font-size': '90%',
+                'color': '#2176c7',
+                'min-height': '18px',
+                'display': 'none'
+              }
+            });
+            typingBar.inject(inputForm, 'before');
+            this._typingBar = typingBar;
+            if(window.console) window.console.log('[showTypingBar] TypingBar erzeugt');
+          } else {
+            if(window.console) window.console.warn('[showTypingBar] Kein inputForm gefunden!');
+          }
+        }
+        if (!this._typingBar) {
+          if(window.console) window.console.warn('[showTypingBar] Keine TypingBar vorhanden!');
+          return;
+        }
+        var typingState = event.tags.typing;
+        var nick = event.user.split('!')[0];
+        if(window.console) window.console.log('[showTypingBar] state:', typingState, 'nick:', nick);
+        if (typingState === 'active') {
+          this._typingBar.set('text', nick + ' is typing...');
+          this._typingBar.setStyle('display', 'block');
+        } else if (typingState === 'paused') {
+          this._typingBar.set('text', nick + ' is pausing...');
+          this._typingBar.setStyle('display', 'block');
+        } else if (typingState === 'done') {
+          this._typingBar.set('text', '');
+          this._typingBar.setStyle('display', 'none');
+        }
+      };
+    }
 
     this.tab = new Element("a");
     this.tab.addClass("tab");

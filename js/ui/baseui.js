@@ -55,6 +55,45 @@ qwebirc.ui.BaseUI = new Class({
       }
     }.bind(this);
   },
+    // Delegiert Tagmsg-Events an das passende Channel-Window
+    onTagmsg: function(event) {
+      // Debug: Query-Fensternamen ausgeben, falls Query-TAGMSG
+      if(!(event.target && (event.target[0] === '#' || event.target[0] === '&'))) {
+        var senderNick = event.user ? event.user.split('!')[0] : null;
+        var queryNames = [];
+        this.windows.each(function(clientId, winHash) {
+          winHash.each(function(winId, win) {
+            if(win.type == qwebirc.ui.WINDOW_QUERY && win.name) {
+              queryNames.push(win.name);
+            }
+          });
+        });
+        if(window.console) window.console.log('[onTagmsg][Debug] Alle Query-Fensternamen:', queryNames, '| senderNick:', senderNick);
+      }
+      if(window.console) {
+        window.console.log('[onTagmsg] called', event);
+      }
+      if (!event.tags || !event.tags.typing) {
+        if(window.console) window.console.log('[onTagmsg] kein typing-tag:', event.tags);
+        return;
+      }
+      // Nur anzeigen, wenn das Ziel dem aktiven Fenster entspricht
+      var senderNick = event.user ? event.user.split('!')[0] : null;
+      var isChannel = event.target && (event.target[0] === '#' || event.target[0] === '&');
+      var active = this.getActiveWindow();
+      if(!active) return;
+      if(isChannel) {
+        // Channel: Nur anzeigen, wenn aktives Fenster Channel und Name passt
+        if(active.type == qwebirc.ui.WINDOW_CHANNEL && active.name && event.target && active.name.toLowerCase() == event.target.toLowerCase()) {
+          if(active.showTypingBar) active.showTypingBar(event);
+        }
+      } else {
+        // Query: Nur anzeigen, wenn aktives Fenster Query und Name passt
+        if(active.type == qwebirc.ui.WINDOW_QUERY && active.name && senderNick && active.name.toLowerCase() == senderNick.toLowerCase()) {
+          if(active.showTypingBar) active.showTypingBar(event);
+        }
+      }
+    },
   newClient: function(client) {
     client.id = String(this.clientId++);
     client.hilightController = new qwebirc.ui.HilightController(client);
@@ -528,6 +567,10 @@ qwebirc.ui.NotificationUI = new Class({
 
 qwebirc.ui.QuakeNetUI = new Class({
   Extends: qwebirc.ui.NotificationUI,
+  initialize: function(parentElement, windowClass, uiName, options) {
+  // ...existing code...
+    this.parent(parentElement, windowClass, uiName, options);
+  },
   urlDispatcher: function(name, window) {
     if(name == "qwhois") {
       return ["span", function(auth) {

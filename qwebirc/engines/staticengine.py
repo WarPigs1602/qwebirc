@@ -48,14 +48,13 @@ class StaticEngine(static.File):
           else:
             config = importlib.import_module('config')
           sasl_enabled = getattr(config, "SASL_LOGIN_ENABLED", False)
-          print(f"[DEBUG] SASL_LOGIN_ENABLED aus config.py: {sasl_enabled}")
           js = f'<script>window.SASL_LOGIN_ENABLED = {"true" if sasl_enabled else "false"};</script>'
           if b"</body>" in data:
             data = data.replace(b"</body>", js.encode("utf-8") + b"</body>")
           else:
             data += js.encode("utf-8")
-        except Exception as e:
-          print(f"[DEBUG] Fehler beim Lesen von SASL_LOGIN_ENABLED: {e}")
+        except Exception:
+          pass
         request.setHeader(b"content-type", b"text/html; charset=utf-8")
         request.setHeader(b"content-length", str(len(data)).encode("utf-8"))
         request.write(data)
@@ -63,7 +62,6 @@ class StaticEngine(static.File):
         reactor.callLater(0, request.finish)
         return server.NOT_DONE_YET
       except Exception as e:
-        print(f"[DEBUG] Fehler beim Lesen der HTML-Datei: {e}")
         request.setResponseCode(500)
         return b"Internal Server Error"
     # Für andere Dateitypen Standardverhalten

@@ -267,6 +267,9 @@ qwebirc.irc.IRCClient = new Class({
     }
 
     this.fireEvent("signedOn");
+    if(this.ui && this.ui.fireEvent) {
+      this.ui.fireEvent("signedOn", this);
+    }
   },
   userJoined: function(user, channel) {
     var nick = user.hostToNick();

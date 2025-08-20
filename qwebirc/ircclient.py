@@ -45,19 +45,46 @@ class QWebIRCClient(basic.LineReceiver):
     self._sasl_authenticating = False
     self._sasl_username = None
     self._sasl_password = None
-    self._capabilities = set()
+    self._capabilities = set()  # alle vom Server angebotenen CAPs (LS)
+    self._cap_available = set() # explizit für LS
+    self._cap_set = set()       # explizit für ACK
     
   def dataReceived(self, data):
     basic.LineReceiver.dataReceived(self, data.replace(b"\r", b""))
+
 
   def lineReceived(self, line):
     if isinstance(line, bytes):
       line = line.decode("utf-8", "replace")
     line = irc_decode(irc.lowDequote(line))
 
+    tags = None
+    # Parse IRCv3 message-tags if present (inkl. draft/message-tags)
+    if line.startswith("@"):
+      try:
+        tags_str, rest = line[1:].split(" ", 1)
+        tags = {}
+        for tag in tags_str.split(";"):
+          if not tag:
+            continue
+          if "=" in tag:
+            k, v = tag.split("=", 1)
+          else:
+            k, v = tag, None
+          # draft/message-tags Kompatibilität: entferne "draft/"-Präfix
+          if k.startswith("draft/"):
+            k = k[6:]
+          # Normalisiere alle typing-Tags auf 'typing'
+          if k.lstrip("+").endswith("typing"):
+            k = "typing"
+          tags[k] = v
+        line = rest
+      except Exception:
+        tags = None
+
     try:
       prefix, command, params = irc.parsemsg(line)
-      self.handleCommand(command, prefix, params)
+      self.handleCommand(command, prefix, params, tags=tags)
     except irc.IRCBadMessage:
       traceback.print_exc()
       return
@@ -68,17 +95,33 @@ class QWebIRCClient(basic.LineReceiver):
       if subcmd == "LS":
         caps = set(params[-1].split())
         self._capabilities = caps
-        # Event an das Frontend senden
+        self._cap_available = caps.copy()  # speichere alle verfügbaren CAPs
         self("capabilities", list(caps))
+        # Request message-tags if available
+        cap_req = []
+        if "message-tags" in caps:
+          cap_req.append("message-tags")
         if self._sasl_username and self._sasl_password and "sasl" in caps:
-          self.write("CAP REQ :sasl")
+          cap_req.append("sasl")
+        if cap_req:
+          self.write("CAP REQ :" + " ".join(cap_req))
         else:
           self.write(CAP_END)
           self._cap_end_sent = True
-      elif subcmd == "ACK" and "sasl" in params[-1]:
-        self._cap_sasl = True
-        self._sasl_authenticating = True
-        self.write("AUTHENTICATE PLAIN")
+      elif subcmd == "ACK":
+        # ACK kann mehrere CAPs enthalten, z.B. "ACK :multi-prefix sasl"
+        ack_caps = set(params[-1].split())
+        self._cap_set.update(ack_caps)
+        if "sasl" in ack_caps:
+          self._cap_sasl = True
+          self._sasl_authenticating = True
+          self.write("AUTHENTICATE PLAIN")
+        # Event für gesetzte CAPs
+        self("cap_set", list(self._cap_set))
+        # If no further negotiation (e.g. no SASL in progress), end CAP
+        if not ("sasl" in ack_caps and self._sasl_authenticating):
+          self.write(CAP_END)
+          self._cap_end_sent = True
       elif subcmd == "NAK":
         self.write(CAP_END)
         self._cap_end_sent = True
@@ -112,8 +155,15 @@ class QWebIRCClient(basic.LineReceiver):
       if nick == self.__nickname:
         self.__nickname = params[0]
         
-  def handleCommand(self, command, prefix, params):
-    self("c", command, prefix, params)
+  def handleCommand(self, command, prefix, params, tags=None):
+    # Für TAGMSG: Nur Event erzeugen, wenn relevante Tags (z.B. typing) vorhanden sind
+    # Unterstütze auch draft/message-tags (bereits beim Parsen entfernt)
+    if command == "TAGMSG":
+      # Akzeptiere sowohl "typing" als auch "message-tags/typing" (draft wurde beim Parsen entfernt)
+      if not (tags and "typing" in tags and tags["typing"]):
+        # Ignoriere TAGMSG ohne typing-Tag komplett (kein Event, keine Zeile)
+        return
+    self("c", command, prefix, params, tags)
     
   def __call__(self, *args):
     self.factory.publisher.event(args)
@@ -131,13 +181,11 @@ class QWebIRCClient(basic.LineReceiver):
     self._sasl_username = f.get("sasl_username")
     self._sasl_password = f.get("sasl_password")
 
-    print(f"[DEBUG] IRCClient.connectionMade: sasl_username={self._sasl_username!r} sasl_password={'***' if self._sasl_password else None}")
 
-    # Begin CAP negotiation if SASL gewünscht
-    if self._sasl_username and self._sasl_password:
-      print("[DEBUG] IRCClient: Starte CAP/SASL-Negotiation (CAP LS)")
-      self._cap_active = True
-      self.write("CAP LS")
+    # CAP-Handshake für alle User
+    self._cap_active = True
+    self.write("CAP LS")
+
     # Normaler Verbindungsaufbau wie bisher
     if not hasattr(config, "WEBIRC_MODE"):
       self.write("USER %s bleh bleh %s :%s" % (ident, ip, realname))
