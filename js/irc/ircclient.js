@@ -255,7 +255,7 @@ qwebirc.irc.IRCClient = new Class({
     if(this.options.autojoin) {
       this.exec("/AUTOJOIN");
     } else {
-      this.newServerInfoLine("CONNECTED", "");
+      var d = function() { this.newServerInfoLine("CONNECTED", ""); }.delay(1000, this);
     }
 
     this.fireEvent("signedOn");
@@ -521,9 +521,9 @@ qwebirc.irc.IRCClient = new Class({
     if(this.ui.uiOptions.ACCEPT_SERVICE_INVITES && this.isNetworkService(user)) {
       if(this.activeTimers.serviceInvite)
         $clear(this.activeTimers.serviceInvite);
-      // Sofort joinen, ohne Delay
+      /* we do this so we can batch the joins, i.e. instead of sending 5 JOIN comands we send 1 with 5 channels. */
+      this.activeTimers.serviceInvite = this.__joinInvited.delay(100, this);
       this.inviteChanList.push(channel);
-      this.__joinInvited();
     }
   },
   userMode: function(modes) {
