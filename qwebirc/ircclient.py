@@ -225,27 +225,12 @@ class QWebIRCClient(basic.LineReceiver):
 
   def error(self, message):
     self.lastError = message
-    # Wenn die Nachricht 'Session disconnect' ist, sende einen neutralen QUIT-Text
-    if message == "Session disconnect":
-      self.write("QUIT :Disconnected")
-    else:
-      self.write("QUIT :qwebirc exception: %s" % message)
+    self.write("QUIT :qwebirc exception: %s" % message)
     self.transport.loseConnection()
 
   def disconnect(self, reason):
-    print("[QWebIRCClient.disconnect] called with reason:", reason)
     self("disconnect", reason)
     self.factory.publisher.disconnect()
-    # Erzwinge das Schließen der TCP-Verbindung
-    if hasattr(self, "transport"):
-      print("[QWebIRCClient.disconnect] self.transport exists:", self.transport)
-      try:
-        self.transport.loseConnection()
-        print("[QWebIRCClient.disconnect] loseConnection() called")
-      except Exception as e:
-        print("[QWebIRCClient.disconnect] Exception:", e)
-    else:
-      print("[QWebIRCClient.disconnect] self.transport does not exist!")
     
 class QWebIRCFactory(protocol.ClientFactory):
   protocol = QWebIRCClient
