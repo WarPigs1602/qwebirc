@@ -120,6 +120,8 @@ class QWebIRCClient(basic.LineReceiver):
           self.write("AUTHENTICATE PLAIN")
         # Event für gesetzte CAPs
         self("cap_set", list(self._cap_set))
+        # Sende ein 'capabilities'-Event mit ['ACK', ...] für das Frontend
+        self("capabilities", ["ACK"] + list(ack_caps))
         # If no further negotiation (e.g. no SASL in progress), end CAP
         if not ("sasl" in ack_caps and self._sasl_authenticating):
           self.write(CAP_END)
@@ -164,6 +166,11 @@ class QWebIRCClient(basic.LineReceiver):
       # Akzeptiere sowohl "typing" als auch "message-tags/typing" (draft wurde beim Parsen entfernt)
       if not (tags and "typing" in tags and tags["typing"]):
         # Ignoriere TAGMSG ohne typing-Tag komplett (kein Event, keine Zeile)
+        return
+    # CAP LS und CAP ACK nicht an das Eventsystem weitergeben (ausblenden)
+    if command == "CAP":
+      subcmd = params[1].upper() if len(params) > 1 else ""
+      if subcmd in ("LS", "ACK"):
         return
     self("c", command, prefix, params, tags)
     
@@ -227,12 +234,27 @@ class QWebIRCClient(basic.LineReceiver):
 
   def error(self, message):
     self.lastError = message
-    self.write("QUIT :qwebirc exception: %s" % message)
+    # Wenn die Nachricht 'Session disconnect' ist, sende einen neutralen QUIT-Text
+    if message == "Session disconnect":
+      self.write("QUIT :Disconnected")
+    else:
+      self.write("QUIT :qwebirc exception: %s" % message)
     self.transport.loseConnection()
 
   def disconnect(self, reason):
+    print("[QWebIRCClient.disconnect] called with reason:", reason)
     self("disconnect", reason)
     self.factory.publisher.disconnect()
+    # Erzwinge das Schließen der TCP-Verbindung
+    if hasattr(self, "transport"):
+      print("[QWebIRCClient.disconnect] self.transport exists:", self.transport)
+      try:
+        self.transport.loseConnection()
+        print("[QWebIRCClient.disconnect] loseConnection() called")
+      except Exception as e:
+        print("[QWebIRCClient.disconnect] Exception:", e)
+    else:
+      print("[QWebIRCClient.disconnect] self.transport does not exist!")
     
 class QWebIRCFactory(protocol.ClientFactory):
   protocol = QWebIRCClient

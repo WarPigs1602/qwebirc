@@ -36,9 +36,13 @@ qwebirc.irc.IRCClient = new Class({
   },
 
   onCapabilities: function(caps) {
-    // Zeige die verfügbaren CAPs im Statusfenster an
-    // Nutze GENERICMESSAGE als Theme-Typ, damit immer ein String verwendet wird
-    this.newServerLine("GENERICMESSAGE", {m: "Available capabilities: " + caps.join(", ")});
+    // Zeige die verfügbaren oder aktiven CAPs im Statusfenster an
+    // Wenn das erste Element 'ACK' ist, dann ist es eine Bestätigung aktiver CAPs (CAP ACK)
+    if (caps && caps.length > 0 && caps[0] === "ACK") {
+      this.newServerLine("GENERICMESSAGE", {m: "Active capabilities: " + caps.slice(1).join(", ")});
+    } else {
+      this.newServerLine("GENERICMESSAGE", {m: "Available capabilities: " + caps.join(", ")});
+    }
   },
   // Debug: Zeitstempel-Logging für alle eingehenden Events
   _debugLogEvent: function(event, data) {

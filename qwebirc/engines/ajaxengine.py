@@ -92,6 +92,8 @@ class IRCSession:
       self.subscriptions.remove(channel)
     except ValueError:
       pass
+    if not self.subscriptions:
+      self.disconnect()
 
   def timeout(self, channel):
     if self.schedule:
@@ -166,6 +168,31 @@ class IRCSession:
     # keep the session hanging around for a few seconds so the
     # client has a chance to see what the issue was
     self.closed = True
+
+    # Cancel any scheduled flush or cleanup timers
+    if self.schedule is not None:
+      try:
+        self.schedule.cancel()
+      except Exception:
+        pass
+      self.schedule = None
+    if self.cleanupschedule is not None:
+      try:
+        self.cleanupschedule.cancel()
+      except Exception:
+        pass
+      self.cleanupschedule = None
+
+    # Trenne die IRC-Client-Verbindung, falls vorhanden
+    if hasattr(self, "client") and self.client is not None:
+      try:
+        if hasattr(self.client, "disconnect"):
+          self.client.disconnect("Session disconnect")
+        elif hasattr(self.client, "error"):
+          self.client.error("Session disconnect")
+      except Exception:
+        pass
+      self.client = None
 
     reactor.callLater(5, cleanupSession, self.id)
 
