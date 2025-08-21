@@ -188,9 +188,39 @@ qwebirc.ui.QUI = new Class({
 
     // Typing-Status-Logik
     var typingTimeout = null;
-    var lastActiveSent = 0;
-    var ACTIVE_DELAY = 500; // ms
+    var typingInterval = null;
     var lastTypingState = "done";
+    var typingInterval = null;
+    var TYPING_INTERVAL = 1000; // ms
+    var PAUSE_DELAY = 2000; // ms
+    var typingTimeout = null;
+
+    var startTypingInterval = function() {
+      if (typingInterval) return;
+      // Sofort senden, um Verzögerung zu vermeiden
+      if(inputbox.value.length > 0 && lastTypingState !== "active") {
+        this.sendTypingTagmsg("active");
+        lastTypingState = "active";
+      }
+      typingInterval = setInterval(function() {
+        if(inputbox.value.length > 0) {
+          if(lastTypingState !== "active") {
+            this.sendTypingTagmsg("active");
+            lastTypingState = "active";
+          }
+        } else {
+          stopTypingInterval();
+        }
+      }.bind(this), TYPING_INTERVAL);
+    }.bind(this);
+
+    var stopTypingInterval = function() {
+      if (typingInterval) {
+        clearInterval(typingInterval);
+        typingInterval = null;
+      }
+    };
+
     var typingHandler = function(e) {
       var win = this.getActiveWindow();
       if(!win || (win.type != qwebirc.ui.WINDOW_CHANNEL && win.type != qwebirc.ui.WINDOW_QUERY)) {
@@ -198,29 +228,46 @@ qwebirc.ui.QUI = new Class({
       }
       if(typingTimeout) clearTimeout(typingTimeout);
       if(inputbox.value.length > 0) {
-        // "active" nur alle ACTIVE_DELAY ms senden
-        var now = Date.now();
-        if(lastTypingState !== "active" || (now - lastActiveSent) > ACTIVE_DELAY) {
-          this.sendTypingTagmsg("active");
-          lastActiveSent = now;
-          lastTypingState = "active";
-        }
+        startTypingInterval();
+        if(typingTimeout) clearTimeout(typingTimeout);
         typingTimeout = setTimeout(function() {
-          // Nur "paused" senden, wenn nicht "done"
-          if(lastTypingState !== "done") {
+          if(lastTypingState !== "done" && lastTypingState !== "paused") {
             this.sendTypingTagmsg("paused");
             lastTypingState = "paused";
           }
-        }.bind(this), 2000);
+        }.bind(this), PAUSE_DELAY);
       } else {
+        stopTypingInterval();
         if(lastTypingState !== "done") {
           this.sendTypingTagmsg("done");
           lastTypingState = "done";
         }
-        // Kein Timeout mehr nötig
+        if(typingTimeout) clearTimeout(typingTimeout);
       }
     }.bind(this);
     inputbox.addEvent("input", typingHandler);
+
+    // Auch bei keydown das Intervall starten, falls input-Event nicht ausgelöst wird
+    inputbox.addEvent("keydown", function() {
+      if(inputbox.value.length > 0) {
+        startTypingInterval();
+        if(typingTimeout) clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(function() {
+          stopTypingInterval();
+          if(lastTypingState !== "done" && lastTypingState !== "paused") {
+            this.sendTypingTagmsg("paused");
+            lastTypingState = "paused";
+          }
+        }.bind(this), PAUSE_DELAY);
+      } else {
+        stopTypingInterval();
+        if(lastTypingState !== "done") {
+          this.sendTypingTagmsg("done");
+          lastTypingState = "done";
+        }
+        if(typingTimeout) clearTimeout(typingTimeout);
+      }
+    }.bind(this));
 
     if(!qwebirc.util.deviceHasKeyboard()) {
       inputbox.addClass("mobile-input");
