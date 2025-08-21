@@ -1,4 +1,9 @@
-import config
+try:
+  import config
+except ImportError:
+  import os, sys
+  sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+  import config
 import qwebirc.util.qjson as json
 
 def get_options():

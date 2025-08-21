@@ -16,7 +16,7 @@ if project_root not in sys.path:
 try:
   from . import dependencies
   from . import pages
-  from . import pagegen
+  from bin import pagegen
 except ImportError:
   import bin.dependencies as dependencies
   import bin.pages as pages

@@ -1,10 +1,21 @@
 import os
 import sys
-from . import pages
+try:
+  from bin import pages
+  from bin import optionsgen
+except ImportError:
+  import os, sys
+  sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+  import pages
+  import optionsgen
 import subprocess
 import re
-from . import optionsgen
-import config
+try:
+  import config
+except ImportError:
+  import os, sys
+  sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+  import config
 
 class GitException(Exception):
   pass
@@ -43,17 +54,21 @@ def csslist(name, debug, gen=False):
 
 def _getgitid():
   try:
-    p = subprocess.Popen(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE, shell=os.name == "nt")
+    p = subprocess.Popen(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=os.name == "nt")
+    try:
+      data, err = p.communicate(timeout=5)
+    except subprocess.TimeoutExpired:
+      p.kill()
+      raise GitException("git command timed out")
+    if p.returncode != 0:
+      raise GitException(f"git failed: {err.decode('utf-8').strip()}")
+    data_str = data.decode("utf-8")
+    m = re.match("^([0-9a-f]+).*", data_str)
+    if not m:
+      raise GitException("git output not recognized")
+    return m.group(1)
   except Exception as e:
-    if hasattr(e, "errno") and e.errno == 2:
-      raise GitException("unable to execute")
-    raise GitException("unknown exception running git: %s" % repr(e))
-    
-  data = p.communicate()[0]
-  if p.wait() != 0:
-    raise GitException("unable to get id")
-  data_str = data.decode("utf-8")
-  return re.match("^([0-9a-f]+).*", data_str).group(1)
+    raise GitException(f"Exception running git: {e}")
 
 GITID = None
 def getgitid():
