@@ -247,24 +247,12 @@ qwebirc.irc.IRCClient = new Class({
     this.nickname = nickname;
     this.newServerLine("SIGNON");
     
-    /* we guarantee that +x is sent out before the joins */
+    /* wir garantieren, dass +x vor den JOINs gesendet wird */
     if(this.ui.uiOptions.USE_HIDDENHOST)
       this.exec("/UMODE +x");
 
+    // Autojoin immer sofort nach Login ausführen, ohne Delay/Timer
     if(this.options.autojoin) {
-      if(qwebirc.auth.loggedin(false) && this.ui.uiOptions.USE_HIDDENHOST) {
-        var d = function() {
-          if($defined(this.activeTimers.autojoin))
-            this.ui.getActiveWindow().infoMessage("Waiting for login before joining channels...");
-        }.delay(5, this);
-        this.activeTimers.autojoin = function() {
-          var w = this.ui.getActiveWindow();
-          w.errorMessage("No login response in 10 seconds.");
-          w.errorMessage("You may want to try authing manually and then type: /autojoin (if you don't auth your host may be visible).");
-        }.delay(10000, this);
-        return;
-      }
-
       this.exec("/AUTOJOIN");
     } else {
       var d = function() { this.newServerInfoLine("CONNECTED", ""); }.delay(1000, this);
