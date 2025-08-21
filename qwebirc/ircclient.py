@@ -88,6 +88,14 @@ class QWebIRCClient(basic.LineReceiver):
       traceback.print_exc()
       return
 
+    # Automatisch auf PING mit PONG antworten
+    if command == "PING":
+      if params:
+        self.write("PONG :" + params[-1])
+      else:
+        self.write("PONG")
+      return
+
     self.handleCommand(command, prefix, params, tags=tags)
 
     # CAP negotiation
