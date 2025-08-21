@@ -69,7 +69,7 @@ def jmerge_files(prefix, suffix, output, files, *args, **kwargs):
     os.unlink(o)
     
   with open(os.path.join(prefix, "static", suffix, output), "w", encoding="utf-8") as f:
-    # COPYRIGHT ist bytes, daher dekodieren
+    # COPYRIGHT is bytes, so decode it
     if isinstance(COPYRIGHT, bytes):
       f.write(COPYRIGHT.decode("utf-8"))
     else:

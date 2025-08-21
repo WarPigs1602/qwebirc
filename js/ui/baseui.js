@@ -55,24 +55,24 @@ qwebirc.ui.BaseUI = new Class({
       }
     }.bind(this);
   },
-    // Delegiert Tagmsg-Events an das passende Channel-Window
+  // Delegates tagmsg events to the appropriate channel window
     onTagmsg: function(event) {
       // ...existing code...
       if (!event.tags || !event.tags.typing) {
         return;
       }
-      // Nur anzeigen, wenn das Ziel dem aktiven Fenster entspricht
+      // Only display if the target matches the active window
       var senderNick = event.user ? event.user.split('!')[0] : null;
       var isChannel = event.target && (event.target[0] === '#' || event.target[0] === '&');
       var active = this.getActiveWindow();
       if(!active) return;
       if(isChannel) {
-        // Channel: Nur anzeigen, wenn aktives Fenster Channel und Name passt
+        // Channel: Only display if active window is channel and name matches
         if(active.type == qwebirc.ui.WINDOW_CHANNEL && active.name && event.target && active.name.toLowerCase() == event.target.toLowerCase()) {
           if(active.showTypingBar) active.showTypingBar(event);
         }
       } else {
-        // Query: Nur anzeigen, wenn aktives Fenster Query und Name passt
+        // Query: Only display if active window is query and name matches
         if(active.type == qwebirc.ui.WINDOW_QUERY && active.name && senderNick && active.name.toLowerCase() == senderNick.toLowerCase()) {
           if(active.showTypingBar) active.showTypingBar(event);
         }
@@ -112,7 +112,8 @@ qwebirc.ui.BaseUI = new Class({
     if(type == qwebirc.ui.WINDOW_STATUS)
       return "";
 
-    if(client == qwebirc.ui.CUSTOM_CLIENT) /* HACK */
+    // HACK: For custom client windows
+    if(client == qwebirc.ui.CUSTOM_CLIENT)
       return "_" + name;
 
     return "_" + client.toIRCLower(name);
@@ -228,19 +229,19 @@ qwebirc.ui.BaseUI = new Class({
     this.windows.get(this.getClientId(window.client)).remove(window.identifier);
   },
     /*
-      this shouldn't be called by overriding classes!
-      they should implement their own!
-      some form of user input MUST be received before an
-      IRC connection is made, else users are going to get
-      tricked into getting themselves glined
+      This shouldn't be called by overriding classes!
+      They should implement their own!
+      Some form of user input MUST be received before an
+      IRC connection is made, otherwise users are going to get
+      tricked into getting themselves glined.
     */
   loginBox: function(callback, initialNickname, initialChannels, autoConnect, autoNick) {
     this.postInitialize();
 
-    // Wrapper-Callback, der SASL-Felder in die Optionen übernimmt
+    // Wrapper callback to copy SASL fields into options
     var self = this;
     var wrappedCallback = function(data) {
-      // SASL-Felder in die Optionen übernehmen, falls vorhanden
+      // Copy SASL fields into options if present
       if (data && typeof data === 'object') {
         if ('sasl_username' in data) self.options.sasl_username = data.sasl_username;
         if ('sasl_password' in data) self.options.sasl_password = data.sasl_password;
@@ -479,7 +480,7 @@ qwebirc.ui.StandardUI = new Class({
   },
   setModifiableStylesheet: function(name) {
     var url = qwebirc.global.staticBaseURL + "css/" + (QWEBIRC_DEBUG ? "debug/" : "") + name + qwebirc.FILE_SUFFIX + ".mcss";
-    // Asynchron laden und erst nach dem Laden Werte setzen
+  // Load asynchronously and set values only after loading
     qwebirc.ui.style.ModifiableStylesheet.load(url).then(function(stylesheet) {
       this.__styleSheet = stylesheet;
       this.setModifiableStylesheetValues({});
