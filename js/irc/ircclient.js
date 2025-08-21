@@ -36,9 +36,16 @@ qwebirc.irc.IRCClient = new Class({
   },
 
   onCapabilities: function(caps) {
-  // Zeige die verfügbaren CAPs im Statusfenster an
-  // Nutze GENERICMESSAGE als Theme-Typ, damit immer ein String verwendet wird
-  this.newServerLine("GENERICMESSAGE", {m: "Available capabilities: " + caps.join(", ")});
+    // Zeige die verfügbaren CAPs im Statusfenster an
+    // Nutze GENERICMESSAGE als Theme-Typ, damit immer ein String verwendet wird
+    this.newServerLine("GENERICMESSAGE", {m: "Available capabilities: " + caps.join(", ")});
+  },
+  // Debug: Zeitstempel-Logging für alle eingehenden Events
+  _debugLogEvent: function(event, data) {
+    var now = new Date().toISOString();
+    if(window && window.console && window.console.log) {
+      window.console.log('[DEBUG]', now, event, data);
+    }
   },
   newLine: function(window, type, data) {
     if(!data)
@@ -236,7 +243,9 @@ qwebirc.irc.IRCClient = new Class({
   
   /* from here down are events */
   rawNumeric: function(numeric, prefix, params) {
-    this.newServerLine("RAW", {"n": "numeric", "m": params.slice(1).join(" ")});
+  this._debugLogEvent('rawNumeric', {numeric: numeric, prefix: prefix, params: params});
+  this._debugLogEvent('rawNumeric', {numeric: numeric, prefix: prefix, params: params});
+  this.newServerLine("RAW", {"n": "numeric", "m": params.slice(1).join(" ")});
   },
   signedOn: function(nickname) {
     this.tracker = new qwebirc.irc.IRCTracker(this);

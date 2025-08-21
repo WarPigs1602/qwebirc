@@ -54,6 +54,8 @@ class QWebIRCClient(basic.LineReceiver):
 
 
   def lineReceived(self, line):
+    import datetime
+    print(f"[DEBUG] {datetime.datetime.now().isoformat()} lineReceived: {repr(line)}")
     if isinstance(line, bytes):
       line = line.decode("utf-8", "replace")
     line = irc_decode(irc.lowDequote(line))
