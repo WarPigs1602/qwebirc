@@ -167,6 +167,8 @@ qwebirc.ui.QUI = new Class({
       inputbox.value = "";
       inputbox.placeholder = "";
       // Sende "done"-Status nach dem Senden
+      if (typingTimeout) clearTimeout(typingTimeout);
+      lastTypingState = "done";
       this.sendTypingTagmsg("done");
     }.bind(this);
 
@@ -186,14 +188,15 @@ qwebirc.ui.QUI = new Class({
 
     // Typing-Status-Logik
     var typingTimeout = null;
-  var lastActiveSent = 0;
-  var ACTIVE_DELAY = 500; // ms
+    var lastActiveSent = 0;
+    var ACTIVE_DELAY = 500; // ms
     var lastTypingState = "done";
     var typingHandler = function(e) {
       var win = this.getActiveWindow();
       if(!win || (win.type != qwebirc.ui.WINDOW_CHANNEL && win.type != qwebirc.ui.WINDOW_QUERY)) {
         return;
       }
+      if(typingTimeout) clearTimeout(typingTimeout);
       if(inputbox.value.length > 0) {
         // "active" nur alle ACTIVE_DELAY ms senden
         var now = Date.now();
@@ -202,22 +205,22 @@ qwebirc.ui.QUI = new Class({
           lastActiveSent = now;
           lastTypingState = "active";
         }
-        if(typingTimeout) clearTimeout(typingTimeout);
         typingTimeout = setTimeout(function() {
-          this.sendTypingTagmsg("paused");
-          lastTypingState = "paused";
+          // Nur "paused" senden, wenn nicht "done"
+          if(lastTypingState !== "done") {
+            this.sendTypingTagmsg("paused");
+            lastTypingState = "paused";
+          }
         }.bind(this), 2000);
       } else {
         if(lastTypingState !== "done") {
           this.sendTypingTagmsg("done");
           lastTypingState = "done";
         }
-        if(typingTimeout) clearTimeout(typingTimeout);
+        // Kein Timeout mehr nötig
       }
     }.bind(this);
     inputbox.addEvent("input", typingHandler);
-  inputbox.addEvent("keydown", typingHandler);
-  inputbox.addEvent("keyup", typingHandler);
 
     if(!qwebirc.util.deviceHasKeyboard()) {
       inputbox.addClass("mobile-input");
