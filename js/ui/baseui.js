@@ -477,8 +477,12 @@ qwebirc.ui.StandardUI = new Class({
     this.tabCompleter.reset();
   },
   setModifiableStylesheet: function(name) {
-    this.__styleSheet = new qwebirc.ui.style.ModifiableStylesheet(qwebirc.global.staticBaseURL + "css/" + (QWEBIRC_DEBUG ? "debug/" : "") + name + qwebirc.FILE_SUFFIX + ".mcss");
-    this.setModifiableStylesheetValues({});
+    var url = qwebirc.global.staticBaseURL + "css/" + (QWEBIRC_DEBUG ? "debug/" : "") + name + qwebirc.FILE_SUFFIX + ".mcss";
+    // Asynchron laden und erst nach dem Laden Werte setzen
+    qwebirc.ui.style.ModifiableStylesheet.load(url).then(function(stylesheet) {
+      this.__styleSheet = stylesheet;
+      this.setModifiableStylesheetValues({});
+    }.bind(this));
   },
   setModifiableStylesheetValues: function(values) {
     for (var k in values)
