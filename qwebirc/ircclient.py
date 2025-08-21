@@ -55,7 +55,6 @@ class QWebIRCClient(basic.LineReceiver):
 
   def lineReceived(self, line):
     import datetime
-    print(f"[DEBUG] {datetime.datetime.now().isoformat()} lineReceived: {repr(line)}")
     if isinstance(line, bytes):
       line = line.decode("utf-8", "replace")
     line = irc_decode(irc.lowDequote(line))
@@ -88,7 +87,6 @@ class QWebIRCClient(basic.LineReceiver):
       prefix, command, params = irc.parsemsg(line)
       self.handleCommand(command, prefix, params, tags=tags)
     except irc.IRCBadMessage:
-      traceback.print_exc()
       return
 
     # CAP negotiation
@@ -242,19 +240,14 @@ class QWebIRCClient(basic.LineReceiver):
     self.transport.loseConnection()
 
   def disconnect(self, reason):
-    print("[QWebIRCClient.disconnect] called with reason:", reason)
     self("disconnect", reason)
     self.factory.publisher.disconnect()
     # Erzwinge das Schließen der TCP-Verbindung
     if hasattr(self, "transport"):
-      print("[QWebIRCClient.disconnect] self.transport exists:", self.transport)
       try:
         self.transport.loseConnection()
-        print("[QWebIRCClient.disconnect] loseConnection() called")
-      except Exception as e:
-        print("[QWebIRCClient.disconnect] Exception:", e)
-    else:
-      print("[QWebIRCClient.disconnect] self.transport does not exist!")
+      except Exception:
+        pass
     
 class QWebIRCFactory(protocol.ClientFactory):
   protocol = QWebIRCClient

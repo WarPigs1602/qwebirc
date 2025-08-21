@@ -57,24 +57,8 @@ qwebirc.ui.BaseUI = new Class({
   },
     // Delegiert Tagmsg-Events an das passende Channel-Window
     onTagmsg: function(event) {
-      // Debug: Query-Fensternamen ausgeben, falls Query-TAGMSG
-      if(!(event.target && (event.target[0] === '#' || event.target[0] === '&'))) {
-        var senderNick = event.user ? event.user.split('!')[0] : null;
-        var queryNames = [];
-        this.windows.each(function(clientId, winHash) {
-          winHash.each(function(winId, win) {
-            if(win.type == qwebirc.ui.WINDOW_QUERY && win.name) {
-              queryNames.push(win.name);
-            }
-          });
-        });
-        if(window.console) window.console.log('[onTagmsg][Debug] Alle Query-Fensternamen:', queryNames, '| senderNick:', senderNick);
-      }
-      if(window.console) {
-        window.console.log('[onTagmsg] called', event);
-      }
+      // ...existing code...
       if (!event.tags || !event.tags.typing) {
-        if(window.console) window.console.log('[onTagmsg] kein typing-tag:', event.tags);
         return;
       }
       // Nur anzeigen, wenn das Ziel dem aktiven Fenster entspricht

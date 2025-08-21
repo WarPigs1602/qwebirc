@@ -84,7 +84,6 @@ if __name__ == "__main__":
   import sys
 
   def callback(x):
-    print(x)
     reactor.stop()
 
   def errback(x):

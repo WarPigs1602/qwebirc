@@ -21,14 +21,12 @@ if autobahn_status == True:
   import autobahn.twisted.resource
   has_websocket = True
   TRANSPORTS.append("websocket")
+
 elif autobahn_status == False:
   # they've been warned already
   pass
 else:
-  print("WARNING:", file=sys.stderr)
-  print("  %s" % autobahn_status, file=sys.stderr)
-  print("  as a result websocket support is disabled.", file=sys.stderr)
-  print("  upgrade your version of autobahn from http://autobahn.ws/python/getstarted/", file=sys.stderr)
+  pass
 
 BAD_SESSION_MESSAGE = "Invalid session, this most likely means the server has restarted; close this dialog and then try refreshing the page."
 MAX_SEQNO = 9223372036854775807  # 2**63 - 1... yeah it doesn't wrap
@@ -367,10 +365,9 @@ class AJAXEngine(resource.Resource):
       session.disconnect()
       raise AJAXException("Connection closed by server; try reconnecting by reloading the page.")
     except Exception as e: # catch all
-      session.disconnect()        
-      traceback.print_exc(file=sys.stderr)
+      session.disconnect()
       raise AJAXException("Unknown error.")
-  
+
     return json.dumps((True, True))
   
   def closeById(self, k):
