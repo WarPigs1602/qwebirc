@@ -119,8 +119,6 @@ class QWebIRCClient(basic.LineReceiver):
           self.write("AUTHENTICATE PLAIN")
         # Event für gesetzte CAPs
         self("cap_set", list(self._cap_set))
-        # Sende ein 'capabilities'-Event mit ['ACK', ...] für das Frontend
-        self("capabilities", ["ACK"] + list(ack_caps))
         # If no further negotiation (e.g. no SASL in progress), end CAP
         if not ("sasl" in ack_caps and self._sasl_authenticating):
           self.write(CAP_END)
@@ -166,11 +164,6 @@ class QWebIRCClient(basic.LineReceiver):
       if not (tags and "typing" in tags and tags["typing"]):
         # Ignoriere TAGMSG ohne typing-Tag komplett (kein Event, keine Zeile)
         return
-    # CAP LS und CAP ACK nicht an das Eventsystem weitergeben (ausblenden)
-    if command == "CAP":
-        subcmd = params[1].upper() if len(params) > 1 else ""
-        if subcmd in ("LS", "ACK"):
-            return
     self("c", command, prefix, params, tags)
     
   def __call__(self, *args):
