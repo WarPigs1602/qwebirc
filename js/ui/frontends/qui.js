@@ -137,10 +137,17 @@ qwebirc.ui.QUI = new Class({
   createInput: function() {
     var form = new Element("form");
     this.input.appendChild(form);
-    
     form.addClass("input");
-    
+
+    // Emoji Picker Button
+  var emojiBtn = new Element("button", { type: "button", html: "😊" });
+  emojiBtn.addClass("emoji-picker-btn");
+  emojiBtn.setStyles({ position: "absolute", left: "5px", bottom: "5px", zIndex: 10, background: "none", border: "none", cursor: "pointer", fontSize: "20px", padding: "0 4px" });
+  form.appendChild(emojiBtn);
+
+    // Inputbox mit Padding links für Emoji-Button
     var inputbox = new Element("input");
+    inputbox.setStyle("paddingLeft", "32px");
     this.addEvent("signedOn", function(client) {
       this.getStatusWindow(client).lines.removeClass("spinner");
       inputbox.placeholder = "chat here! you can also use commands, like /JOIN";
@@ -154,6 +161,134 @@ qwebirc.ui.QUI = new Class({
     form.appendChild(inputbox);
     this.inputbox = inputbox;
     this.inputbox.maxLength = 470;
+
+    // Emoji Picker Overlay
+  var emojiOverlay = new Element("div");
+  emojiOverlay.addClass("emoji-picker-overlay");
+  emojiOverlay.setStyles({ display: "none", position: "absolute", left: "0", bottom: "40px", zIndex: 1000, background: "#fff", border: "1px solid #ccc", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", padding: "8px", minWidth: "220px", maxHeight: "220px", overflowY: "auto" });
+  form.appendChild(emojiOverlay);
+
+    // Emoji Kategorien und Emojis
+    var emojiCategories = [
+      { name: "Smileys & People", icon: "😃", emojis: [
+        "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
+        "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌",
+        "😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕"
+      ] },
+      { name: "Animals & Nature", icon: "🐻", emojis: [
+        "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🐔","🐧","🐦","🐤",
+        "🐣","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦓","🦍","🐢","🐍","🦎","🦂","🦀","🦞","🦐","🦑","🐙","🦑"
+      ] },
+      { name: "Food & Drink", icon: "🍎", emojis: [
+        "🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑",
+        "🥦","🥬","🥒","🌶️","🌽","🥕","🧄","🧅","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🥞"
+      ] },
+      { name: "Travel & Places", icon: "✈️", emojis: [
+        "🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🚚","🚛","🚜","🛵","🏍️","🚲","🛴","🚨","🚔","🚍",
+        "🚘","🚖","🚡","🚠","🚟","🚃","🚋","🚞","🚝","🚄","🚅","🚈","🚂","🚆","🚇","🚊","🚉","✈️","🛫","🛬",
+        "🛩️","💺","🛰️","🚀","🛸","🚁","⛵","🛶","🚤","🛥️","🛳️","⛴️","🚢","⚓","🪝","⛽","🚧","🚦","🚥","🚏"
+      ] },
+      { name: "Objects", icon: "💡", emojis: [
+        "⌚","📱","📲","💻","⌨️","🖥️","🖨️","🖱️","🖲️","🕹️","🗜️","💽","💾","💿","📀","📼","📷","📸","📹","🎥",
+        "📽️","🎞️","📞","☎️","📟","📠","📺","📻","🎙️","🎚️","🎛️","⏱️","⏲️","⏰","🕰️","⌛","⏳","📡","🔋","🔌"
+      ] },
+      { name: "Flags", icon: "🏳️", emojis: [
+        "🏳️","🏴","🏁","🚩","🏳️‍🌈","🏳️‍⚧️","🇦🇹","🇩🇪","🇨🇭","🇺🇸","🇬🇧","🇫🇷","🇮🇹","🇪🇸","🇵🇱","🇳🇱","🇸🇪","🇳🇴","🇩🇰","🇫🇮",
+        "🇨🇦","🇧🇷","🇦🇷","🇲🇽","🇯🇵","🇨🇳","🇰🇷","🇦🇺","🇳🇿","🇮🇳","🇹🇷","🇷🇺","🇺🇦","🇮🇱","🇪🇬","🇿🇦","🇸🇦","🇦🇪","🇶🇦","🇸🇬"
+      ] },
+      { name: "Symbols", icon: "❤️",
+        emojis: [
+          "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟",
+          "☮️","✝️","☪️","🕉️","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈","♉","♊","♋","♌","♍","♎","♏",
+          "♐","♑","♒","♓","🆔","⚛️","🉑","☢️","☣️","📴","📳","🈶","🈚","🈸","🈺","🈷️","✴️","🆚","💮","🉐",
+          "©️","®️","™️","ℹ️","🔞","🚭","☑️","✅","✔️","❌","❎","➕","➖","➗","➰","➿","🔟","#️⃣","*️⃣","0️⃣",
+          "1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔢","🔣","🔤","🔡","🔠","🔽","🔼","🔺","🔻","🔸","🔹"
+        ]
+      }
+    ];
+    var activeCategory = 0;
+
+    function renderEmojiPicker() {
+  emojiOverlay.empty();
+  // Scrollen im Overlay komplett deaktivieren
+  emojiOverlay.setStyle('maxHeight', 'none');
+  emojiOverlay.setStyle('overflowY', 'visible');
+      // Kategorienleiste
+      var catBar = new Element("div");
+      catBar.setStyles({ display: "flex", gap: "8px", marginBottom: "8px", borderBottom: "1.5px solid #3a3f4b", paddingBottom: "6px" });
+      emojiCategories.forEach(function(cat, idx) {
+        var btn = new Element("button");
+        btn.set("type", "button");
+        btn.set("text", cat.icon);
+        btn.set("title", cat.name);
+        btn.setStyles({ background: idx===activeCategory?"#ececff":"none", border: "none", fontSize: "20px", cursor: "pointer", borderRadius: "4px", padding: "2px 6px", color: idx===activeCategory?"#232634":"#e0e0e0" });
+        btn.addEvent("click", function(e) {
+          if(e && e.preventDefault) e.preventDefault();
+          activeCategory = idx;
+          renderEmojiPicker();
+        });
+        catBar.appendChild(btn);
+      });
+      emojiOverlay.appendChild(catBar);
+      // Emojis
+      var emojiGrid = new Element("ul");
+      emojiGrid.setStyles({ listStyle: "none", padding: "0", margin: "10px 0 0 0" });
+      var cat = emojiCategories[activeCategory];
+      var perRow = 10;
+      for(var i=0; i<cat.emojis.length; i+=perRow) {
+        var rowLi = new Element("li");
+        rowLi.setStyles({ marginBottom: "4px", whiteSpace: "nowrap" });
+        cat.emojis.slice(i, i+perRow).forEach(function(emoji) {
+          var emojiBtn = new Element("button");
+          emojiBtn.set("type", "button");
+          emojiBtn.set("text", emoji);
+          emojiBtn.setStyles({ fontSize: "22px", background: "none", border: "none", cursor: "pointer", padding: "3px 4px", borderRadius: "5px", display: "inline-block" });
+          emojiBtn.addEvent("click", function(e) {
+            if(e) {
+              if(e.preventDefault) e.preventDefault();
+              if(e.stopPropagation) e.stopPropagation();
+            }
+            try {
+              insertAtCursor(inputbox, emoji);
+              emojiOverlay.setStyle("display", "none");
+              inputbox.focus();
+            } catch (err) {}
+          });
+          rowLi.appendChild(emojiBtn);
+        });
+        emojiGrid.appendChild(rowLi);
+      }
+      emojiOverlay.appendChild(emojiGrid);
+    }
+
+    function insertAtCursor(input, text) {
+      var start = input.selectionStart, end = input.selectionEnd;
+      var value = input.value;
+      input.value = value.substring(0, start) + text + value.substring(end);
+      input.selectionStart = input.selectionEnd = start + text.length;
+      input.dispatchEvent(new Event('input'));
+    }
+
+    emojiBtn.addEvent("click", function(e) {
+      if(e && e.preventDefault) e.preventDefault();
+      if(emojiOverlay.getStyle("display") === "none") {
+        renderEmojiPicker();
+        emojiOverlay.setStyle("display", "block");
+      } else {
+        emojiOverlay.setStyle("display", "none");
+      }
+    });
+    // Schließe Picker bei Klick außerhalb
+    document.addEventListener("mousedown", function(e) {
+      if(!e) return;
+      var target = e.target || e.srcElement;
+      if(!emojiOverlay || !emojiBtn) return;
+      if(typeof emojiOverlay.contains === "function" && typeof emojiBtn.contains === "function") {
+        if(!emojiOverlay.contains(target) && !emojiBtn.contains(target)) {
+          emojiOverlay.setStyle("display", "none");
+        }
+      }
+    });
     // Setze IRC-Client-Referenz beim ersten connect
     this.addEvent("signedOn", function(client) {
       this.client = client;
@@ -296,7 +431,8 @@ qwebirc.ui.QUI = new Class({
     
     form.addEvent("submit", function(e) {
       new Event(e).stop();
-      sendInput();
+  sendInput();
+  emojiOverlay.setStyle("display", "none");
     });
 
     var reset = this.resetTabComplete.bind(this);

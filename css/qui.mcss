@@ -1,3 +1,72 @@
+/* Emoji Picker Styles */
+.qwebirc-qui .emoji-picker-btn {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 10;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.qwebirc-qui .emoji-picker-btn:hover {
+  background: #ececff;
+}
+.qwebirc-qui .emoji-picker-overlay {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: 40px;
+  z-index: 1000;
+  background: #232634;
+  border: 1.5px solid #3a3f4b;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px #0005;
+  padding: 10px 10px 6px 10px;
+  min-width: 220px;
+  max-height: 240px;
+  overflow-y: auto;
+  color: #e0e0e0;
+}
+.qwebirc-qui .emoji-picker-overlay button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 2px 5px;
+  transition: background 0.15s;
+}
+.qwebirc-qui .emoji-picker-overlay button:hover {
+  background: #3a3f4b;
+}
+.qwebirc-qui .emoji-picker-overlay .emoji-category-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  justify-content: flex-start;
+}
+.qwebirc-qui .emoji-picker-overlay .emoji-category-bar button {
+  font-size: 18px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #232634;
+  border: 1.5px solid transparent;
+}
+.qwebirc-qui .emoji-picker-overlay .emoji-category-bar button.active,
+.qwebirc-qui .emoji-picker-overlay .emoji-category-bar button:focus {
+  background: #ececff;
+  color: #232634;
+  border: 1.5px solid #7a6ff0;
+}
+.qwebirc-qui .emoji-picker-overlay .emoji-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
 topic_background=c,f2f0ff,back
 lines_background=c,181a20,back
 topic_border=c,232634,front
