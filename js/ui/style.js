@@ -4,7 +4,7 @@ qwebirc.ui.style.ModifiableStylesheet = new Class({
     // Nur synchrones Setup, keine Daten laden
   },
   load: function(url) {
-    // Instanz-Methode, lädt das Stylesheet und initialisiert die Instanz
+  // Instance method: loads the stylesheet and initializes the instance
     return this.__getStylesheet(url).then(function(data) {
       var n = this.__parseStylesheet(data, url);
       this.__cssText = n.cssText;
@@ -15,7 +15,7 @@ qwebirc.ui.style.ModifiableStylesheet = new Class({
   },
 });
 
-// Statische Hilfsmethode für bequeme Initialisierung
+// Static helper method for convenient initialization
 qwebirc.ui.style.ModifiableStylesheet.load = function(url) {
   var instance = new qwebirc.ui.style.ModifiableStylesheet();
   return instance.load(url);
@@ -29,7 +29,7 @@ qwebirc.ui.style.ModifiableStylesheet.implement({
     return tag;
   },
   __getStylesheet: function(url) {
-    // Liefert ein Promise, das den Inhalt zurückgibt
+  // Returns a promise that yields the content
     return new Promise(function(resolve, reject) {
       var r = new Request({url: url, async: true});
       r.addEvent("complete", function(x) {

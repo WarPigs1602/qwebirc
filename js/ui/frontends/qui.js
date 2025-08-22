@@ -5,7 +5,7 @@ qwebirc.ui.QUI = new Class({
     this.theme = theme;
     this.parentElement = parentElement;
     this.setModifiableStylesheet("qui");
-  this.client = null; // Referenz auf IRC-Client für Typing
+  this.client = null; // Reference to IRC client for typing
   },
   postInitialize: function() {
     this.qjsui = new qwebirc.ui.QUI.JSUI("qwebirc-qui", this.parentElement);
@@ -177,7 +177,7 @@ qwebirc.ui.QUI = new Class({
       var win = this.getActiveWindow();
       if(!win) return;
       var target = win.name;
-      // Nur Channel oder Query unterstützen
+  // Only support channel or query
       if(win.type == qwebirc.ui.WINDOW_CHANNEL || win.type == qwebirc.ui.WINDOW_QUERY) {
         if(this.client && this.client.send) {
           this.client.send("@+typing=" + state + " TAGMSG " + target);
@@ -197,7 +197,7 @@ qwebirc.ui.QUI = new Class({
 
     var startTypingInterval = function() {
       if (typingInterval) return;
-      // Sofort senden, um Verzögerung zu vermeiden
+  // Send immediately to avoid delay
       if(inputbox.value.length > 0 && lastTypingState !== "active") {
         this.sendTypingTagmsg("active");
         lastTypingState = "active";
@@ -247,7 +247,7 @@ qwebirc.ui.QUI = new Class({
     }.bind(this);
     inputbox.addEvent("input", typingHandler);
 
-    // Auch bei keydown das Intervall starten, falls input-Event nicht ausgelöst wird
+  // Also start interval on keydown in case input event is not triggered
     inputbox.addEvent("keydown", function() {
       if(inputbox.value.length > 0) {
         startTypingInterval();
@@ -499,7 +499,7 @@ qwebirc.ui.QUI.Window = new Class({
   initialize: function(parentObject, client, type, name, identifier) {
     this.parent(parentObject, client, type, name, identifier);
 
-    // Typing-Bar für Channel- und Query-Fenster
+  // Typing bar for channel and query windows
     if(type == qwebirc.ui.WINDOW_CHANNEL || type == qwebirc.ui.WINDOW_QUERY) {
       this._typingBar = null;
       this.showTypingBar = function(event) {

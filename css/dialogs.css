@@ -1,3 +1,56 @@
+/* nologologinheader h1 blau mit Schatten */
+.qwebirc-loginbox .tr1[name="nologologinheader"] h1 {
+  color: #098ED1;
+  text-shadow: 0 2px 8px #0003, 0 1px 0 #fff2;
+}
+/* Modernisierte SASL-Inputs und Passwortfelder */
+.qwebirc-loginbox input#sasl_username,
+.qwebirc-loginbox input#sasl_password,
+.qwebirc-loginbox input#confirm_sasl_username,
+.qwebirc-loginbox input#confirm_sasl_password {
+  width: 220px;
+  border: 1.5px solid #3a3f4b;
+  border-radius: 6px;
+  background: #232634;
+  color: #e0e0e0;
+  padding: 10px 14px;
+  font-size: 1.1em;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px #0002;
+}
+.qwebirc-loginbox input#sasl_username:focus,
+.qwebirc-loginbox input#sasl_password:focus,
+.qwebirc-loginbox input#confirm_sasl_username:focus,
+.qwebirc-loginbox input#confirm_sasl_password:focus {
+  border: 1.5px solid #7a6ff0;
+  outline: none;
+  box-shadow: 0 0 0 2px #7a6ff033;
+}
+
+/* Modernisierte Labels */
+.qwebirc-loginbox label {
+  color: #b0b0b0;
+  font-size: 1em;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+/* Tabellenstruktur modernisieren */
+.qwebirc-loginbox table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+.qwebirc-loginbox td {
+  padding: 4px 8px;
+}
+
+/* Placeholder color for inputs */
+.qwebirc-loginbox input::placeholder {
+  color: #888;
+  opacity: 1;
+}
 /**************** LOGIN BOX *******************/
 
 .qwebirc-centrebox {
@@ -59,8 +112,53 @@
   _background: none;
 }
 
+/* Modernisiertes Login-Input */
 .qwebirc-loginbox input#loginnickname, .qwebirc-loginbox input#loginchannels {
-  width: 200px;
+  width: 220px;
+  border: 1.5px solid #3a3f4b;
+  border-radius: 6px;
+  background: #232634;
+  color: #e0e0e0;
+  padding: 10px 14px;
+  font-size: 1.1em;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px #0002;
+}
+.qwebirc-loginbox input#loginnickname:focus, .qwebirc-loginbox input#loginchannels:focus {
+  border: 1.5px solid #7a6ff0;
+  outline: none;
+  box-shadow: 0 0 0 2px #7a6ff033;
+}
+/* Modernisiertes Login-Button */
+.qwebirc-loginbox input[type="submit"],
+.qwebirc-loginbox input[type="button"],
+.qwebirc-loginbox button {
+  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 10px;
+}
+.qwebirc-loginbox input[type="submit"]:hover,
+.qwebirc-loginbox input[type="button"]:hover,
+.qwebirc-loginbox button:hover {
+  background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
+  box-shadow: 0 4px 16px #0003;
+}
+/* Modernisiertes Login-Formular */
+.qwebirc-loginbox form {
+  background: #232634;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0003;
+  border: 1.5px solid #3a3f4b;
+  padding: 24px 18px;
+}
 }
 
 /**************** CONFIRM LOGIN BOX *******************/

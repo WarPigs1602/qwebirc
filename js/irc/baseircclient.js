@@ -71,7 +71,7 @@ qwebirc.irc.BaseIRCClient = new Class({
         n = command;
       var o = this["irc_" + n];
       if(o) {
-        // Für TAGMSG (und ggf. andere Kommandos mit Tags) tags als drittes Argument übergeben
+  // For TAGMSG (and possibly other commands with tags), pass tags as third argument
         if(n === "TAGMSG") {
           var r = o.run([prefix, sl, tags], this);
         } else {

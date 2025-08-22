@@ -36,8 +36,8 @@ qwebirc.irc.IRCClient = new Class({
   },
 
   onCapabilities: function(caps) {
-    // Zeige die verfügbaren oder aktiven CAPs im Statusfenster an
-    // Wenn das erste Element 'ACK' ist, dann ist es eine Bestätigung aktiver CAPs (CAP ACK)
+  // Show available or active CAPs in the status window
+  // If the first element is 'ACK', it is a confirmation of active CAPs (CAP ACK)
     if (caps && caps.length > 0 && caps[0] === "ACK") {
       this.newServerLine("GENERICMESSAGE", {m: "Active capabilities: " + caps.slice(1).join(", ")});
     } else {
@@ -251,7 +251,7 @@ qwebirc.irc.IRCClient = new Class({
     if(this.ui.uiOptions.USE_HIDDENHOST)
       this.exec("/UMODE +x");
 
-    // Autojoin immer sofort nach Login ausführen, ohne Delay/Timer
+  // Always perform autojoin immediately after login, without delay/timer
     if(this.options.autojoin) {
       this.exec("/AUTOJOIN");
     } else {

@@ -31,7 +31,7 @@ qwebirc.ui.ConnectPane = new Class({
         var box = (autoConnect ? "confirm" : "login");
         exec("[name=" + box + "box]", util.setVisible(true));
 
-        // SASL-Felder beim Umschalten auf Confirm explizit übernehmen
+  // Explicitly copy SASL fields when switching to confirm
         if (autoConnect) {
           // Login-Formular suchen (immer das erste)
           var loginUser = rootElement.getElements("input[name=sasl_username]")[0];

@@ -1,1 +1,1 @@
-qwebirc.VERSION = "1.02";
+qwebirc.VERSION = "2.0a";
