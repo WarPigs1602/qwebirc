@@ -171,9 +171,11 @@ qwebirc.ui.QUI = new Class({
     // Emoji Kategorien und Emojis
     var emojiCategories = [
       { name: "Smileys & People", icon: "😃", emojis: [
-        "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
-        "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌",
-        "😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕"
+  "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
+  "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌",
+  "😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕",
+  // Hand-Emojis mit Hauttönen
+  "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦾","🦵","🦶","👂","🦻","👃"
       ] },
       { name: "Animals & Nature", icon: "🐻", emojis: [
         "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🐔","🐧","🐦","🐤",
@@ -202,26 +204,35 @@ qwebirc.ui.QUI = new Class({
           "☮️","✝️","☪️","🕉️","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈","♉","♊","♋","♌","♍","♎","♏",
           "♐","♑","♒","♓","🆔","⚛️","🉑","☢️","☣️","📴","📳","🈶","🈚","🈸","🈺","🈷️","✴️","🆚","💮","🉐",
           "©️","®️","™️","ℹ️","🔞","🚭","☑️","✅","✔️","❌","❎","➕","➖","➗","➰","➿","🔟","#️⃣","*️⃣","0️⃣",
-          "1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔢","🔣","🔤","🔡","🔠","🔽","🔼","🔺","🔻","🔸","🔹"
+          "1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔢","🔣","🔤","🔡","🔠","🔽","🔼","🔺","🔻","🔸","🔹",
+          // Weitere Symbole
+          "⬆️","⬇️","⬅️","➡️","↗️","↘️","↙️","↖️","↩️","↪️","⤴️","⤵️","🔀","🔁","🔂","🔄","🔃","🔚","🔙","🔛",
+          "🔜","🔝","🛑","⏏️","⏩","⏪","⏫","⏬","⏭️","⏮️","⏸️","⏹️","⏺️","⏯️","⏭️","⏮️","⏸️","⏹️","⏺️","⏯️",
+          "▪️","▫️","◾","◽","◼️","◻️","⬛","⬜","🔳","🔲","◉","◯","◐","◑","◒","◓","◔","◕","⚫","⚪",
+          "🔘","🔴","🔵","🔺","🔻","🔸","🔹","🔶","🔷","🔳","🔲","🔈","🔉","🔊","🔇","🔕","🔔","🔕","🔔","🔕"
         ]
       }
     ];
     var activeCategory = 0;
 
     function renderEmojiPicker() {
-  emojiOverlay.empty();
-  // Scrollen im Overlay komplett deaktivieren
-  emojiOverlay.setStyle('maxHeight', 'none');
-  emojiOverlay.setStyle('overflowY', 'visible');
+      emojiOverlay.empty();
+      var cat = emojiCategories[activeCategory];
+      // emojiOverlay darf nicht scrollen
+      emojiOverlay.setStyle('overflowY', 'visible');
+      emojiOverlay.setStyle('maxHeight', 'none');
+      // Wrapper für feste Kopfzeile (Kategorien + ggf. Farbauswahl)
+      var header = new Element("div");
+      header.setStyles({ position: "relative", zIndex: 2, background: "#fff", padding: "0 0 4px 0", borderBottom: "1.5px solid #3a3f4b" });
       // Kategorienleiste
       var catBar = new Element("div");
-      catBar.setStyles({ display: "flex", gap: "8px", marginBottom: "8px", borderBottom: "1.5px solid #3a3f4b", paddingBottom: "6px" });
-      emojiCategories.forEach(function(cat, idx) {
+      catBar.setStyles({ display: "flex", gap: "8px", margin: "8px 0 0 0", paddingBottom: "6px" });
+      emojiCategories.forEach(function(catItem, idx) {
         var btn = new Element("button");
         btn.set("type", "button");
-        btn.set("text", cat.icon);
-        btn.set("title", cat.name);
-        btn.setStyles({ background: idx===activeCategory?"#ececff":"none", border: "none", fontSize: "20px", cursor: "pointer", borderRadius: "4px", padding: "2px 6px", color: idx===activeCategory?"#232634":"#e0e0e0" });
+        btn.set("text", catItem.icon);
+        btn.set("title", catItem.name);
+        btn.setStyles({ background: idx===activeCategory?"#ececff":"none", border: "none", fontSize: "20px", cursor: "pointer", borderRadius: "4px", padding: "2px 6px", color: idx===activeCategory?"#232634":"#888" });
         btn.addEvent("click", function(e) {
           if(e && e.preventDefault) e.preventDefault();
           activeCategory = idx;
@@ -229,19 +240,67 @@ qwebirc.ui.QUI = new Class({
         });
         catBar.appendChild(btn);
       });
-      emojiOverlay.appendChild(catBar);
-      // Emojis
-      var emojiGrid = new Element("ul");
-      emojiGrid.setStyles({ listStyle: "none", padding: "0", margin: "10px 0 0 0" });
-      var cat = emojiCategories[activeCategory];
+      header.appendChild(catBar);
+      // Farbauswahl für Smileys & People
+      var skinBar = null;
+      if(cat.name === "Smileys & People") {
+        var skinTones = [
+          { label: "Default", color: "#FFD93B", code: "" },
+          { label: "Light", color: "#FADCBC", code: "\uD83C\uDFFB" },
+          { label: "Medium-Light", color: "#E0BB95", code: "\uD83C\uDFFC" },
+          { label: "Medium", color: "#C68642", code: "\uD83C\uDFFD" },
+          { label: "Dark", color: "#8D5524", code: "\uD83C\uDFFE" },
+          { label: "Very Dark", color: "#5A3A1B", code: "\uD83C\uDFFF" }
+        ];
+        skinBar = new Element("div");
+        skinBar.setStyles({ display: "flex", gap: "6px", margin: "8px 0 0 0", alignItems: "center" });
+        skinTones.forEach(function(tone, idx) {
+          var btn = new Element("button");
+          btn.set("type", "button");
+          btn.set("title", tone.label);
+          btn.setStyles({ width: "22px", height: "22px", background: tone.color, border: idx===window.activeSkinTone?"2px solid #7a6ff0":"1px solid #888", borderRadius: "50%", cursor: "pointer", outline: "none", padding: 0 });
+          btn.addEvent("click", function(e) {
+            if(e && e.preventDefault) e.preventDefault();
+            window.activeSkinTone = idx;
+            renderEmojiPicker();
+          });
+          skinBar.appendChild(btn);
+        });
+        header.appendChild(skinBar);
+      }
+      emojiOverlay.appendChild(header);
+      // Scrollbarer Bereich für Emojis
       var perRow = 10;
+      var numRows = Math.ceil(cat.emojis.length / perRow);
+      var maxRows = 7;
+      var emojiScroll = new Element("div");
+      emojiScroll.setStyles({
+        maxHeight: (numRows > maxRows ? (maxRows*38+8) : 'none') + 'px',
+        overflowY: numRows > maxRows ? 'auto' : 'visible',
+        marginTop: '8px',
+        paddingRight: '2px'
+      });
+      // Hand-Emojis, die Hauttöne unterstützen
+      var handEmojis = [
+        "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦾","🦵","🦶","👂","🦻","👃"
+      ];
+      var skinToneCode = (typeof window.activeSkinTone !== 'undefined' && cat.name === "Smileys & People") ? window.activeSkinTone : 0;
+      var emojiGrid = new Element("ul");
+      emojiGrid.setStyles({ listStyle: "none", padding: "0", margin: "0" });
       for(var i=0; i<cat.emojis.length; i+=perRow) {
         var rowLi = new Element("li");
         rowLi.setStyles({ marginBottom: "4px", whiteSpace: "nowrap" });
         cat.emojis.slice(i, i+perRow).forEach(function(emoji) {
           var emojiBtn = new Element("button");
           emojiBtn.set("type", "button");
-          emojiBtn.set("text", emoji);
+          // Hautfarbe nur bei Hand-Emojis
+          var showEmoji = emoji;
+          if(cat.name === "Smileys & People" && skinToneCode && handEmojis.indexOf(emoji) !== -1) {
+            try {
+              showEmoji = emoji + String.fromCodePoint(0x1F3FB + skinToneCode - 1);
+            } catch(e) {}
+          }
+          emojiBtn.set("text", showEmoji);
           emojiBtn.setStyles({ fontSize: "22px", background: "none", border: "none", cursor: "pointer", padding: "3px 4px", borderRadius: "5px", display: "inline-block" });
           emojiBtn.addEvent("click", function(e) {
             if(e) {
@@ -249,7 +308,7 @@ qwebirc.ui.QUI = new Class({
               if(e.stopPropagation) e.stopPropagation();
             }
             try {
-              insertAtCursor(inputbox, emoji);
+              insertAtCursor(inputbox, showEmoji);
               emojiOverlay.setStyle("display", "none");
               inputbox.focus();
             } catch (err) {}
@@ -258,7 +317,8 @@ qwebirc.ui.QUI = new Class({
         });
         emojiGrid.appendChild(rowLi);
       }
-      emojiOverlay.appendChild(emojiGrid);
+      emojiScroll.appendChild(emojiGrid);
+      emojiOverlay.appendChild(emojiScroll);
     }
 
     function insertAtCursor(input, text) {
@@ -862,7 +922,7 @@ qwebirc.ui.QUI.Window = new Class({
   removePrevMenu: function() {
     if(!this.prevNick)
       return;
-      
+
     this.prevNick.removeClass("selected");
     this.prevNick.removeClass("selected-middle");
     if(this.prevNick.menu)
