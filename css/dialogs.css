@@ -8,13 +8,13 @@
 .qwebirc-loginbox input#sasl_password,
 .qwebirc-loginbox input#confirm_sasl_username,
 .qwebirc-loginbox input#confirm_sasl_password {
-  width: 220px;
+  width: 200px;
   border: 1.5px solid #3a3f4b;
   border-radius: 6px;
   background: #232634;
   color: #e0e0e0;
-  padding: 10px 14px;
-  font-size: 1.1em;
+  padding: 6px 10px;
+  font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px #0002;
 }
@@ -114,13 +114,13 @@
 
 /* Modernisiertes Login-Input */
 .qwebirc-loginbox input#loginnickname, .qwebirc-loginbox input#loginchannels {
-  width: 220px;
+  width: 200px;
   border: 1.5px solid #3a3f4b;
   border-radius: 6px;
   background: #232634;
   color: #e0e0e0;
-  padding: 10px 14px;
-  font-size: 1.1em;
+  padding: 6px 10px;
+  font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px #0002;
 }
@@ -137,13 +137,13 @@
   color: #fff;
   border: none;
   border-radius: 6px;
-  padding: 10px 22px;
-  font-size: 1.1em;
+  padding: 6px 12px;
+  font-size: 1em;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 8px #0002;
   transition: background 0.2s, box-shadow 0.2s;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 .qwebirc-loginbox input[type="submit"]:hover,
 .qwebirc-loginbox input[type="button"]:hover,
@@ -181,13 +181,22 @@
 
 /**************** ABOUT PANE *******************/
 .qwebirc-aboutpane {
-  font-size: 1em !important;
+  font-size: 1.08em !important;
+  line-height: 1.6;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  background: #232634;
+  color: #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0003;
+  border: 1.5px solid #3a3f4b;
+  padding: 18px 12px;
 }
 
 .qwebirc-aboutpane .mainbody {
-  font-size: 0.8em;
+  font-size: 1em;
+  line-height: 1.7;
   text-align: center;
-  padding: 5px;
+  padding: 7px 4px;
 }
 
 .qwebirc-aboutpane table {
@@ -199,19 +208,24 @@
 }
 
 .qwebirc-aboutpane .header {
-  background: white;
+  background: #232634;
   text-align: center;
-  border-bottom: 1px solid gray;
-  padding-bottom: 5px;
+  border-bottom: 1px solid #3a3f4b;
+  padding-bottom: 7px;
 }
 
 .qwebirc-aboutpane .header .title {
-  font-size: 3em;
+  font-size: 1.5em;
+  color: #ececff;
+  margin-bottom: 4px;
+  font-family: 'Segoe UI Semibold', 'Verdana', 'Arial', sans-serif;
 }
 
 .qwebirc-aboutpane .header .subtitle {
   text-align: center;
-  margin-top: 10px;
+  margin-top: 6px;
+  color: #b0b0b0;
+  font-size: 1.08em;
 }
 
 .qwebirc-aboutpane .skipmargin {
@@ -220,16 +234,37 @@
 
 /**************** EMBEDDED WIZARD *******************/
  div.qwebirc-embeddedwizard {
-  padding-left: 5px;
-  padding-top: 2px;
+  background: #232634;
+  color: #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0003;
+  border: 1.5px solid #3a3f4b;
+  padding: 14px 10px 10px 10px;
+  font-size: 1.08em;
+  line-height: 1.6;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
 }
 
 .qwebirc-embeddedwizard input.text {
-  width: 300px;
+  width: 220px;
+  font-size: 1.08em;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: #232634;
+  color: #ececff;
+  border: 1.5px solid #7a6ff0;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
 }
 
 .qwebirc-embeddedwizard input.iframetext {
   width: 95%;
+  font-size: 1.08em;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: #232634;
+  color: #ececff;
+  border: 1.5px solid #7a6ff0;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
 }
 
 .qwebirc-embeddedwizard div.wizardcontrols {
@@ -237,6 +272,17 @@
 
 .qwebirc-embeddedwizard .wizardcontrols input {
   min-width: 70px;
+  font-size: 1.08em;
+  padding: 7px 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
+  color: #ececff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.2s, box-shadow 0.2s;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
 }
 
 /**************** PRIVACY POLICY PANE *******************/

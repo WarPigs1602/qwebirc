@@ -43,18 +43,16 @@
   }
   .qwebirc-qui .input input.keyboard-input,
   .qwebirc-qui .input input[type="text"],
-  .qwebirc-qui .input input[type="search"] {
-    font-size: 0.95em !important;
-    padding: 4px 2px !important;
-    min-height: 24px !important;
-  }
+  .qwebirc-qui .input input[type="search"],
   .qwebirc-qui .input input[type="submit"],
   .qwebirc-qui .input input[type="button"],
+  .qwebirc-qui select,
+  .qwebirc-qui textarea,
   .qwebirc-qui button {
     font-size: 0.95em !important;
-    padding: 4px 6px !important;
-    margin-top: 2px !important;
-    min-height: 24px !important;
+    padding: 3px 5px !important;
+    min-height: 20px !important;
+    margin-top: 0 !important;
   }
   .qwebirc-qui .dropdownmenu a {
     font-size: 0.7em !important;
@@ -100,18 +98,16 @@
   }
   .qwebirc-qui .input input.keyboard-input,
   .qwebirc-qui .input input[type="text"],
-  .qwebirc-qui .input input[type="search"] {
-    font-size: 0.98em !important;
-    padding: 6px 4px !important;
-    min-height: 28px !important;
-  }
+  .qwebirc-qui .input input[type="search"],
   .qwebirc-qui .input input[type="submit"],
   .qwebirc-qui .input input[type="button"],
+  .qwebirc-qui select,
+  .qwebirc-qui textarea,
   .qwebirc-qui button {
     font-size: 0.98em !important;
-    padding: 6px 8px !important;
-    margin-top: 4px !important;
-    min-height: 28px !important;
+    padding: 5px 7px !important;
+    min-height: 22px !important;
+    margin-top: 0 !important;
   }
   .qwebirc-qui .nicklist {
     font-size: 0.92em !important;
@@ -349,8 +345,8 @@ html {
 .qwebirc-qui .input input.keyboard-input {
   border: 1.5px solid #3a3f4b;
   margin: 0px 0px 0px 0px;
-  font-size: 1.1em;
-  padding: 8px 12px;
+  font-size: 1em;
+  padding: 6px 10px;
   width: 98%;
   border-radius: 6px;
   background: #232634;
@@ -391,13 +387,12 @@ html {
 .qwebirc-qui button,
 .qwebirc-qui input[type="submit"],
 .qwebirc-qui input[type="button"] {
-  position: absolute;
-  top: 0px;
+  position: static;
   background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
   color: #fff;
   border: none;
   border-radius: 6px;
-  padding: 8px 18px;
+  padding: 6px 12px;
   font-size: 1em;
   font-weight: 600;
   cursor: pointer;
@@ -429,7 +424,7 @@ html {
   border-radius: 6px;
   background: #232634;
   color: #e0e0e0;
-  padding: 8px 12px;
+  padding: 6px 10px;
   font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px #0002;
