@@ -247,13 +247,30 @@ lines_text=c,e0e0e0,front
 menu_text=c,e0e0e0,front
 nicklist_selected_background=c,2a2d3a,back
 
+
 body {
   margin: 0;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100vh;
   font-family: Verdana, sans-serif;
   background: #181a20;
   color: #e0e0e0;
+}
+
+html {
+  min-height: 100vh;
+}
+
+#ircui {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  max-width: 100vw;
+  overflow: auto;
 }
 
 html {
