@@ -698,10 +698,23 @@ qwebirc.ui.QUI.Window = new Class({
   // Typing bar for channel and query windows
     if(type == qwebirc.ui.WINDOW_CHANNEL || type == qwebirc.ui.WINDOW_QUERY) {
       this._typingBar = null;
-      this.showTypingBar = function(event) {
-        if (!event.tags || !event.tags.typing) {
-          return;
+      this._typingUsers = {};
+      this._typingTimeouts = {};
+      this._typingBarHideTimeout = null;
+
+      // Hilfsfunktion: Nickname mit Farbe als HTML
+      this._renderNick = function(nick) {
+        if (this.nicksColoured && typeof nick.toHSBColour === 'function') {
+          var color = nick.toHSBColour(this.client);
+          if (color) {
+            return '<span style="color:' + color.rgbToHex() + '">' + nick + '</span>';
+          }
         }
+        return '<span>' + nick + '</span>';
+      };
+
+      // Zeigt die Typing-Bar für alle aktiven Tipper
+      this._updateTypingBar = function() {
         if (!this._typingBar) {
           var inputForm = $$('.input form')[0];
           if (inputForm) {
@@ -710,32 +723,61 @@ qwebirc.ui.QUI.Window = new Class({
             });
             typingBar.inject(inputForm, 'before');
             this._typingBar = typingBar;
-          } else {
           }
         }
-        if (!this._typingBar) {
-          return;
-        }
-        var typingState = event.tags.typing;
-        var nick = event.user.split('!')[0];
-        if (typingState === 'active') {
-          this._typingBar.set('html', nick + ' is typing <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>');
-          this._typingBar.removeClass('active');
-          this._typingBar.removeClass('paused');
-          this._typingBar.addClass('qwebirc-typing-bar');
-          this._typingBar.addClass('active');
-        } else if (typingState === 'paused') {
-          this._typingBar.set('text', nick + ' paused');
-          this._typingBar.removeClass('active');
-          this._typingBar.removeClass('paused');
-          this._typingBar.addClass('qwebirc-typing-bar');
-          this._typingBar.addClass('paused');
-        } else if (typingState === 'done') {
+        if (!this._typingBar) return;
+
+        var nicks = Object.keys(this._typingUsers).filter(function(nick) {
+          return this._typingUsers[nick] === 'active';
+        }.bind(this));
+
+        if (nicks.length === 0) {
           this._typingBar.set('text', '');
           this._typingBar.removeClass('active');
           this._typingBar.removeClass('paused');
           this._typingBar.addClass('qwebirc-typing-bar');
+          return;
         }
+
+  var nickHtml = nicks.map(this._renderNick.bind(this)).join(', ');
+  var text = nickHtml + ' <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>';
+  this._typingBar.set('html', text);
+        this._typingBar.removeClass('paused');
+        this._typingBar.addClass('qwebirc-typing-bar');
+        this._typingBar.addClass('active');
+      };
+
+      // Hauptfunktion: Event-Verarbeitung
+      this.showTypingBar = function(event) {
+        if (!event.tags || !event.tags.typing) return;
+        var typingState = event.tags.typing;
+        var nick = event.user.split('!')[0];
+
+        // Zeitsteuerung: nach 5s Inaktivität ausblenden
+        var hideDelay = 5000;
+        if (this._typingTimeouts[nick]) {
+          clearTimeout(this._typingTimeouts[nick]);
+        }
+        if (typingState === 'active') {
+          this._typingUsers[nick] = 'active';
+          this._typingTimeouts[nick] = setTimeout(function() {
+            delete this._typingUsers[nick];
+            this._updateTypingBar();
+          }.bind(this), hideDelay);
+        } else if (typingState === 'paused') {
+          this._typingUsers[nick] = 'paused';
+          this._typingTimeouts[nick] = setTimeout(function() {
+            delete this._typingUsers[nick];
+            this._updateTypingBar();
+          }.bind(this), hideDelay);
+        } else if (typingState === 'done') {
+          delete this._typingUsers[nick];
+          if (this._typingTimeouts[nick]) {
+            clearTimeout(this._typingTimeouts[nick]);
+            delete this._typingTimeouts[nick];
+          }
+        }
+        this._updateTypingBar();
       };
     }
 
