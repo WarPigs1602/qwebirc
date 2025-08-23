@@ -16,9 +16,22 @@ qwebirc.ui.ConnectPane = new Class({
       onSuccess: function() {
 
         // SASL-Felder erst nach Laden des HTML und Setzen des Flags einblenden
-        if(window.SASL_LOGIN_ENABLED === true) {
-          parent.getElements('.sasl-row').setStyle('display', '');
+        // Checkbox-Logik für SASL-Felder
+        var saslCheckbox = parent.getElement('#show_sasl_fields');
+        if (saslCheckbox) {
+          saslCheckbox.addEvent('change', function() {
+            parent.getElements('.sasl-row').setStyle('display', this.checked ? '' : 'none');
+          });
         }
+        // Checkbox-Logik für Confirm-Dialog
+        var saslCheckboxConfirm = parent.getElement('#show_sasl_fields_confirm');
+        if (saslCheckboxConfirm) {
+          saslCheckboxConfirm.addEvent('change', function() {
+            parent.getElements('.sasl-row').setStyle('display', this.checked ? '' : 'none');
+          });
+        }
+        // Standardmäßig SASL-Felder ausblenden
+        parent.getElements('.sasl-row').setStyle('display', 'none');
         $clear(cb);
 
         var rootElement = parent.getElement("[name=connectroot]");
