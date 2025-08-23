@@ -699,51 +699,42 @@ qwebirc.ui.QUI.Window = new Class({
     if(type == qwebirc.ui.WINDOW_CHANNEL || type == qwebirc.ui.WINDOW_QUERY) {
       this._typingBar = null;
       this.showTypingBar = function(event) {
-        if(window.console) window.console.log('[showTypingBar] called', event, 'window:', this.name);
         if (!event.tags || !event.tags.typing) {
-          if(window.console) window.console.log('[showTypingBar] kein typing-tag:', event.tags);
           return;
         }
         if (!this._typingBar) {
           var inputForm = $$('.input form')[0];
-          if(window.console) window.console.log('[showTypingBar] inputForm:', inputForm);
           if (inputForm) {
             var typingBar = new Element("div", {
               'class': 'qwebirc-typing-bar',
-              'styles': {
-                'border': '1px solid #b3d4fc',
-                'background': '#eaf6ff',
-                'padding': '3px 8px',
-                'margin': '0 0 4px 0',
-                'font-size': '90%',
-                'color': '#2176c7',
-                'min-height': '18px',
-                'display': 'none'
-              }
             });
             typingBar.inject(inputForm, 'before');
             this._typingBar = typingBar;
-            if(window.console) window.console.log('[showTypingBar] TypingBar erzeugt');
           } else {
-            if(window.console) window.console.warn('[showTypingBar] Kein inputForm gefunden!');
           }
         }
         if (!this._typingBar) {
-          if(window.console) window.console.warn('[showTypingBar] Keine TypingBar vorhanden!');
           return;
         }
         var typingState = event.tags.typing;
         var nick = event.user.split('!')[0];
-        if(window.console) window.console.log('[showTypingBar] state:', typingState, 'nick:', nick);
         if (typingState === 'active') {
-          this._typingBar.set('text', nick + ' is typing...');
-          this._typingBar.setStyle('display', 'block');
+          this._typingBar.set('html', nick + ' is typing <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>');
+          this._typingBar.removeClass('active');
+          this._typingBar.removeClass('paused');
+          this._typingBar.addClass('qwebirc-typing-bar');
+          this._typingBar.addClass('active');
         } else if (typingState === 'paused') {
-          this._typingBar.set('text', nick + ' is pausing...');
-          this._typingBar.setStyle('display', 'block');
+          this._typingBar.set('text', nick + ' paused');
+          this._typingBar.removeClass('active');
+          this._typingBar.removeClass('paused');
+          this._typingBar.addClass('qwebirc-typing-bar');
+          this._typingBar.addClass('paused');
         } else if (typingState === 'done') {
           this._typingBar.set('text', '');
-          this._typingBar.setStyle('display', 'none');
+          this._typingBar.removeClass('active');
+          this._typingBar.removeClass('paused');
+          this._typingBar.addClass('qwebirc-typing-bar');
         }
       };
     }

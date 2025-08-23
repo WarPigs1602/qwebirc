@@ -272,19 +272,19 @@ qwebirc.irc.BaseIRCClient = new Class({
 
     irc_TAGMSG: function(prefix, params, tags) {
       // params: [target], tags: IRCv3 message tags
-      if(window.console) window.console.log('[irc_TAGMSG] called', prefix, params, tags);
+  // Debug-Ausgabe entfernt
       // Komplett ignorieren, wenn kein typing-Tag vorhanden ist (verhindert leere Zeilen)
       if(!(tags && tags.typing)) {
-        if(window.console) window.console.log('[irc_TAGMSG] kein typing-tag:', tags);
+  // Debug-Ausgabe entfernt
         return undefined;
       }
       var user = prefix;
       var target = params[0];
       if(this.ui && this.ui.onTagmsg) {
-        if(window.console) window.console.log('[irc_TAGMSG] onTagmsg aufrufen', user, target, tags);
+  // Debug-Ausgabe entfernt
         this.ui.onTagmsg({user: user, target: target, tags: tags});
       } else {
-        if(window.console) window.console.warn('[irc_TAGMSG] kein this.ui.onTagmsg vorhanden!');
+  // Debug-Ausgabe entfernt
       }
       return true;
     },
