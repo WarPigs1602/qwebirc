@@ -1,3 +1,36 @@
+/* Passwort-Auge-Icon im Eingabefeld platzieren */
+.qwebirc-loginbox td[style*="position:relative"] label {
+  position: absolute;
+  right: 0.7em;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1.5em;
+  display: flex;
+  align-items: center;
+  z-index: 3;
+  padding: 0;
+  pointer-events: auto;
+}
+.qwebirc-loginbox td[style*="position:relative"] label span[title="Show password"] {
+  font-size: 1.2em;
+  color: #888;
+  transition: color 0.2s;
+  pointer-events: none;
+}
+.qwebirc-loginbox td[style*="position:relative"] label:hover span[title="Show password"] {
+  color: #7a6ff0;
+}
+.qwebirc-loginbox td[style*="position:relative"] input[type="checkbox"] {
+  opacity: 0;
+  width: 1.5em;
+  height: 1.5em;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  cursor: pointer;
+  margin: 0;
+}
 /* About-Dialog: Links besser sichtbar */
 .mainbody a {
   color: #297fff;
@@ -93,7 +126,7 @@
   border-radius: 6px;
   background: #232634;
   color: #e0e0e0;
-  padding: 6px 10px;
+  padding: 6px 2.2em 6px 10px;
   font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px #0002;

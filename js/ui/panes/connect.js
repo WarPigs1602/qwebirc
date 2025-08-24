@@ -14,24 +14,85 @@ qwebirc.ui.ConnectPane = new Class({
       url: qwebirc.global.staticBaseURL + "panes/connect.html",
       update: parent,
       onSuccess: function() {
+        // Passwort-Einblendfunktion für beide Passwortfelder
+        var pwToggle = parent.getElement('#show_sasl_password');
+        var pwField = parent.getElement('#sasl_password');
+        if(pwToggle && pwField) {
+          pwToggle.addEvent('change', function() {
+            pwField.type = this.checked ? 'text' : 'password';
+          });
+        }
+        var pwToggle2 = parent.getElement('#show_confirm_sasl_password');
+        var pwField2 = parent.getElement('#confirm_sasl_password');
+        if(pwToggle2 && pwField2) {
+          pwToggle2.addEvent('change', function() {
+            pwField2.type = this.checked ? 'text' : 'password';
+          });
+        }
 
         // SASL-Felder erst nach Laden des HTML und Setzen des Flags einblenden
         // Checkbox-Logik für SASL-Felder
-        var saslCheckbox = parent.getElement('#show_sasl_fields');
-        if (saslCheckbox) {
-          saslCheckbox.addEvent('change', function() {
-            parent.getElements('.sasl-row').setStyle('display', this.checked ? '' : 'none');
-          });
+        var self = this;
+        // Login-Formular (Nickname/Channels)
+        var loginForm = parent.getElement('tr[name=loginbox] form');
+        if (loginForm) {
+          var saslCheckbox = loginForm.getElement('#show_sasl_fields');
+          var saslUserField = loginForm.getElement('#sasl_username');
+          var saslPassField = loginForm.getElement('#sasl_password');
+          // Standardmäßig ausblenden
+          loginForm.getElements('.sasl-row').setStyle('display', 'none');
+          // Aus Cookie wiederherstellen
+          var savedUser = self.cookie.get('sasl_username');
+          var savedPass = self.cookie.get('sasl_password');
+          if(saslCheckbox && (savedUser || savedPass)) {
+            saslCheckbox.checked = true;
+            loginForm.getElements('.sasl-row').setStyle('display', '');
+            if(saslUserField && savedUser) saslUserField.value = savedUser;
+            if(saslPassField && savedPass) saslPassField.value = savedPass;
+          }
+          if (saslCheckbox) {
+            saslCheckbox.addEvent('change', function() {
+              var checked = this.checked;
+              loginForm.getElements('.sasl-row').setStyle('display', checked ? '' : 'none');
+              if(checked && saslUserField && saslPassField) {
+                var savedUser = self.cookie.get('sasl_username');
+                var savedPass = self.cookie.get('sasl_password');
+                if(savedUser) saslUserField.value = savedUser;
+                if(savedPass) saslPassField.value = savedPass;
+              }
+            });
+          }
         }
-        // Checkbox-Logik für Confirm-Dialog
-        var saslCheckboxConfirm = parent.getElement('#show_sasl_fields_confirm');
-        if (saslCheckboxConfirm) {
-          saslCheckboxConfirm.addEvent('change', function() {
-            parent.getElements('.sasl-row').setStyle('display', this.checked ? '' : 'none');
-          });
+        // Confirm-Dialog
+        var confirmForm = parent.getElement('tr[name=confirmbox] form');
+        if (confirmForm) {
+          var saslCheckboxConfirm = confirmForm.getElement('#show_sasl_fields_confirm');
+          var saslUserFieldConfirm = confirmForm.getElement('#confirm_sasl_username');
+          var saslPassFieldConfirm = confirmForm.getElement('#confirm_sasl_password');
+          // Standardmäßig ausblenden
+          confirmForm.getElements('.sasl-row').setStyle('display', 'none');
+          // Aus Cookie wiederherstellen
+          var savedUser = self.cookie.get('sasl_username');
+          var savedPass = self.cookie.get('sasl_password');
+          if(saslCheckboxConfirm && (savedUser || savedPass)) {
+            saslCheckboxConfirm.checked = true;
+            confirmForm.getElements('.sasl-row').setStyle('display', '');
+            if(saslUserFieldConfirm && savedUser) saslUserFieldConfirm.value = savedUser;
+            if(saslPassFieldConfirm && savedPass) saslPassFieldConfirm.value = savedPass;
+          }
+          if (saslCheckboxConfirm) {
+            saslCheckboxConfirm.addEvent('change', function() {
+              var checked = this.checked;
+              confirmForm.getElements('.sasl-row').setStyle('display', checked ? '' : 'none');
+              if(checked && saslUserFieldConfirm && saslPassFieldConfirm) {
+                var savedUser = self.cookie.get('sasl_username');
+                var savedPass = self.cookie.get('sasl_password');
+                if(savedUser) saslUserFieldConfirm.value = savedUser;
+                if(savedPass) saslPassFieldConfirm.value = savedPass;
+              }
+            });
+          }
         }
-        // Standardmäßig SASL-Felder ausblenden
-        parent.getElements('.sasl-row').setStyle('display', 'none');
         $clear(cb);
 
         var rootElement = parent.getElement("[name=connectroot]");
@@ -159,6 +220,17 @@ qwebirc.ui.ConnectPane = new Class({
 
     this.__cancelLogin();
     this.fireEvent("close");
+    // SASL speichern oder löschen je nach Checkbox
+    var saslCheckbox = this.rootElement.getElement('#show_sasl_fields');
+    var saslUserField = this.rootElement.getElement('#sasl_username');
+    var saslPassField = this.rootElement.getElement('#sasl_password');
+    if(saslCheckbox && saslCheckbox.checked && saslUserField && saslPassField) {
+      this.cookie.set('sasl_username', saslUserField.value);
+      this.cookie.set('sasl_password', saslPassField.value);
+    } else {
+      this.cookie.erase('sasl_username');
+      this.cookie.erase('sasl_password');
+    }
     this.cookie.extend(data);
     this.cookie.save();
     this.options.callback(data);
