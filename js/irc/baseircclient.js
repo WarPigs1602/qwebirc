@@ -288,19 +288,18 @@ qwebirc.irc.BaseIRCClient = new Class({
 
     irc_TAGMSG: function(prefix, params, tags) {
       // params: [target], tags: IRCv3 message tags
-  // Debug-Ausgabe entfernt
+      // Nur verarbeiten, wenn Capability aktiv ist
+      if (!this.activeCaps || this.activeCaps.indexOf("message-tags") === -1) {
+        return undefined;
+      }
       // Komplett ignorieren, wenn kein typing-Tag vorhanden ist (verhindert leere Zeilen)
       if(!(tags && tags.typing)) {
-  // Debug-Ausgabe entfernt
         return undefined;
       }
       var user = prefix;
       var target = params[0];
       if(this.ui && this.ui.onTagmsg) {
-  // Debug-Ausgabe entfernt
         this.ui.onTagmsg({user: user, target: target, tags: tags});
-      } else {
-  // Debug-Ausgabe entfernt
       }
       return true;
     },

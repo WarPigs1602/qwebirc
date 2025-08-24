@@ -37,10 +37,12 @@ qwebirc.irc.IRCClient = new Class({
   },
 
   onCapabilities: function(caps) {
-  // Show available or active CAPs in the status window
-  // If the first element is 'ACK', it is a confirmation of active CAPs (CAP ACK)
+    // Show available or active CAPs in the status window
+    // If the first element is 'ACK', it is a confirmation of active CAPs (CAP ACK)
+    if (!this.activeCaps) this.activeCaps = [];
     if (caps && caps.length > 0 && caps[0] === "ACK") {
-      this.newServerLine("GENERICMESSAGE", {m: "Active capabilities: " + caps.slice(1).join(", ")});
+      this.activeCaps = caps.slice(1);
+      this.newServerLine("GENERICMESSAGE", {m: "Active capabilities: " + this.activeCaps.join(", ")});
     } else {
       this.newServerLine("GENERICMESSAGE", {m: "Available capabilities: " + caps.join(", ")});
     }
