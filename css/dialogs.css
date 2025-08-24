@@ -1,3 +1,36 @@
+/* Globale Scrollbar-Anpassung für alle Dialoge außer Connect- und Chat-Dialog */
+body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) ::-webkit-scrollbar {
+  width: 12px;
+  background: #232634;
+}
+body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) ::-webkit-scrollbar-thumb {
+  background: #5a5fcf;
+  border-radius: 6px;
+}
+body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
+  scrollbar-width: thin;
+  scrollbar-color: #5a5fcf #232634;
+}
+
+/* Scrollbare Container in Dialogen an Seitenrand kleben lassen */
+.qwebirc-aboutpane,
+.qwebirc-optionspane,
+.qwebirc-embeddedwizard,
+.qwebirc-privacypolicypane,
+.qwebirc-feedbackpane,
+.qwebirc-faqpane {
+  overflow-y: auto !important;
+  max-height: 90vh;
+  /* Scrollbar immer am Rand, nicht "innen" */
+  box-sizing: border-box;
+}
+
+/* Connect- und Chat-Dialoge explizit ohne sichtbare Scrollbar am Rand */
+.qwebirc-connectpane,
+.qwebirc-chatpane {
+  overflow-y: visible !important;
+  scrollbar-width: none;
+}
 /* Passwort-Auge-Icon im Eingabefeld platzieren */
 .qwebirc-loginbox td[style*="position:relative"] label {
   position: absolute;
