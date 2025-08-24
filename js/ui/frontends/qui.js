@@ -369,14 +369,17 @@ qwebirc.ui.QUI = new Class({
 
     // Hilfsfunktion: Sende TAGMSG mit typing-Status
     this.sendTypingTagmsg = function(state) {
+      // Typing-Indicator bei Befehlen (Eingaben mit /) deaktivieren
+      if (typeof inputbox !== 'undefined' && inputbox.value && inputbox.value.trim().charAt(0) === '/') {
+        return;
+      }
       var win = this.getActiveWindow();
       if(!win) return;
       var target = win.name;
-  // Only support channel or query
+      // Only support channel or query
       if(win.type == qwebirc.ui.WINDOW_CHANNEL || win.type == qwebirc.ui.WINDOW_QUERY) {
         if(this.client && this.client.send) {
           this.client.send("@+typing=" + state + " TAGMSG " + target);
-        } else {
         }
       }
     };
