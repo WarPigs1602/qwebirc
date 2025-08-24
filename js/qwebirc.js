@@ -1,6 +1,6 @@
 
+
 var qwebirc = {ui: {themes: {}, style: {}}, irc: {}, util: {crypto: {}}, config: {}, auth: {}, sound: {}, connected: false, xdomain: {}};
-qwebirc.VERSION = "2.0";
 
 if(typeof QWEBIRC_BUILD != "undefined") {
   qwebirc.BUILD = QWEBIRC_BUILD;

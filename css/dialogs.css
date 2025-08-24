@@ -1,3 +1,83 @@
+/* About-Dialog: Links besser sichtbar */
+.mainbody a {
+  color: #297fff;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: color 0.2s, background 0.2s;
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+.mainbody a:hover {
+  color: #fff;
+  background: #5a5fcf;
+  text-decoration: underline;
+}
+/* About-Dialog: Close-Button im dialogs.css-Style, ohne Konflikte */
+.mainbody input.close {
+  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 6px;
+}
+.mainbody input.close:hover {
+  background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
+  box-shadow: 0 4px 16px #0003;
+}
+/* About-Dialog: Button wie dialogs.css */
+.about-close-btn {
+  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 6px;
+}
+.about-close-btn:hover {
+  background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
+  box-shadow: 0 4px 16px #0003;
+}
+/* About-Dialog: Links und Button */
+.qwebirc-aboutpane .about-link {
+  color: #5a8fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.qwebirc-aboutpane .about-link:hover {
+  color: #7a6ff0;
+  background: none;
+  border-radius: 0;
+  text-decoration: none;
+}
+.qwebirc-aboutpane .about-close-btn {
+  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 6px;
+}
+.qwebirc-aboutpane .about-close-btn:hover {
+  background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
+  box-shadow: 0 4px 16px #0003;
+}
 /* nologologinheader h1 blau mit Schatten */
 .qwebirc-loginbox .tr1[name="nologologinheader"] h1 {
   color: #098ED1;
@@ -233,19 +313,50 @@
 }
 
 /**************** EMBEDDED WIZARD *******************/
- div.qwebirc-embeddedwizard {
+div.qwebirc-embeddedwizard {
   background: #232634;
   color: #e0e0e0;
   border-radius: 10px;
   box-shadow: 0 2px 12px #0003;
   border: 1.5px solid #3a3f4b;
-  padding: 14px 10px 10px 10px;
+  padding: 14px 10px;
   font-size: 1.08em;
-  line-height: 1.6;
+  line-height: 1.25;
   font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
 }
+.qwebirc-embeddedwizard label {
+  color: #b0b0b0;
+  font-size: 1em;
+  font-weight: 500;
+  margin-bottom: 2px;
+  display: inline-block;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+}
+.qwebirc-embeddedwizard input[type="radio"] {
+  accent-color: #7a6ff0;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.qwebirc-embeddedwizard .wizardcontrols label,
+.qwebirc-embeddedwizard label[for^="options_radio"],
+.qwebirc-embeddedwizard label[for^="nick"],
+.qwebirc-embeddedwizard label[for^="lookandfeel"],
+.qwebirc-embeddedwizard label[for^="prompt"] {
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  font-size: 1em;
+  color: #b0b0b0;
+  font-weight: 500;
+  margin-left: 2px;
+  margin-right: 12px;
+  cursor: pointer;
+}
 
-.qwebirc-embeddedwizard input.text {
+.qwebirc-embeddedwizard input.text,
+.qwebirc-embeddedwizard input[type="text"],
+.qwebirc-embeddedwizard input[type="number"],
+.qwebirc-embeddedwizard input[type="password"] {
   width: 220px;
   font-size: 1.08em;
   padding: 7px 12px;
@@ -254,6 +365,16 @@
   color: #ececff;
   border: 1.5px solid #7a6ff0;
   font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px #0002;
+}
+.qwebirc-embeddedwizard input.text:focus,
+.qwebirc-embeddedwizard input[type="text"]:focus,
+.qwebirc-embeddedwizard input[type="number"]:focus,
+.qwebirc-embeddedwizard input[type="password"]:focus {
+  border: 1.5px solid #5a5fcf;
+  outline: none;
+  box-shadow: 0 0 0 2px #7a6ff033;
 }
 
 .qwebirc-embeddedwizard input.iframetext {
@@ -265,14 +386,24 @@
   color: #ececff;
   border: 1.5px solid #7a6ff0;
   font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px #0002;
+}
+.qwebirc-embeddedwizard input.iframetext:focus {
+  border: 1.5px solid #5a5fcf;
+  outline: none;
+  box-shadow: 0 0 0 2px #7a6ff033;
 }
 
 .qwebirc-embeddedwizard div.wizardcontrols {
 }
 
-.qwebirc-embeddedwizard .wizardcontrols input {
+.qwebirc-embeddedwizard .wizardcontrols input,
+.qwebirc-embeddedwizard input[type="submit"],
+.qwebirc-embeddedwizard input[type="button"],
+.qwebirc-embeddedwizard button {
   min-width: 70px;
-  font-size: 1.08em;
+  font-size: 1em;
   padding: 7px 14px;
   border-radius: 6px;
   background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
@@ -283,6 +414,18 @@
   box-shadow: 0 2px 8px #0002;
   transition: background 0.2s, box-shadow 0.2s;
   font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  margin-top: 6px;
+}
+.qwebirc-embeddedwizard .wizardcontrols input:hover,
+.qwebirc-embeddedwizard input[type="submit"]:hover,
+.qwebirc-embeddedwizard input[type="button"]:hover,
+.qwebirc-embeddedwizard button:hover {
+  background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
+  box-shadow: 0 4px 16px #0003;
+}
+/* Kompaktere Zeilenabstände für den Wizard */
+.qwebirc-embeddedwizard > div {
+  margin-bottom: 4px;
 }
 
 /**************** PRIVACY POLICY PANE *******************/
@@ -413,6 +556,84 @@
 
 /************* OPTIONS *****************/
 
+
+/* Modernisiertes Options-Dialog Design */
+.qwebirc-optionspane {
+  background: #232634;
+  color: #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0003;
+  border: 1.5px solid #3a3f4b;
+  padding: 14px 10px;
+  font-size: 1.08em;
+  line-height: 1.25;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+}
+
+.qwebirc-optionspane table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 4px;
+}
+.qwebirc-optionspane td {
+  padding: 2px 6px;
+}
+.qwebirc-optionspane label {
+  color: #b0b0b0;
+  font-size: 1em;
+  font-weight: 500;
+  margin-bottom: 2px;
+  display: inline-block;
+}
+.qwebirc-optionspane input[type="text"],
+.qwebirc-optionspane input[type="number"],
+.qwebirc-optionspane input[type="password"] {
+  width: 220px;
+  font-size: 1.08em;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: #232634;
+  color: #ececff;
+  border: 1.5px solid #7a6ff0;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px #0002;
+}
+.qwebirc-optionspane input[type="text"]:focus,
+.qwebirc-optionspane input[type="number"]:focus,
+.qwebirc-optionspane input[type="password"]:focus {
+  border: 1.5px solid #5a5fcf;
+  outline: none;
+  box-shadow: 0 0 0 2px #7a6ff033;
+}
+.qwebirc-optionspane input[type="checkbox"],
+.qwebirc-optionspane input[type="radio"] {
+  accent-color: #7a6ff0;
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+}
+.qwebirc-optionspane input[type="submit"],
+.qwebirc-optionspane input[type="button"],
+.qwebirc-optionspane button {
+  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: 6px;
+}
+.qwebirc-optionspane input[type="submit"]:hover,
+.qwebirc-optionspane input[type="button"]:hover,
+.qwebirc-optionspane button:hover {
+  background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
+  box-shadow: 0 4px 16px #0003;
+}
 .qwebirc-optionspane div.hue-slider {
   border: 0px solid black;
   width: 360px;
@@ -420,14 +641,17 @@
   background-image: url(../images/hue.png);
   margin-top: 5px;
   margin-bottom: 5px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px #0002;
 }
-
 .qwebirc-optionspane div.hue-slider .knob {
-  width: 8px;
-  height: 16px;
-  top: -5px;
-  opacity: 0.75;
-  background: grey;
-  border: 1px solid black;
+  width: 12px;
+  height: 22px;
+  top: -7px;
+  opacity: 0.85;
+  background: #7a6ff0;
+  border: 2px solid #ececff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px #0003;
 }
 
