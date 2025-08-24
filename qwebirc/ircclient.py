@@ -161,15 +161,20 @@ class QWebIRCClient(basic.LineReceiver):
     # Für TAGMSG: Nur Event erzeugen, wenn relevante Tags (z.B. typing) vorhanden sind
     # Unterstütze auch draft/message-tags (bereits beim Parsen entfernt)
     if command == "TAGMSG":
-      # Akzeptiere sowohl "typing" als auch "message-tags/typing" (draft wurde beim Parsen entfernt)
       if not (tags and "typing" in tags and tags["typing"]):
-        # Ignoriere TAGMSG ohne typing-Tag komplett (kein Event, keine Zeile)
         return
     # CAP LS und CAP ACK nicht an das Eventsystem weitergeben (ausblenden)
     if command == "CAP":
       subcmd = params[1].upper() if len(params) > 1 else ""
       if subcmd in ("LS", "ACK"):
         return
+    # 005/PREFIX-Handling: Sende PREFIX-Info als Event an das Frontend
+    if command == "005":
+      # Suche PREFIX=... in params
+      for p in params:
+        if isinstance(p, str) and p.startswith("PREFIX="):
+          self("prefixes", p[7:])
+          break
     self("c", command, prefix, params, tags)
     
   def __call__(self, *args):

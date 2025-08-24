@@ -10,8 +10,9 @@ qwebirc.irc.IRCClient = new Class({
 
     this.ui = ui;
 
-    this.prefixes = "@+";
-    this.modeprefixes = "ov";
+  // Standardmäßig alle gängigen Prefixe und Modes setzen
+  this.prefixes = "~&@%+";
+  this.modeprefixes = "qaohv";
     this.windows = new QHash();
     
     this.commandparser = new qwebirc.irc.Commands(this);

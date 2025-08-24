@@ -640,3 +640,15 @@ iframe {
   background: #232634;
   color: #888;
 }
+
+.prefix-owner, .prefix-admin, .prefix-op, .prefix-halfop, .prefix-voice, .prefix-unknown, .prefix-none {
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+  margin-right: 4px; /* Abstand rechts neben dem Symbol */
+}
+.prefix-none {
+  width: 16px;
+  margin-right: 4px;
+  /* Kein Symbol anzeigen, Platz bleibt leer */
+}

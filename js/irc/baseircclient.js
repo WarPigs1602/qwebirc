@@ -28,6 +28,9 @@ qwebirc.irc.BaseIRCClient = new Class({
     this.lowerNickname = this.toIRCLower(this.nickname);    
 
     this.__signedOn = false;
+    // Standard-Prefixe und Mapping, werden ggf. dynamisch überschrieben
+    this.prefixes = "~&@%+";
+    this.prefixModes = {"~": "q", "&": "a", "@": "o", "%": "h", "+": "v"};
     this.pmodes = new QHash({b: qwebirc.irc.PMODE_LIST, l: qwebirc.irc.PMODE_SET_ONLY, k: qwebirc.irc.PMODE_SET_UNSET, o: qwebirc.irc.PMODE_SET_UNSET, v: qwebirc.irc.PMODE_SET_UNSET});
     this.channels = new QSet();
     this.chanPrefixes = new QSet("#", "&");
@@ -60,6 +63,20 @@ qwebirc.irc.BaseIRCClient = new Class({
         this.disconnected(data[1]);
       }
       this.disconnect();
+    } else if(message == "prefixes") {
+      // Dynamische PREFIX-Info vom Backend
+      var prefixstr = data[1];
+      // Beispiel: (qaohv)~&@%+
+      var m = prefixstr.match(/^\(([^)]+)\)(.+)$/);
+      if(m) {
+        var modes = m[1].split("");
+        var prefixes = m[2].split("");
+        this.prefixes = m[2];
+        this.prefixModes = {};
+        for(var i=0;i<prefixes.length;i++) {
+          this.prefixModes[prefixes[i]] = modes[i];
+        }
+      }
     } else if(message == "c") {
       var command = data[1].toUpperCase();
       var prefix = data[2];
@@ -71,7 +88,6 @@ qwebirc.irc.BaseIRCClient = new Class({
         n = command;
       var o = this["irc_" + n];
       if(o) {
-  // For TAGMSG (and possibly other commands with tags), pass tags as third argument
         if(n === "TAGMSG") {
           var r = o.run([prefix, sl, tags], this);
         } else {

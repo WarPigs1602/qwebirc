@@ -1,3 +1,9 @@
+  aliases: new QHash({
+    "HALFOP": "halfop",
+    "DEHALFOP": "dehalfop",
+    "VOICE": "voice",
+    "DEVOICE": "devoice"
+  }),
 qwebirc.irc.BaseCommandParser = new Class({
   initialize: function(parentObject) {
     this.send = parentObject.send;
@@ -140,5 +146,46 @@ qwebirc.irc.BaseCommandParser = new Class({
     r.get();
     
     return true;
-  }
+  },
+  // IRC MODE-Kommandos für Rechte
+  cmd_OP: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " +o " + args];
+  }],
+  cmd_DEOP: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " -o " + args];
+  }],
+  cmd_voice: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " +v " + args];
+  }],
+  cmd_devoice: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " -v " + args];
+  }],
+  cmd_halfop: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " +h " + args];
+  }],
+  cmd_dehalfop: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " -h " + args];
+  }],
+  cmd_ADMIN: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " +a " + args];
+  }],
+  cmd_DEADMIN: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " -a " + args];
+  }],
+  cmd_OWNER: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " +q " + args];
+  }],
+  cmd_DEOWNER: [true, 1, 1, function(args) {
+    var channel = this.getActiveWindow().name;
+    return ["MODE", channel + " -q " + args];
+  }],
 });

@@ -963,19 +963,46 @@ qwebirc.ui.QUI.Window = new Class({
     this.prevNick = null;
   },
   nickListAdd: function(nick, position) {
+    // Nur das höchste Prefix anzeigen
     var realNick = this.client.stripPrefix(nick);
-    
+    var prefix = nick.charAt(0);
+    var prefixClass = "";
+    var prefixSymbol = "";
+    switch(prefix) {
+      case "~": prefixClass = "prefix-owner"; prefixSymbol = "👑"; break;
+      case "&": prefixClass = "prefix-admin"; prefixSymbol = "★"; break;
+      case "@": prefixClass = "prefix-op"; prefixSymbol = "●"; break;
+      case "%": prefixClass = "prefix-halfop"; prefixSymbol = "◑"; break;
+      case "+": prefixClass = "prefix-voice"; prefixSymbol = "➤"; break;
+      case ' ': case '': prefixClass = "prefix-none"; prefixSymbol = ""; break;
+      default: prefixClass = "prefix-unknown"; prefixSymbol = prefix ? prefix : ""; break; // Buchstabe wieder anzeigen
+    }
     var e = new Element("a");
     qwebirc.ui.insertAt(position, this.nicklist, e);
+    // Nur ein Prefix-Symbol mit Abstand
+    if(prefixSymbol) {
+      var prefixSpan = new Element("span");
+      prefixSpan.addClass(prefixClass);
+      prefixSpan.setStyle("display", "inline-block");
+      prefixSpan.setStyle("width", "16px");
+      prefixSpan.setStyle("text-align", "center");
+      prefixSpan.set("text", prefixSymbol);
+      e.appendChild(prefixSpan);
+    } else {
+      // Platz freihalten, damit alles bündig bleibt
+      var emptySpan = new Element("span");
+      emptySpan.setStyle("display", "inline-block");
+      emptySpan.setStyle("width", "16px");
+      e.appendChild(emptySpan);
+    }
     var span = new Element("span");
     if(this.parentObject.uiOptions.NICK_COLOURS) {
       var colour = realNick.toHSBColour(this.client);
       if($defined(colour))
         span.setStyle("color", colour.rgbToHex());
     }
-    span.set("text", nick);
+    span.set("text", realNick);
     e.appendChild(span);
-    
     e.realNick = realNick;
     
     e.addEvent("click", function(x) {
