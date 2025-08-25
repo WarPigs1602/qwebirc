@@ -430,11 +430,16 @@ qwebirc.irc.BaseIRCClient = new Class({
           return '\x00' + nick + '\x00';
         }
         var msg;
-        if (isPrivilege && arg) {
+        // Ban und Ban-Exception speziell behandeln
+        if ((mode === 'b' || mode === 'e') && arg) {
+          var action = (cmode === '+') ? 'set' : 'removed';
+          var type = (mode === 'b') ? 'ban' : 'ban-exception';
+          msg = colourNick(userNick) + ' ' + action + ' ' + type + ' for ' + arg + ' in ' + channel;
+        } else if (isPrivilege && arg) {
           var action = (cmode === '+') ? 'granted' : 'removed';
-          msg = colourNick(userNick) + ' ' + action + ' ' + privilegeName + ' to ' + colourNick(arg) + ' on ' + channel;
+          msg = colourNick(userNick) + ' ' + action + ' ' + privilegeName + ' to ' + colourNick(arg) + ' in ' + channel;
         } else {
-          msg = colourNick(userNick) + ' sets mode ' + cmode + mode + (arg ? ' ' + arg : '') + ' on ' + channel;
+          msg = colourNick(userNick) + ' set mode ' + cmode + mode + (arg ? ' ' + arg : '') + ' on ' + channel;
         }
         if (self.ui && self.ui.getWindow) {
           var win = self.ui.getWindow(self, qwebirc.ui.WINDOW_CHANNEL, channel);
