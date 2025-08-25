@@ -362,7 +362,9 @@ qwebirc.irc.IRCClient = new Class({
       }
     }, this);
 
-    this.newChanLine(channel, "MODE", user, {"m": raw.join(" ")});
+    if (!this.__suppressModeNotify) {
+      this.newChanLine(channel, "MODE", user, {"m": raw.join(" ")});
+    }
     
     this.updateNickList(channel);
   },

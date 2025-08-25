@@ -1,3 +1,4 @@
+
 qwebirc.ui.themes.ThemeControlCodeMap = {
   "C": "\x03",
   "B": "\x02",
@@ -76,6 +77,7 @@ qwebirc.ui.themes.Default = {
   "IGNOREENTRY": ["- $h", false],
   "IGNOREEMPTY": ["Ignore list is empty.", false],
   "SILENCE": ["Silenced: $h", false],
+  "MODEMSG": ["$m", true],
 
   "NOTIFYCHANMSGTITLE": ["Mentioned on $c:", false],
   "NOTIFYCHANMSGBODY": ["<$@$n> $m", false],

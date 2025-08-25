@@ -400,7 +400,59 @@ qwebirc.irc.BaseIRCClient = new Class({
         data.push(d);
       }, this);
       
-      this.channelMode(user, target, data, args);
+      // Einzelne Modes nacheinander anzeigen und Rechteänderungen speziell behandeln
+      var self = this;
+      data.forEach(function(modeArr) {
+        var cmode = modeArr[0];
+        var mode = modeArr[1];
+        var arg = modeArr[2];
+        var prefixModes = self.prefixModes || {};
+        var channel = target;
+        var isPrivilege = false;
+        var privilegeName = null;
+        for (var prefix in prefixModes) {
+          if (prefixModes[prefix] === mode) {
+            isPrivilege = true;
+            switch (mode) {
+              case 'o': privilegeName = 'Op'; break;
+              case 'v': privilegeName = 'Voice'; break;
+              case 'h': privilegeName = 'Halfop'; break;
+              case 'a': privilegeName = 'Admin'; break;
+              case 'q': privilegeName = 'Owner'; break;
+              default: privilegeName = mode; break;
+            }
+            break;
+          }
+        }
+        var userNick = user && user.hostToNick ? user.hostToNick() : user;
+        // Nicknamen für Colourise mit \x00 umschließen (wie in theme.js und colour.js)
+        function colourNick(nick) {
+          return '\x00' + nick + '\x00';
+        }
+        var msg;
+        if (isPrivilege && arg) {
+          var action = (cmode === '+') ? 'granted' : 'removed';
+          msg = colourNick(userNick) + ' ' + action + ' ' + privilegeName + ' to ' + colourNick(arg) + ' on ' + channel;
+        } else {
+          msg = colourNick(userNick) + ' sets mode ' + cmode + mode + (arg ? ' ' + arg : '') + ' on ' + channel;
+        }
+        if (self.ui && self.ui.getWindow) {
+          var win = self.ui.getWindow(self, qwebirc.ui.WINDOW_CHANNEL, channel);
+          if (win && win.addLine) {
+            win.addLine("MODEMSG", {m: msg});
+          }
+        }
+  // ...kein mode-colour Event mehr...
+      });
+      // Die eigentliche Mode-Logik weiterreichen, aber ohne klassische Anzeige
+      if (typeof this.channelMode === 'function') {
+        try {
+          this.__suppressModeNotify = true;
+          this.channelMode(user, target, data, args);
+        } finally {
+          this.__suppressModeNotify = false;
+        }
+      }
     }
     
     return true;
