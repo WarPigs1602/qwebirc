@@ -79,6 +79,16 @@ qwebirc.ui.QUI = new Class({
 
     this.setSideTabs(this.uiOptions.SIDE_TABS);
 
+    // Verbindungsstatus in Typing-Bar automatisch ausblenden, wenn signedOn kommt
+    this.addEvent && this.addEvent('signedOn', function() {
+      if(window.qwebircConnectStatus) {
+  // Debug-Ausgabe entfernt
+        window.qwebircConnectStatus.hide();
+      } else {
+  // Debug-Ausgabe entfernt
+      }
+    });
+
   },
   newWindow: function(client, type, name) {
     var w = this.parent(client, type, name);
@@ -848,8 +858,68 @@ qwebirc.ui.QUI.Window = new Class({
     this.parentObject.qjsui.applyClasses("middle", this.lines);
     this.lines.addClass("lines");
 
-    if(type == qwebirc.ui.WINDOW_STATUS)
-      this.lines.addClass("spinner");
+  // Entferne spinner-Grafik beim Verbinden
+  // if(type == qwebirc.ui.WINDOW_STATUS)
+  //   this.lines.addClass("spinner");
+// --- Connect-Status in Typing-Bar anzeigen ---
+// Hilfsfunktion für animierte Punkte
+// Typing-Bar-Style: Drei leere <span class="typing-dot"></span> für animierte Punkte
+function getTypingBarDots() {
+  return '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+}
+
+// Connect-Status-Objekt
+var connectStatus = {
+  interval: null,
+  step: 0,
+  typingBar: null,
+  show: function() {
+    if (this.interval) return;
+    var typingBar = document.querySelector('.qwebirc-typing-bar');
+    if (!typingBar) {
+      // Versuche, die Typing-Bar zu erzeugen, falls sie noch nicht existiert
+      var inputForm = $$('.input form')[0];
+      if (inputForm) {
+        typingBar = new Element('div', {'class': 'qwebirc-typing-bar active'});
+        typingBar.inject(inputForm, 'before');
+      }
+    }
+    if (!typingBar) return;
+    this.typingBar = typingBar;
+    typingBar.addClass('active');
+    var self = this;
+  // Keine Animation, sondern wie Typing-Bar
+  typingBar.set('html', 'Trying to connect server <span class="typing-dots">' + getTypingBarDots() + '</span>');
+// Automatisch Statusmeldung ausblenden, wenn signedOn-Event kommt
+if (window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.QUI) {
+  var QUIproto = qwebirc.ui.QUI.prototype;
+  var oldPostInit = QUIproto.postInitialize;
+  QUIproto.postInitialize = function() {
+    if (oldPostInit) oldPostInit.apply(this, arguments);
+    this.addEvent && this.addEvent('signedOn', function() {
+      if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
+    });
+  };
+}
+  },
+  hide: function() {
+  // Debug-Ausgabe entfernt
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+    // Entferne ALLE Typing-Bars mit dieser Klasse aus dem DOM
+    var bars = document.querySelectorAll('.qwebirc-typing-bar');
+    bars.forEach(function(bar) {
+      bar.style.display = 'none';
+      if (bar.parentNode) bar.parentNode.removeChild(bar);
+    });
+    this.typingBar = null;
+  }
+};
+
+// Export für andere Module
+window.qwebircConnectStatus = connectStatus;
 
     if(type != qwebirc.ui.WINDOW_CUSTOM && type != qwebirc.ui.WINDOW_CONNECT)
       this.lines.addClass("ircwindow");

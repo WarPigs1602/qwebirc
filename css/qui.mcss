@@ -527,10 +527,7 @@ iframe {
   border: none;
 }
 
-.qwebirc-qui .spinner {
-  background: url($(base_url)../images/spinner.png) no-repeat $(lines_background);
-  background-position: top 5px right 5px;
-}
+
 
 @media screen and (max-device-width:1024px) {
   .qwebirc-qui .lines {
@@ -610,9 +607,10 @@ iframe {
   display: none;
   border-radius: 6px;
   transition: background 0.2s, color 0.2s;
+  z-index: 20;
 }
 .qwebirc-qui .qwebirc-typing-bar.active {
-  display: block;
+  display: block !important;
   background: #2a2d3a;
   color: #b3d4fc;
   position: relative;

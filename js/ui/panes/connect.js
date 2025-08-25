@@ -229,12 +229,13 @@ qwebirc.ui.ConnectPane = new Class({
   },
   __connect: function(e) {
     new Event(e).stop();
+    // Zeige Status in Typing-Bar
+    if(window.qwebircConnectStatus) window.qwebircConnectStatus.show();
     var data = this.validate();
-    // Debug-Ausgabe der SASL-Felder
-  // Debug-Ausgabe entfernt
-    if(data === false)
+    if(data === false) {
+      if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
       return;
-
+    }
     this.__cancelLogin();
     this.fireEvent("close");
     // SASL speichern oder löschen je nach Checkbox
@@ -250,6 +251,7 @@ qwebirc.ui.ConnectPane = new Class({
     }
     this.cookie.extend(data);
     this.cookie.save();
+    // Verbindung wird asynchron hergestellt, Status bleibt bis hide() aufgerufen wird
     this.options.callback(data);
   },
   __cancelLogin: function(noUIModifications) {
@@ -258,17 +260,20 @@ qwebirc.ui.ConnectPane = new Class({
   },
   __loginConnect: function(e) {
     new Event(e).stop();
-    if(this.validate() === false)
+    // Zeige Status in Typing-Bar
+    if(window.qwebircConnectStatus) window.qwebircConnectStatus.show();
+    if(this.validate() === false) {
+      if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
       return;
-
+    }
     this.__performLogin(function() {
       var data = this.validate();
       if(data === false) {
         /* we're logged in -- show the normal join button */
         this.util.exec("[name=connectbutton]", this.util.setVisible(true));
+        if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
         return;
       }
-
       this.fireEvent("close");
       this.options.callback(data);
     }.bind(this), "loginconnectbutton");
