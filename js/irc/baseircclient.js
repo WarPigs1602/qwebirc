@@ -38,18 +38,8 @@ qwebirc.irc.BaseIRCClient = new Class({
     this.chanPrefixes = new QSet("#", "&");
     this.nextctcp = 0;
 
-    // Capabilities-Handling
-    this.activeCaps = [];
-    this.onCapabilities = function(caps) {
-      // Erwartet: caps ist ein Array oder String mit Leerzeichen-getrennten Capabilities
-      if (typeof caps === "string") {
-        this.activeCaps = caps.split(" ");
-      } else if (Array.isArray(caps)) {
-        this.activeCaps = caps;
-      } else {
-        this.activeCaps = [];
-      }
-    };
+  // Capabilities-Handling
+  this.activeCaps = [];
 
     this.connection = new qwebirc.irc.IRCConnection({
       initialNickname: this.nickname,
