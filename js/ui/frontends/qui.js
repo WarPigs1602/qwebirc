@@ -187,7 +187,7 @@ qwebirc.ui.QUI = new Class({
   "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌",
   "😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕",
   // Hand-Emojis mit Hauttönen
-  "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦾","🦵","🦶","👂","🦻","👃"
+  "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦵","🦶","👂","🦻","👃"
       ] },
       { name: "Animals & Nature", icon: "🐻", emojis: [
         "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🐔","🐧","🐦","🐤",
@@ -258,20 +258,37 @@ qwebirc.ui.QUI = new Class({
       var skinBar = null;
       if(cat.name === "Smileys & People") {
         var skinTones = [
-          { label: "Default", color: "#FFD93B", code: "" },
-          { label: "Light", color: "#FADCBC", code: "\uD83C\uDFFB" },
-          { label: "Medium-Light", color: "#E0BB95", code: "\uD83C\uDFFC" },
-          { label: "Medium", color: "#C68642", code: "\uD83C\uDFFD" },
-          { label: "Dark", color: "#8D5524", code: "\uD83C\uDFFE" },
-          { label: "Very Dark", color: "#5A3A1B", code: "\uD83C\uDFFF" }
+          { label: "Default", code: "" },
+          { label: "Light", code: "\uD83C\uDFFB" },
+          { label: "Medium-Light", code: "\uD83C\uDFFC" },
+          { label: "Medium", code: "\uD83C\uDFFD" },
+          { label: "Dark", code: "\uD83C\uDFFE" },
+          { label: "Very Dark", code: "\uD83C\uDFFF" }
         ];
+        var handBase = "";
+        // Standard-Hand-Emoji für die Anzeige (Daumen hoch)
+        var handEmoji = "";
+        handEmoji = "";
+        handEmoji = "";
+        handEmoji = "";
+        handEmoji = "";
+        handEmoji = "";
+        handEmoji = "👍";
         skinBar = new Element("div");
         skinBar.setStyles({ display: "flex", gap: "6px", margin: "8px 0 0 0", alignItems: "center" });
         skinTones.forEach(function(tone, idx) {
           var btn = new Element("button");
           btn.set("type", "button");
           btn.set("title", tone.label);
-          btn.setStyles({ width: "22px", height: "22px", background: tone.color, border: idx===window.activeSkinTone?"2px solid #7a6ff0":"1px solid #888", borderRadius: "50%", cursor: "pointer", outline: "none", padding: 0 });
+          // Hand-Emoji mit Hautton
+          var showHand = handEmoji;
+          if(idx > 0) {
+            try {
+              showHand = handEmoji + String.fromCodePoint(0x1F3FB + idx - 1);
+            } catch(e) {}
+          }
+          btn.set("text", showHand);
+          btn.setStyles({ width: "28px", height: "28px", background: "none", border: "none", cursor: "pointer", outline: "none", padding: 0, fontSize: "22px" });
           btn.addEvent("click", function(e) {
             if(e && e.preventDefault) e.preventDefault();
             window.activeSkinTone = idx;
