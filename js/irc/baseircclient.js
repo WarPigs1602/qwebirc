@@ -25,7 +25,7 @@ qwebirc.irc.BaseIRCClient = new Class({
     this.toIRCLower = qwebirc.irc.RFC1459toIRCLower;
 
     this.nickname = this.options.nickname;
-    this.lowerNickname = this.toIRCLower(this.nickname);    
+    this.lowerNickname = this.toIRCLower(this.nickname);
 
     this.__signedOn = false;
     // Standard-Prefixe und Mapping, werden ggf. dynamisch überschrieben
@@ -38,6 +38,19 @@ qwebirc.irc.BaseIRCClient = new Class({
     this.chanPrefixes = new QSet("#", "&");
     this.nextctcp = 0;
 
+    // Capabilities-Handling
+    this.activeCaps = [];
+    this.onCapabilities = function(caps) {
+      // Erwartet: caps ist ein Array oder String mit Leerzeichen-getrennten Capabilities
+      if (typeof caps === "string") {
+        this.activeCaps = caps.split(" ");
+      } else if (Array.isArray(caps)) {
+        this.activeCaps = caps;
+      } else {
+        this.activeCaps = [];
+      }
+    };
+
     this.connection = new qwebirc.irc.IRCConnection({
       initialNickname: this.nickname,
       onRecv: this.dispatch.bind(this),
@@ -45,7 +58,7 @@ qwebirc.irc.BaseIRCClient = new Class({
       sasl_username: this.options.sasl_username || null,
       sasl_password: this.options.sasl_password || null
     });
-  
+
     this.send = this.connection.send.bind(this.connection);
     this.disconnect = this.connection.disconnect.bind(this.connection);
 

@@ -382,7 +382,10 @@ qwebirc.ui.QUI = new Class({
       // Only support channel or query
       if(win.type == qwebirc.ui.WINDOW_CHANNEL || win.type == qwebirc.ui.WINDOW_QUERY) {
         if(this.client && this.client.send) {
-          this.client.send("@+typing=" + state + " TAGMSG " + target);
+          // Prüfe, ob message-tags-Cap aktiv ist
+          if(this.client.activeCaps && this.client.activeCaps.indexOf("message-tags") !== -1) {
+            this.client.send("@+typing=" + state + " TAGMSG " + target);
+          }
         }
       }
     };
