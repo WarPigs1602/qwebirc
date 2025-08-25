@@ -9,10 +9,10 @@
   background: none;
   border: none;
   cursor: pointer;
-  height: 1.2em;
-  width: 1.2em;
-  font-size: 1.2em;
-  line-height: 1.2em;
+  height: 1em;
+  width: 1em;
+  font-size: 1em;
+  line-height: 1em;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,7 +21,7 @@
   transition: background 0.15s;
 }
 .qwebirc-qui .emoji-picker-btn:hover {
-  background: #ececff;
+  background: #232634;
 }
 .qwebirc-qui .emoji-picker-overlay {
   display: none;
@@ -66,7 +66,7 @@
 }
 .qwebirc-qui .emoji-picker-overlay .emoji-category-bar button.active,
 .qwebirc-qui .emoji-picker-overlay .emoji-category-bar button:focus {
-  background: #ececff;
+  background: #232634;
   color: #232634;
   border: 1.5px solid #7a6ff0;
 }
@@ -107,28 +107,26 @@ nicklist_selected_background=c,2a2d3a,back
 
 body {
   margin: 0;
-  min-height: 100vh;
-  font-family: 'Segoe UI', Verdana, Arial, sans-serif;
-  background: #181a20;
+  height: 100%;
+  overflow: hidden;
+  font-family: Verdana, sans-serif;
+  background: #232634;
   color: #e0e0e0;
-  font-size: 0.95em;
 }
 
 html {
-  min-height: 100vh;
+  overflow: hidden;
+  background: #232634;
 }
 
 #ircui {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  min-height: 100vh;
-  max-width: 100vw;
-  overflow: auto;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 html {
@@ -174,7 +172,6 @@ html {
   overflow: auto;
   background: $(lines_background);
   font-size: 0.8em;
-  border-radius: 4px;
 }
 
 .qwebirc-qui .lines a,
@@ -231,12 +228,12 @@ html {
 }
 
 .qwebirc-qui .input-flash {
-  background: #bbffbb;
+  background: #232634;
 }
 
 .qwebirc-qui .input input.mobile-input {
   width: 99%;
-  font-size: 0.95em;
+  font-size: 1.2em;
   padding: 6px 10px;
   border: 1.5px solid #3a3f4b;
   border-radius: 6px;
@@ -244,6 +241,7 @@ html {
   color: #e0e0e0;
   box-shadow: 0 2px 8px #0002;
   outline: none;
+  margin: 2px 0px 0px 0px;
   transition: border 0.2s, box-shadow 0.2s;
 }
 /* Placeholder für mobile Eingabezeile */
@@ -286,7 +284,7 @@ html {
   color: #b0b0b0;
   padding-left: 5px;
   padding-bottom: 3px;
-  font-size: 0.95em;
+  font-size: 1.1em;
   cursor: default;
 }
 
@@ -422,7 +420,6 @@ html {
   background: $(nicklist_background);
   color: $(nicklist_text);
   font-size: 0.7em;
-  border-radius: 4px 0 0 4px;
 }
 
 .qwebirc-qui .nicklist a {
@@ -531,11 +528,11 @@ iframe {
 
 @media screen and (max-device-width:1024px) {
   .qwebirc-qui .lines {
-  font-size: 0.95em;
+    font-size: 1.2em;
   }
 
   .qwebirc-qui .ircwindow div {
-  font-size: 0.95em;
+    font-size: 0.8em;
   }
 
   .qwebirc-qui .tabbar {
@@ -543,7 +540,7 @@ iframe {
   }
 
   .qwebirc-qui .tabbar, .qwebirc-qui .nicklist {
-  font-size: 0.95em;
+    font-size: 1.3em;
   }
 
   .qwebirc-qui .topic, .qwebirc-qui .dropdownmenu a, .qwebirc-qui .dropdownhint {
