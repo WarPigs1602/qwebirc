@@ -38,7 +38,7 @@ vim config.py  # or use your preferred editor
 
 Make sure to set at least the IRC server address and port, and review other options such as SASL_LOGIN_ENABLED if you want to enable SASL authentication fields in the login form.
 
-### 5. Compile static resources (optional, but recommended)
+### 5. Compile static resources
 
 ```
 ./compile.py
