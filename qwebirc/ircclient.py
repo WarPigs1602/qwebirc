@@ -1,3 +1,5 @@
+import sys
+print("[qwebirc][DEBUG] ircclient.py wurde geladen", file=sys.stderr)
 CAP_END = "CAP END"
 import twisted, sys, codecs, traceback
 from twisted.words.protocols import irc
@@ -273,17 +275,34 @@ class QWebIRCFactory(protocol.ClientFactory):
     self.publisher.disconnect()
 
 def create_irc(*args, **kwargs):
+  import sys
+  print("[qwebirc][DEBUG] create_irc() wurde aufgerufen", file=sys.stderr)
   f = QWebIRCFactory(*args, **kwargs)
   tcpkwargs = {}
   if hasattr(config, "OUTGOING_IP"):
     tcpkwargs["bindAddress"] = (config.OUTGOING_IP, 0)
 
+  import sys
   if CONNECTION_RESOLVER is None:
     if hasattr(config, "SSLPORT"):
-      from twisted.internet import ssl
-      reactor.connectSSL(config.IRCSERVER, config.SSLPORT, f, ssl.ClientContextFactory(), **tcpkwargs)
+      from .novverify import NoVerifyClientContextFactory
+      print(f"[qwebirc][SSL] Versuche Verbindung zu {config.IRCSERVER}:{config.SSLPORT} (TLS)", file=sys.stderr)
+      try:
+        reactor.connectSSL(config.IRCSERVER, config.SSLPORT, f, NoVerifyClientContextFactory(), **tcpkwargs)
+        print(f"[qwebirc][SSL] Verbindungsversuch zu {config.IRCSERVER}:{config.SSLPORT} (TLS) initiiert", file=sys.stderr)
+      except Exception as e:
+        print("[qwebirc][SSL] Fehler beim Aufbau der TLS-Verbindung:", e, file=sys.stderr)
+        import traceback
+        traceback.print_exc()
     else:
-      reactor.connectTCP(config.IRCSERVER, config.IRCPORT, f, **tcpkwargs)
+      print(f"[qwebirc][TCP] Versuche Verbindung zu {config.IRCSERVER}:{config.IRCPORT} (TCP)", file=sys.stderr)
+      try:
+        reactor.connectTCP(config.IRCSERVER, config.IRCPORT, f, **tcpkwargs)
+        print(f"[qwebirc][TCP] Verbindungsversuch zu {config.IRCSERVER}:{config.IRCPORT} (TCP) initiiert", file=sys.stderr)
+      except Exception as e:
+        print("[qwebirc][TCP] Fehler beim Aufbau der TCP-Verbindung:", e, file=sys.stderr)
+        import traceback
+        traceback.print_exc()
     return f
 
   def callback(result):

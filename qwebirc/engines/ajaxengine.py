@@ -234,6 +234,8 @@ class AJAXEngine(resource.Resource):
     return b"404" ## TODO: tidy up
 
   def newConnection(self, request):
+    import sys
+    print("[qwebirc][DEBUG] newConnection() aufgerufen", file=sys.stderr)
     ticket = login_optional(request)
     
     ip = request.getClientIP()
@@ -286,6 +288,7 @@ class AJAXEngine(resource.Resource):
         kwargs["sasl_username"] = ircclient.irc_decode(sasl_username[0])
       if sasl_password and ircclient.irc_decode(sasl_password[0]):
         kwargs["sasl_password"] = ircclient.irc_decode(sasl_password[0])
+      print(f"[qwebirc][DEBUG] proceed() called mit kwargs: {kwargs}", file=sys.stderr)
       client = ircclient.create_irc(session, **kwargs)
       session.client = client
 
