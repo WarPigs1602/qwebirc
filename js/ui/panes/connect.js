@@ -14,6 +14,23 @@ qwebirc.ui.ConnectPane = new Class({
       url: qwebirc.global.staticBaseURL + "panes/connect.html",
       update: parent,
       onSuccess: function() {
+        // SASL-Login-Felder und Checkbox initial ausblenden, wenn SASL_LOGIN_ENABLED nicht aktiv
+        if(typeof window.SASL_LOGIN_ENABLED !== 'undefined' && !window.SASL_LOGIN_ENABLED) {
+          // Login-Formular
+          var loginForm = parent.getElement('tr[name=loginbox] form');
+          if(loginForm) {
+            var saslCheckbox = loginForm.getElement('#show_sasl_fields');
+            if(saslCheckbox) saslCheckbox.parentNode.parentNode.remove();
+            loginForm.getElements('.sasl-row').each(function(row){ row.remove(); });
+          }
+          // Confirm-Dialog
+          var confirmForm = parent.getElement('tr[name=confirmbox] form');
+          if(confirmForm) {
+            var saslCheckboxConfirm = confirmForm.getElement('#show_sasl_fields_confirm');
+            if(saslCheckboxConfirm) saslCheckboxConfirm.parentNode.parentNode.remove();
+            confirmForm.getElements('.sasl-row').each(function(row){ row.remove(); });
+          }
+        }
         // Passwort-Einblendfunktion für beide Passwortfelder
         var pwToggle = parent.getElement('#show_sasl_password');
         var pwField = parent.getElement('#sasl_password');
