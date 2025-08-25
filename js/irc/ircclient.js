@@ -243,6 +243,14 @@ qwebirc.irc.IRCClient = new Class({
   
   /* from here down are events */
   rawNumeric: function(numeric, prefix, params) {
+    // SASL Auth: Numeric 900 - schöner anzeigen
+    if (numeric == 900 && params.length >= 4) {
+      // params: [ourNick, loginNick, account, message]
+      var msg = params[3];
+      // Zeige nur "You are now logged in as <nick>"
+      this.newServerLine("GENERICMESSAGE", {m: msg});
+      return;
+    }
     this.newServerLine("RAW", {"n": "numeric", "m": params.slice(1).join(" ")});
   },
   signedOn: function(nickname) {
