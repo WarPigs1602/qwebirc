@@ -33,6 +33,8 @@ qwebirc.irc.BaseIRCClient = new Class({
     this.prefixModes = {"~": "q", "&": "a", "@": "o", "%": "h", "+": "v"};
     this.pmodes = new QHash({b: qwebirc.irc.PMODE_LIST, l: qwebirc.irc.PMODE_SET_ONLY, k: qwebirc.irc.PMODE_SET_UNSET, o: qwebirc.irc.PMODE_SET_UNSET, v: qwebirc.irc.PMODE_SET_UNSET});
     this.channels = new QSet();
+    // Channels persistent speichern
+    this._loadPersistentChannels();
     this.chanPrefixes = new QSet("#", "&");
     this.nextctcp = 0;
 
@@ -196,11 +198,32 @@ qwebirc.irc.BaseIRCClient = new Class({
   __getChannel: function(name) {
     return this.channels.contains(this.toIRCLower(name));
   },
-  __killChannel: function(name) {
-    this.channels.remove(this.toIRCLower(name));
+  // Channels persistent speichern/laden
+  _loadPersistentChannels: function() {
+    try {
+      var data = localStorage.getItem("qwebirc_channels");
+      if (data) {
+        var chans = JSON.parse(data);
+        chans.forEach(function(c) { this.channels.add(c); }, this);
+      }
+    } catch(e) {}
+  },
+  _savePersistentChannels: function() {
+    try {
+      var arr = [];
+      this.channels.each(function(c) { arr.push(c); });
+      localStorage.setItem("qwebirc_channels", JSON.stringify(arr));
+    } catch(e) {}
   },
   __nowOnChannel: function(name) {
-    this.channels.add(this.toIRCLower(name));
+    var cname = this.toIRCLower(name);
+    this.channels.add(cname);
+    this._savePersistentChannels();
+  },
+  __killChannel: function(name) {
+    var cname = this.toIRCLower(name);
+    this.channels.remove(cname);
+    this._savePersistentChannels();
   },
   irc_KICK: function(prefix, params) {
     var kicker = prefix;

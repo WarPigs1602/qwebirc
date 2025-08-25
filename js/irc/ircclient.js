@@ -249,15 +249,34 @@ qwebirc.irc.IRCClient = new Class({
     this.tracker = new qwebirc.irc.IRCTracker(this);
     this.nickname = nickname;
     this.newServerLine("SIGNON");
-    
-    /* wir garantieren, dass +x vor den JOINs gesendet wird */
+
+    // +x vor JOINs
     if(this.ui.uiOptions.USE_HIDDENHOST)
       this.exec("/UMODE +x");
 
-  // Always perform autojoin immediately after login, without delay/timer
+    // Channels aus localStorage joinen
+    var persistentChans = [];
+    try {
+      var data = localStorage.getItem("qwebirc_channels");
+      if (data) persistentChans = JSON.parse(data);
+    } catch(e) {}
+
+    // Channels aus Login-Formular (autojoin) joinen
+    var autojoinChans = [];
     if(this.options.autojoin) {
-      this.exec("/AUTOJOIN");
-    } else {
+      autojoinChans = this.options.autojoin.split(/[, ]+/).filter(Boolean);
+    }
+
+    // Alle Channels (unique)
+    var allChans = {};
+    persistentChans.forEach(function(c) { allChans[c] = true; });
+    autojoinChans.forEach(function(c) { allChans[c] = true; });
+
+    var joinList = Object.keys(allChans);
+    if(joinList.length > 0) {
+      this.exec("/JOIN " + joinList.join(","));
+    }
+    else {
       var d = function() { this.newServerInfoLine("CONNECTED", ""); }.delay(1000, this);
     }
 
