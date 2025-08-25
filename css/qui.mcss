@@ -7,7 +7,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 1em;
   padding: 0 6px;
   border-radius: 6px;
   transition: background 0.15s;
@@ -34,7 +34,7 @@
 .qwebirc-qui .emoji-picker-overlay button {
   background: none;
   border: none;
-  font-size: 22px;
+  font-size: 1em;
   cursor: pointer;
   border-radius: 5px;
   padding: 2px 5px;
@@ -50,7 +50,7 @@
   justify-content: flex-start;
 }
 .qwebirc-qui .emoji-picker-overlay .emoji-category-bar button {
-  font-size: 18px;
+  font-size: 1em;
   padding: 2px 6px;
   border-radius: 4px;
   background: #232634;
@@ -100,9 +100,10 @@ nicklist_selected_background=c,2a2d3a,back
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: Verdana, sans-serif;
+  font-family: 'Segoe UI', Verdana, Arial, sans-serif;
   background: #181a20;
   color: #e0e0e0;
+  font-size: 0.95em;
 }
 
 html {
@@ -164,7 +165,7 @@ html {
   color: $(lines_text);
   overflow: auto;
   background: $(lines_background);
-  font-size: 0.8em;
+  font-size: 0.95em;
   border-radius: 4px;
 }
 
@@ -196,7 +197,7 @@ html {
 
 .qwebirc-qui .input input.keyboard-input {
   width: 99%;
-  font-size: 1em;
+  font-size: 0.95em;
   padding: 6px 10px;
   border: 1.5px solid #3a3f4b;
   border-radius: 6px;
@@ -224,7 +225,7 @@ html {
 
 .qwebirc-qui .input input.mobile-input {
   width: 99%;
-  font-size: 1em;
+  font-size: 0.95em;
   padding: 6px 10px;
   border: 1.5px solid #3a3f4b;
   border-radius: 6px;
@@ -274,7 +275,7 @@ html {
   color: #b0b0b0;
   padding-left: 5px;
   padding-bottom: 3px;
-  font-size: 1.1em;
+  font-size: 0.95em;
   cursor: default;
 }
 
@@ -334,7 +335,7 @@ html {
 }
 
 .qwebirc-qui .tabbar {
-  font-size: 0.8em;
+  font-size: 0.95em;
   color: $(tabbar_text);
   margin-left: 25px;
   line-height: 24px;
@@ -409,7 +410,7 @@ html {
   overflow: auto;
   background: $(nicklist_background);
   color: $(nicklist_text);
-  font-size: 0.7em;
+  font-size: 0.95em;
   border-radius: 4px 0 0 4px;
 }
 
@@ -522,11 +523,11 @@ iframe {
 
 @media screen and (max-device-width:1024px) {
   .qwebirc-qui .lines {
-    font-size: 1.2em;
+  font-size: 0.95em;
   }
 
   .qwebirc-qui .ircwindow div {
-    font-size: 0.8em;
+  font-size: 0.95em;
   }
 
   .qwebirc-qui .tabbar {
@@ -534,7 +535,7 @@ iframe {
   }
 
   .qwebirc-qui .tabbar, .qwebirc-qui .nicklist {
-    font-size: 1.3em;
+  font-size: 0.95em;
   }
 
   .qwebirc-qui .topic, .qwebirc-qui .dropdownmenu a, .qwebirc-qui .dropdownhint {

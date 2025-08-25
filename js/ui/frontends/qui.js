@@ -142,7 +142,8 @@ qwebirc.ui.QUI = new Class({
     // Emoji Picker Button
   var emojiBtn = new Element("button", { type: "button", html: "😊" });
   emojiBtn.addClass("emoji-picker-btn");
-  emojiBtn.setStyles({ position: "absolute", left: "5px", bottom: "5px", zIndex: 10, background: "none", border: "none", cursor: "pointer", fontSize: "20px", padding: "0 4px" });
+  // Dynamische Größe: 1em
+  emojiBtn.setStyles({ position: "absolute", left: "5px", bottom: "5px", zIndex: 10, background: "none", border: "none", cursor: "pointer", fontSize: "1em", padding: "0 4px" });
   form.appendChild(emojiBtn);
 
     // Inputbox mit Padding links für Emoji-Button
@@ -165,7 +166,8 @@ qwebirc.ui.QUI = new Class({
     // Emoji Picker Overlay
   var emojiOverlay = new Element("div");
   emojiOverlay.addClass("emoji-picker-overlay");
-  emojiOverlay.setStyles({ display: "none", position: "absolute", left: "0", bottom: "40px", zIndex: 1000, background: "#fff", border: "1px solid #ccc", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", padding: "8px", minWidth: "220px", maxHeight: "220px", overflowY: "auto" });
+  // Dynamische Größe: 1em
+  emojiOverlay.setStyles({ display: "none", position: "absolute", left: "0", bottom: "40px", zIndex: 1000, background: "#fff", border: "1px solid #ccc", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", padding: "8px", minWidth: "220px", maxHeight: "220px", overflowY: "auto", fontSize: "1em" });
   form.appendChild(emojiOverlay);
 
     // Emoji Kategorien und Emojis
@@ -232,7 +234,8 @@ qwebirc.ui.QUI = new Class({
         btn.set("type", "button");
         btn.set("text", catItem.icon);
         btn.set("title", catItem.name);
-        btn.setStyles({ background: idx===activeCategory?"#ececff":"none", border: "none", fontSize: "20px", cursor: "pointer", borderRadius: "4px", padding: "2px 6px", color: idx===activeCategory?"#232634":"#888" });
+        // Dynamische Größe: 1em
+        btn.setStyles({ background: idx===activeCategory?"#ececff":"none", border: "none", fontSize: "1em", cursor: "pointer", borderRadius: "4px", padding: "2px 6px", color: idx===activeCategory?"#232634":"#888" });
         btn.addEvent("click", function(e) {
           if(e && e.preventDefault) e.preventDefault();
           activeCategory = idx;
