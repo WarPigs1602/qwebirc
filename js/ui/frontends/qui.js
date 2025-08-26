@@ -817,18 +817,84 @@ qwebirc.ui.QUI.Window = new Class({
       };
     }
 
+
     this.tab = new Element("a");
     this.tab.addClass("tab");
-    this.tab.addEvent("focus", function() { this.blur() }.bind(this.tab));;
+    this.tab.addEvent("focus", function() { this.blur() }.bind(this.tab));
 
     this.spaceNode = document.createTextNode(" ");
-    parentObject.tabs.appendChild(this.tab);
-    parentObject.tabs.appendChild(this.spaceNode);
+
+    // Tabs sortieren: 1. Sonstige (außer Channel/Query) alphabetisch, 2. Channels alphabetisch, 3. Querys alphabetisch am Ende
+    this.tab.windowType = type;
+    // Query-Nick als Attribut für Sortierung setzen
+    if(type === qwebirc.ui.WINDOW_QUERY && typeof name === 'string') {
+      this.tab.setAttribute('data-querynick', name);
+    }
+    // Channelname als Attribut für Sortierung setzen
+    if(type === qwebirc.ui.WINDOW_CHANNEL && typeof name === 'string') {
+      this.tab.setAttribute('data-channel', name);
+    }
+    var allTabs = Array.from(parentObject.tabs.childNodes).filter(function(node) {
+      return node.nodeType === 1 && node.classList.contains("tab");
+    });
+    allTabs.push(this.tab);
+    // Gruppieren
+    var statusTabs = allTabs.filter(function(tab) {
+      return tab.windowType === qwebirc.ui.WINDOW_STATUS;
+    });
+    var channelTabs = allTabs.filter(function(tab) {
+      return tab.windowType === qwebirc.ui.WINDOW_CHANNEL;
+    });
+    var queryTabs = allTabs.filter(function(tab) {
+      return tab.windowType === qwebirc.ui.WINDOW_QUERY;
+    });
+    var otherTabs = allTabs.filter(function(tab) {
+      return tab.windowType !== qwebirc.ui.WINDOW_CHANNEL && tab.windowType !== qwebirc.ui.WINDOW_QUERY && tab.windowType !== qwebirc.ui.WINDOW_STATUS;
+    });
+    // Sortieren
+    otherTabs.sort(function(a, b) {
+      return a.textContent.localeCompare(b.textContent, undefined, {sensitivity: 'base'});
+    });
+    channelTabs.sort(function(a, b) {
+      // Sortiere alphabetisch, case-insensitive, Channel-Prefixe ignorieren (wie im IRC)
+      function stripPrefix(name) {
+        return name.replace(/^[#&!+]+/, '');
+      }
+      // Versuche, den echten Channelnamen aus data-channel zu nehmen, sonst fallback auf Text
+      var aName = a.getAttribute && a.getAttribute('data-channel') ? a.getAttribute('data-channel') : a.textContent.trim();
+      var bName = b.getAttribute && b.getAttribute('data-channel') ? b.getAttribute('data-channel') : b.textContent.trim();
+      var an = stripPrefix(aName).toLowerCase();
+      var bn = stripPrefix(bName).toLowerCase();
+      if (an < bn) return -1;
+      if (an > bn) return 1;
+      return 0;
+    });
+    queryTabs.sort(function(a, b) {
+      // Querys auch alphabetisch, case-insensitive sortieren, Nick aus Attribut wenn vorhanden
+      var aNick = a.getAttribute && a.getAttribute('data-querynick') ? a.getAttribute('data-querynick') : a.textContent.trim();
+      var bNick = b.getAttribute && b.getAttribute('data-querynick') ? b.getAttribute('data-querynick') : b.textContent.trim();
+      var an = aNick.toLowerCase();
+      var bn = bNick.toLowerCase();
+      if (an < bn) return -1;
+      if (an > bn) return 1;
+      return 0;
+    });
+    // Alle Tabs entfernen
+    allTabs.forEach(function(tab) {
+      if (tab.parentNode === parentObject.tabs) parentObject.tabs.removeChild(tab);
+    });
+  // Reihenfolge: Status, Channels, Querys, Sonstige
+  var sortedTabs = statusTabs.concat(channelTabs, queryTabs, otherTabs);
+    sortedTabs.forEach(function(tab) {
+      parentObject.tabs.appendChild(tab);
+    });
+    // SpaceNode nach dem eigenen Tab einfügen
+    parentObject.tabs.insertBefore(this.spaceNode, this.tab.nextSibling);
 
     if(type != qwebirc.ui.WINDOW_STATUS && type != qwebirc.ui.WINDOW_CONNECT) {
       var tabclose = new Element("span");
       this.tabclose = tabclose;
-      tabclose.set("text", "X");
+  tabclose.set("html", '<svg viewBox="0 0 14 14"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>');
       tabclose.addClass("tabclose");
       var close = function(e) {
         new Event(e).stop();
