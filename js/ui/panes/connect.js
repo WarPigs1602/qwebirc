@@ -55,9 +55,16 @@ qwebirc.ui.ConnectPane = new Class({
                 var inserted = false;
                 for (var i = 0; i < rows.length; i++) {
                   if (rows[i].getAttribute('name') === 'connectbutton') {
-                    table.insertBefore(captchaRow, rows[i]);
-                    inserted = true;
-                    break;
+                    // Sicherstellen, dass rows[i] wirklich ein Kind von table ist
+                    if (rows[i].parentNode === table) {
+                      table.insertBefore(captchaRow, rows[i]);
+                      inserted = true;
+                      break;
+                    } else if (rows[i].parentNode) {
+                      rows[i].parentNode.insertBefore(captchaRow, rows[i]);
+                      inserted = true;
+                      break;
+                    }
                   }
                 }
                 if (!inserted) {
