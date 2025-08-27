@@ -103,6 +103,13 @@ def producehtml(name, debug):
   div = ui.get("div", "")
   customjs = ui.get("customjs", "")
 
+  captcha_js = """
+  <script>
+    window.CAPTCHA_TYPE = \"%s\";
+    window.CAPTCHA_SITE_KEY = \"%s\";
+  </script>
+  """ % (getattr(config, "CAPTCHA_TYPE", ""), getattr(config, "CAPTCHA_SITE_KEY", ""))
+
   return """%s
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -113,7 +120,7 @@ def producehtml(name, debug):
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" sizes="192x192" href="%simages/highresicon.png"/>
   <link rel="shortcut icon" type="image/png" href="%simages/favicon.png"/>
-%s<script type="text/javascript">QWEBIRC_DEBUG=%s;</script>%s
+%s%s<script type="text/javascript">QWEBIRC_DEBUG=%s;</script>%s
 %s
   <script type="text/javascript">
     var ui = new qwebirc.ui.Interface("ircui", qwebirc.ui.%s, %s);
@@ -127,7 +134,7 @@ def producehtml(name, debug):
   </div>
 </body>
 </html>
-""" % (ui["doctype"], config.APP_TITLE, config.STATIC_BASE_URL, config.STATIC_BASE_URL, csshtml, debug and "true" or "false", customjs, jshtml, ui["class"], optionsgen.get_options(), div)
+""" % (ui["doctype"], config.APP_TITLE, config.STATIC_BASE_URL, config.STATIC_BASE_URL, csshtml, captcha_js, debug and "true" or "false", customjs, jshtml, ui["class"], optionsgen.get_options(), div)
 
 def main(outputdir=".", produce_debug=True):
   p = os.path.join(outputdir, "static")
