@@ -53,6 +53,36 @@ qwebirc.irc.IRCConnection = new Class({
     this.transportStatus = "unknown";
   },
   __error: function(text) {
+    // Lokalisierung häufiger Fehlerpräfixe und spezieller Invalid-Session-Meldung
+    try {
+      var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+      if(i18n) {
+        var prefixEn = "An error occurred:";
+        if(text.indexOf(prefixEn) === 0 && i18n.ERROR_OCCURRED) {
+          // Ersetze Präfix
+            text = i18n.ERROR_OCCURRED + text.substring(prefixEn.length);
+        }
+        var invalidSessionEn = "Invalid session, this most likely means the server has restarted; close this dialog and then try refreshing the page.";
+        if(text.indexOf(invalidSessionEn) !== -1 && i18n.ERROR_INVALID_SESSION) {
+          text = text.replace(invalidSessionEn, i18n.ERROR_INVALID_SESSION);
+        }
+        var floodEn = "BUG: uncontrolled flood detected -- disconnected.";
+        if(text === floodEn && i18n.ERROR_FLOOD) text = i18n.ERROR_FLOOD;
+        var unableSendEn = "Unable to send command after multiple retries.";
+        if(text === unableSendEn && i18n.ERROR_UNABLE_SEND) text = i18n.ERROR_UNABLE_SEND;
+        var connClosedEn = "Error: connection closed after several requests failed.";
+        if(text === connClosedEn && i18n.ERROR_CONN_CLOSED) text = i18n.ERROR_CONN_CLOSED;
+        var badMsgTypeEn = "An error occurred: bad message type";
+        if(text === badMsgTypeEn && i18n.ERROR_BAD_MSGTYPE) text = i18n.ERROR_BAD_MSGTYPE;
+        var remoteServerEn = "Couldn't connect to remote server.";
+        if(text === remoteServerEn && i18n.ERROR_REMOTE_SERVER) text = i18n.ERROR_REMOTE_SERVER;
+        var connFailedPrefixEn = "An error occurred: ";
+        if(text.indexOf(connFailedPrefixEn) === 0 && text.length > connFailedPrefixEn.length && i18n.ERROR_GENERIC_PREFIX) {
+          text = i18n.ERROR_GENERIC_PREFIX + text.substring(connFailedPrefixEn.length);
+        }
+      }
+    } catch(e) { /* silent */ }
     this.fireEvent("error", text);
     this.log("ERROR: " + text);
     if(this.options.errorAlert)

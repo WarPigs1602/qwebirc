@@ -171,5 +171,13 @@
   ,"SASL_ABORTED": "SASL-Authentifizierung abgebrochen"
   ,"SASL_ALREADY": "SASL-Authentifizierung bereits abgeschlossen"
   ,"SASL_MECHS": "Verfügbare SASL-Mechanismen: {mechanisms}"
+  ,"ERROR_OCCURRED": "Ein Fehler ist aufgetreten:"
+  ,"ERROR_INVALID_SESSION": "Ungültige Sitzung – wahrscheinlich wurde der Server neu gestartet; schließe diesen Dialog und lade die Seite neu."
+  ,"ERROR_FLOOD": "BUG: unkontrollierter Flood erkannt -- Verbindung getrennt."
+  ,"ERROR_UNABLE_SEND": "Befehl konnte nach mehreren Versuchen nicht gesendet werden."
+  ,"ERROR_CONN_CLOSED": "Fehler: Verbindung geschlossen nachdem mehrere Anfragen fehlgeschlagen sind."
+  ,"ERROR_BAD_MSGTYPE": "Ein Fehler ist aufgetreten: ungültiger Nachrichtentyp"
+  ,"ERROR_REMOTE_SERVER": "Konnte keine Verbindung zum entfernten Server herstellen."
+  ,"ERROR_GENERIC_PREFIX": "Ein Fehler ist aufgetreten:"
   }
 }
