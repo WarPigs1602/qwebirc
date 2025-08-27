@@ -26,6 +26,20 @@ except ImportError:
 dependencies.vcheck()
 
 COPYRIGHT = open("js/copyright.js", "rb").read()
+MCOMPILED_MARKER = ".compiled"
+MCSS_SUFFIX = ".mcss"
+
+# Simple build stats & logging
+STATS = {
+  'locales': 0,
+  'css_bundles': 0,
+  'js_bundles': 0,
+  'js_minified': 0,
+  'js_fallback': 0
+}
+
+def log(msg):
+  print(f"[build] {msg}")
 
 class MinifyException(Exception):
   pass
@@ -54,6 +68,8 @@ def jmerge_files(prefix, suffix, output, files, *args, **kwargs):
   if is_js:
     try:
       compiled = minify_with_uglify(o)
+      STATS['js_minified'] += 1
+      log(f"Minified {output}")
     except MinifyException as e:
       global JAVA_WARNING_SURPRESSED
       if not JAVA_WARNING_SURPRESSED:
@@ -64,15 +80,22 @@ def jmerge_files(prefix, suffix, output, files, *args, **kwargs):
           compiled = f.read()
       except Exception as e2:
         raise MinifyException("could not read unminified file: %s" % e2)
+      STATS['js_fallback'] += 1
+      log(f"Minify fallback (unminified) for {output}")
   else:
     with open(o, "rb") as f:
       compiled = f.read()
+    STATS['css_bundles'] += 1
+    log(f"Bundled CSS {output}")
 
   try:
     os.unlink(o)
-  except:
+  except OSError:
     time.sleep(1)
-    os.unlink(o)
+    try:
+      os.unlink(o)
+    except OSError:
+      log(f"Warning: could not remove temp file {o}")
 
   with open(os.path.join(prefix, "static", suffix, output), "w", encoding="utf-8") as f:
     # COPYRIGHT is bytes, so decode it
@@ -102,6 +125,8 @@ def merge_files(output, files, root_path=lambda x: x):
         f.write(content + "\n")
 
 def main(outputdir=".", produce_debug=True):
+  log("Starting build ...")
+  log(f"Output directory: {os.path.abspath(outputdir)}")
   # Locales kopieren
   src_locales = os.path.join(os.path.dirname(__file__), "..", "locales")
   dest_locales = os.path.join(outputdir, "static", "locales")
@@ -110,33 +135,40 @@ def main(outputdir=".", produce_debug=True):
   for fname in os.listdir(src_locales):
     if fname.endswith(".json"):
       shutil.copy2(os.path.join(src_locales, fname), os.path.join(dest_locales, fname))
+      STATS['locales'] += 1
+  log(f"Copied {STATS['locales']} locale file(s)")
   ID = pagegen.getgitid()
-  
+  log(f"Detected git build id: {ID}")
   pagegen.main(outputdir, produce_debug=produce_debug)
+  log("Generated base pages")
 
   coutputdir = os.path.join(outputdir, "compiled")
-  try:
-    os.mkdir(coutputdir)
-  except:
-    pass
+  if not os.path.isdir(coutputdir):
+    try:
+      os.mkdir(coutputdir)
+    except OSError:
+      log(f"Warning: could not create temp dir {coutputdir}")
     
-  try:
-    os.mkdir(os.path.join(outputdir, "static", "css"))
-  except:
-    pass
+  css_out_dir = os.path.join(outputdir, "static", "css")
+  if not os.path.isdir(css_out_dir):
+    try:
+      os.mkdir(css_out_dir)
+    except OSError:
+      log(f"Warning: could not create css dir {css_out_dir}")
   
   #jmerge_files(outputdir, "js", "qwebirc", pages.DEBUG_BASE, lambda x: os.path.join("js", x + ".js"))
 
-  for uiname, value in list(pages.UIs.items()):
+  for uiname, value in pages.UIs.items():
+    log(f"Building UI '{uiname}' ...")
     csssrc = pagegen.csslist(uiname, True)
     jmerge_files(outputdir, "css", uiname + "-" + ID, csssrc)
     shutil.copy2(os.path.join(outputdir, "static", "css", uiname + "-" + ID + ".css"), os.path.join(outputdir, "static", "css", uiname + ".css"))
     
-    mcssname = os.path.join("css", uiname + ".mcss")
+    mcssname = os.path.join("css", uiname + MCSS_SUFFIX)
     if os.path.exists(mcssname):
-      mcssdest = os.path.join(outputdir, "static", "css", uiname + ".mcss")
+      mcssdest = os.path.join(outputdir, "static", "css", uiname + MCSS_SUFFIX)
       shutil.copy2(mcssname, mcssdest)
-      shutil.copy2(mcssdest, os.path.join(outputdir, "static", "css", uiname + "-" + ID + ".mcss"))
+      shutil.copy2(mcssdest, os.path.join(outputdir, "static", "css", uiname + "-" + ID + MCSS_SUFFIX))
     
     #jmerge_files(outputdir, "js", uiname, value["uifiles"], lambda x: os.path.join("js", "ui", "frontends", x + ".js"))
     
@@ -149,26 +181,33 @@ def main(outputdir=".", produce_debug=True):
       alljs.append(os.path.join("js", y + ".js"))
     for y in value["uifiles"]:
       alljs.append(os.path.join("js", "ui", "frontends", y + ".js"))
-    jmerge_files(outputdir, "js", uiname + "-" + ID, alljs, file_prefix="QWEBIRC_BUILD=\"" + ID + "\";\n")
+  jmerge_files(outputdir, "js", uiname + "-" + ID, alljs, file_prefix="QWEBIRC_BUILD=\"" + ID + "\";\n")
+  STATS['js_bundles'] += 1
+  log(f"Bundled JS for UI '{uiname}'")
 
-  os.rmdir(coutputdir)
+  try:
+    os.rmdir(coutputdir)
+  except OSError:
+    log(f"Warning: could not remove temp dir {coutputdir}")
+  log("Cleaned temporary compile directory")
   
-  f = open(".compiled", "w")
-  f.close()
+  with open(MCOMPILED_MARKER, "w") as f:
+    f.write("")
+  log(f"Wrote {MCOMPILED_MARKER} marker")
+  log("Build summary: Locales=%(locales)d CSS bundles=%(css_bundles)d JS bundles=%(js_bundles)d JS minified=%(js_minified)d (fallback=%(js_fallback)d)" % STATS)
+  log("Build finished successfully.")
   
 def has_compiled():
   try:
-    f = open(".compiled", "r")
-    f.close()
-    return True
-  except:
+    with open(MCOMPILED_MARKER, "r"):
+      return True
+  except OSError:
     pass
     
   try:
-    f = open(os.path.join("bin", ".compiled"), "r")
-    f.close()
-    return True
-  except:
+    with open(os.path.join("bin", MCOMPILED_MARKER), "r"):
+      return True
+  except OSError:
     pass
   
   return False

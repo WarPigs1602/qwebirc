@@ -42,9 +42,15 @@ qwebirc.irc.IRCClient = new Class({
     if (!this.activeCaps) this.activeCaps = [];
     if (caps && caps.length > 0 && caps[0] === "ACK") {
       this.activeCaps = caps.slice(1);
-      this.newServerLine("GENERICMESSAGE", {m: "Active capabilities: " + this.activeCaps.join(", ")});
+  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+  var label = (i18n && i18n.CAP_ACTIVE) || 'Active capabilities:';
+  this.newServerLine("GENERICMESSAGE", {m: label + " " + this.activeCaps.join(", ")});
     } else {
-      this.newServerLine("GENERICMESSAGE", {m: "Available capabilities: " + caps.join(", ")});
+  var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
+  var label2 = (i18n2 && i18n2.CAP_AVAILABLE) || 'Available capabilities:';
+  this.newServerLine("GENERICMESSAGE", {m: label2 + " " + caps.join(", ")});
     }
   },
   newLine: function(window, type, data) {

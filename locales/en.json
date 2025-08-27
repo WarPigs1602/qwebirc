@@ -153,5 +153,7 @@
   ,"MODEMSG_BANEX_SET": "{setter} set ban-exception for {mask} in {channel}"
   ,"MODEMSG_BANEX_REMOVE": "{setter} removed ban-exception for {mask} in {channel}"
   ,"MODEMSG_GENERIC": "{setter} set mode {modestring} on {channel}"
+  ,"CAP_ACTIVE": "Active capabilities:"
+  ,"CAP_AVAILABLE": "Available capabilities:"
   }
 }
