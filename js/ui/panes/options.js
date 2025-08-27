@@ -14,10 +14,8 @@ qwebirc.ui.supportsFocus = function() {
  * settableByURL...
  */
 qwebirc.config.DEFAULT_OPTIONS = [
-  [20, "LANGUAGE", "Language", 0, null, [
-    ["Deutsch", "de"],
-    ["English", "en"]
-  ]],
+  // LANGUAGE Optionsliste wird dynamisch aus /locales/index.json befüllt (see integrateLanguagesIntoOptions)
+  [20, "LANGUAGE", "Language", 0, null, [ ["English","en"] ]],
   [1, "BEEP_ON_MENTION", "Beep on activity", true],
   [16, "NOTIFICATIONS", "Emit HTML5 notifications on activity", false, {
     enabled: function() {
@@ -202,6 +200,9 @@ qwebirc.config.RadioInput = new Class({
     var value = this.option.options;
     var select = document.createElement('select');
     select.disabled = !this.enabled;
+    if(this.option.prefix === 'LANGUAGE') {
+      select.id = 'qwebirc-language-select';
+    }
     this.mainElement = select;
     for(var i=0;i<value.length;i++) {
       var opt = document.createElement('option');
@@ -224,7 +225,10 @@ qwebirc.config.RadioInput = new Class({
         }
       }
       if(this.option.prefix === "LANGUAGE" && window.qwebirc && window.qwebirc.config) {
-        window.qwebirc.config.LANGUAGE = select.value;
+  window.qwebirc.config.LANGUAGE = select.value;
+  // Flag setzen damit afterOptionsInit die manuelle Wahl priorisiert
+  window.__qwebircManualLanguage = select.value.toLowerCase();
+  if(typeof persistLanguage === 'function') try { persistLanguage(select.value.toLowerCase()); } catch(e) {}
         if(typeof afterOptionsInit === "function") afterOptionsInit();
       }
       this.applyChanges();
@@ -280,16 +284,31 @@ qwebirc.config.RadioOption = new Class({
     this.parent(optionId, prefix, label, this.options[default_][1], extras);
   },
   setSavedValue: function(x) {
+    // SPEZIALFALL: LANGUAGE wird dynamisch erweitert (Manifest erst nach Initialisierung geladen).
+    // Wenn der gespeicherte Wert (Cookie) noch nicht in der Optionsliste ist, behalten wir ihn
+    // statt auf den Default zurückzufallen. Später, wenn integrateLanguagesIntoOptions() läuft,
+    // wird die Optionsliste aktualisiert und der Wert korrekt gematcht.
+    var found = false;
     for(var i=0;i<this.options.length;i++) {
       var y = this.options[i][1];
       if(x == y) {
         this.position = i;
         this.value = x;
-        return;
+        found = true;
+        break;
       }
     }
-    this.position = this.defaultposition;
-    this.value = this.default_;
+    if(!found) {
+      if(this.prefix === 'LANGUAGE') {
+        // Wert merken, Position auf Default lassen bis Liste verfügbar ist
+        this.value = x; // bewusst kein Fallback, damit späteres Matching klappt
+        this.position = this.defaultposition;
+        return;
+      } else {
+        this.position = this.defaultposition;
+        this.value = this.default_;
+      }
+    }
   }
 });
 
@@ -394,9 +413,19 @@ qwebirc.ui.Options = new Class({
 qwebirc.ui.OptionsPane = new Class({
   Implements: [Events],
   initialize: function(parentElement, optionObject) {
+  this.type = 'optionspane';
     this.parentElement = parentElement;
     this.optionObject = optionObject;
     this.createElements();
+    // Listener für Sprachwechsel
+    window.addEventListener('qwebirc:languageChanged', function(ev){
+      try { this.translate(ev.detail.lang); } catch(e) {}
+    }.bind(this));
+    // Sofortige Erstübersetzung, falls Locale für aktuelle Sprache schon geladen wurde
+    try {
+      var initialLang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+      this.translate(initialLang);
+    } catch(e) {}
   },
   rebuild: function() {
     // Panel komplett neu rendern
@@ -405,46 +434,60 @@ qwebirc.ui.OptionsPane = new Class({
     }
     this.createElements();
   },
+  translate: function(lang) {
+    if(!lang) lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+    if(!i18n || !i18n.options) return;
+    // Aktualisiere Optionslabels
+    this.optionObject.getOptionList().forEach(function(opt){
+      if(opt._labelElement) {
+        var key = opt.prefix;
+        var translated = i18n.options[key];
+        if(translated) {
+          if(opt._isWide) opt._labelElement.set('text', translated + ':'); else opt._labelElement.set('text', translated);
+        }
+      }
+    });
+    // Buttons
+    var saveBtn = this.parentElement.getElement('input.qwebirc-options-save');
+    var cancelBtn = this.parentElement.getElement('input.qwebirc-options-cancel');
+    if(saveBtn && i18n.options.SAVE) saveBtn.value = i18n.options.SAVE;
+    if(cancelBtn && i18n.options.CANCEL) cancelBtn.value = i18n.options.CANCEL;
+  },
   createElements: function() {
     var FE = function(element, parent) {
       var n = new Element(element);
       parent.appendChild(n);
       return n;
     };
-    
-    var t = FE("table", this.parentElement);
+    // Tabelle: jede Option = eine Zeile (Label links, Input rechts)
+    var t = FE("table", this.parentElement); t.addClass('qwebirc-options-table');
     var tb = FE("tbody", t);
-    
     this.boxList = [];
-    
     var optList = this.optionObject.getOptionList();
     for(var i=0;i<optList.length;i++) {
       var x = optList[i];
-      
-      var row = FE("tr", tb);
-      var cell = FE("td", row);
-
       x.id = qwebirc.util.generateID();
-      var ele = new x.Element(cell, x, i, this);
+      var row = FE('tr', tb); row.addClass('option-row');
+      var labelCell = FE('td', row); labelCell.addClass('label-cell');
+      var valueCell = FE('td', row); valueCell.addClass('value-cell');
+      // Input in valueCell rendern
+      var ele = new x.Element(valueCell, x, i, this);
       this.boxList.push([x, ele]);
-      var eleElement = cell.lastChild;
-      if(ele.wide)
-        cell.removeChild(eleElement);
-
-      var label = new Element("label", {"for": x.id});
-      cell.appendChild(label);
-
-      var eleParent;
+      // Label erstellen (nachdem Element erzeugt, damit x.id vorhanden)
+      var label = new Element('label', { 'for': x.id });
+      label.set('text', x.label + (ele.wide ? ':' : ''));
+      labelCell.appendChild(label);
+      x._labelElement = label; x._isWide = !!ele.wide;
       if(ele.wide) {
-        label.set("text", x.label + ":");
-        cell.appendChild(eleElement);
-      } else {
-        label.set("text", x.label);
+        // Bei wide-Option: valueCell über beide Spalten (Label oben links, Value rechts gestreckt)
+        valueCell.colSpan = 1; // behalten wir bei zwei Zellen; CSS kann Breite steuern
+        row.addClass('wide-option');
       }
     }
-    
-    var r = FE("tr", tb);
-    var cella = FE("td", r);
+    // Save/Cancel Zeile
+    var r = FE('tr', tb); r.addClass('buttons-row');
+    var cella = FE('td', r); cella.setAttribute('colspan','2'); cella.addClass('buttons-cell');
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
     var saveLabel = (i18n && i18n.options && i18n.options.SAVE) ? i18n.options.SAVE : "Save";
@@ -452,6 +495,7 @@ qwebirc.ui.OptionsPane = new Class({
 
     var save = qwebirc.util.createInput("submit", cella);
     save.value = saveLabel;
+  save.addClass("qwebirc-options-save");
     save.addEvent("click", function() {
       this.save();
       this.fireEvent("close");
@@ -459,6 +503,7 @@ qwebirc.ui.OptionsPane = new Class({
 
     var cancel = qwebirc.util.createInput("submit", cella);
     cancel.value = cancelLabel;
+  cancel.addClass("qwebirc-options-cancel");
     cancel.addEvent("click", function() {
       this.cancel();
       this.fireEvent("close");

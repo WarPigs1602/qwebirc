@@ -281,6 +281,12 @@ qwebirc.ui.ConnectPane = new Class({
   var rootElement = parent.getElement("[name=connectroot]");
   self.rootElement = rootElement;
 
+  // Nach vollständigem Aufbau sicherstellen, dass die zuletzt gesetzte Sprache angewendet wird
+  try {
+    var effectiveLang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || lang;
+    translateCurrent(effectiveLang);
+  } catch(e) {}
+
   self.util.exec = function(n, x) { rootElement.getElements(n).each(x); };
   var util = self.util;
         var exec = util.exec;

@@ -286,6 +286,21 @@ qwebirc.ui.BaseUI = new Class({
       initialNickname: initialNickname, initialChannels: initialChannels, autoConnect: autoConnect, callback: wrappedCallback, autoNick: autoNick,
       uiOptions: this.options
     }, qwebirc.ui.WINDOW_CONNECT);
+  // Falls Übersetzung erst nach Erstellung geladen wird oder jetzt schon abweicht: Fenster-Titel aktualisieren
+  try {
+    var currentLang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[currentLang] && window.qwebirc.i18n[currentLang].options;
+    if(i18n2 && i18n2.TAB_CONNECT) {
+      // Suche Connect-Fenster (typ WINDOW_CONNECT) und setze Titel falls unterschiedlich
+      for(var i=0;i<this.windowArray.length;i++) {
+        var w = this.windowArray[i];
+        if(w && w.type == qwebirc.ui.WINDOW_CONNECT && w.setTitle && w.name !== i18n2.TAB_CONNECT) {
+          w.setTitle(i18n2.TAB_CONNECT);
+          if(w.active) this.updateTitle(i18n2.TAB_CONNECT + ' - ' + this.options.appTitle);
+        }
+      }
+    }
+  } catch(e) {}
   },
   focusChange: function(newValue) {
     var window_ = this.getActiveWindow();
@@ -328,12 +343,17 @@ qwebirc.ui.StandardUI = new Class({
     if($defined(this.options.hue)) this.__styleValues.hue = this.options.hue;
     this.tabCompleter = new qwebirc.ui.TabCompleterFactory(this);
   this.uiOptions = new qwebirc.ui.DefaultOptionsClass(this, options.uiOptionsArg);
+  // Global verfügbar machen für Persistenz (LANGUAGE Cookie)
+  try { if(window.qwebirc && window.qwebirc.ui) window.qwebirc.ui.uiOptions = this.uiOptions; } catch(e) {}
+  /* debug log entfernt */
   // Sprache aus gespeicherten Optionen übernehmen, falls vorhanden
   if (this.uiOptions && this.uiOptions.optionHash && this.uiOptions.optionHash["LANGUAGE"] && this.uiOptions.optionHash["LANGUAGE"].value) {
     window.qwebirc = window.qwebirc || {};
     window.qwebirc.config = window.qwebirc.config || {};
     window.qwebirc.config.LANGUAGE = this.uiOptions.optionHash["LANGUAGE"].value;
   }
+  // Früh persistieren falls Cookie noch nicht gesetzt
+  // WICHTIG: Keine frühe Persistierung hier – sonst wird Cookie gesetzt bevor Browser-Sprache erkannt werden kann
   if (typeof setInitialLanguageOnOptions === "function") setInitialLanguageOnOptions(this.uiOptions);
   if (typeof afterOptionsInit === "function") afterOptionsInit();
     this.customWindows = new QHash();
@@ -481,6 +501,10 @@ qwebirc.ui.StandardUI = new Class({
     }.bind(this));
     
     d.setSubWindow(ew);
+    // Falls Fenster direkt übersetzbar ist (Options/Embed/About/Connect), Titel aktualisieren
+    if(d._applyTranslatedTitle) {
+      try { d._applyTranslatedTitle(); } catch(e) {}
+    }
   },
   embeddedWindow: function() {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';

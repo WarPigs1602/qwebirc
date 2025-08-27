@@ -37,6 +37,7 @@ qwebirc.ui.EmbedWizard = new Class({
     baseURL: "http://webchat.quakenet.org/"
   },
   initialize: function(parent, options) {
+  this.type = 'embeddedwizard';
     /* for some unknown reason setOptions doesn't work... */
     this.options.uiOptions = options.uiOptions;
     this.options.baseURL = options.baseURL;

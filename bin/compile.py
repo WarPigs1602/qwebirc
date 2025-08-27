@@ -6,6 +6,7 @@ import os
 import subprocess
 import shutil
 import time
+import json
 
 # Import-Logik für Direktaufruf oder als Modul
 
@@ -132,10 +133,28 @@ def main(outputdir=".", produce_debug=True):
   dest_locales = os.path.join(outputdir, "static", "locales")
   if not os.path.exists(dest_locales):
     os.makedirs(dest_locales)
+  locale_index = []
   for fname in os.listdir(src_locales):
-    if fname.endswith(".json"):
-      shutil.copy2(os.path.join(src_locales, fname), os.path.join(dest_locales, fname))
+    if fname.endswith(".json") and fname != "index.json":
+      src_file = os.path.join(src_locales, fname)
+      dest_file = os.path.join(dest_locales, fname)
+      shutil.copy2(src_file, dest_file)
       STATS['locales'] += 1
+      # Versuche language_name zu extrahieren
+      try:
+        with open(src_file, "r", encoding="utf-8") as lf:
+          data = json.load(lf)
+          name = data.get("language_name") or fname.rsplit(".",1)[0]
+      except Exception:
+        name = fname.rsplit(".",1)[0]
+      code = fname.rsplit(".",1)[0]
+      locale_index.append({"code": code, "name": name})
+  # Manifest schreiben
+  try:
+    with open(os.path.join(dest_locales, "index.json"), "w", encoding="utf-8") as mf:
+      json.dump(locale_index, mf, ensure_ascii=False, indent=2)
+  except Exception as e:
+    log(f"Warning: could not write locale index: {e}")
   log(f"Copied {STATS['locales']} locale file(s)")
   ID = pagegen.getgitid()
   log(f"Detected git build id: {ID}")

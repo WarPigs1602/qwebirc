@@ -135,6 +135,15 @@ qwebirc.ui.QUI = new Class({
         buildEntries();
       }.bind(this));
     }
+    // Fallback: explizit auf Sprachevent hören (falls Translator nicht feuert)
+    window.addEventListener('qwebirc:languageChanged', function(){
+      if(this.__menuCache) {
+        this.UICommands = this.__menuCache.map(function(entry){
+          return [(typeof entry[0] === 'function') ? entry[0] : entry[0], entry[1]];
+        });
+      }
+      buildEntries();
+    }.bind(this));
     
     var dropdown = new Element("div");
     dropdown.addClass("dropdown-tab");
@@ -754,6 +763,8 @@ qwebirc.ui.QUI.Window = new Class({
   
   initialize: function(parentObject, client, type, name, identifier) {
     this.parent(parentObject, client, type, name, identifier);
+  // Speichere Originalnamen für spätere Neuübersetzung (nur für feste System-Panes)
+  this._baseName = name;
 
   // Typing bar for channel and query windows
     if(type == qwebirc.ui.WINDOW_CHANNEL || type == qwebirc.ui.WINDOW_QUERY) {
@@ -918,7 +929,28 @@ qwebirc.ui.QUI.Window = new Class({
     if(type != qwebirc.ui.WINDOW_STATUS && type != qwebirc.ui.WINDOW_CONNECT) {
       var tabclose = new Element("span");
       this.tabclose = tabclose;
-  tabclose.set("html", '<svg viewBox="0 0 14 14"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>');
+      // SVG sauber im Namespace erstellen (verhindert unsichtbares Icon bei manchen Engines) + Fallback '×'
+      try {
+        var svgns = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(svgns, "svg");
+        svg.setAttribute("viewBox", "0 0 14 14");
+        svg.setAttribute("width", "14");
+        svg.setAttribute("height", "14");
+        var l1 = document.createElementNS(svgns, "line");
+        l1.setAttribute("x1", "3"); l1.setAttribute("y1", "3"); l1.setAttribute("x2", "11"); l1.setAttribute("y2", "11");
+        var l2 = document.createElementNS(svgns, "line");
+        l2.setAttribute("x1", "11"); l2.setAttribute("y1", "3"); l2.setAttribute("x2", "3"); l2.setAttribute("y2", "11");
+        // Styles über CSS, aber minimaler Inline-Fallback
+        l1.setAttribute("stroke", "currentColor"); l2.setAttribute("stroke", "currentColor");
+        l1.setAttribute("stroke-width", "2"); l2.setAttribute("stroke-width", "2");
+        l1.setAttribute("stroke-linecap", "round"); l2.setAttribute("stroke-linecap", "round");
+        svg.appendChild(l1); svg.appendChild(l2);
+        tabclose.empty();
+        tabclose.appendChild(svg);
+      } catch(e) {
+        // Fallback Text falls SVG nicht gerendert wird
+        tabclose.set("text", "×");
+      }
       tabclose.addClass("tabclose");
       var close = function(e) {
         new Event(e).stop();
@@ -958,6 +990,25 @@ qwebirc.ui.QUI.Window = new Class({
         return;
         
       parentObject.selectWindow(this);
+    }.bind(this));
+    // Registriere Übersetzer für System-Tabs
+    if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
+      window.qwebirc.registerTranslator(function(){
+        try { this._applyTranslatedTitle(); } catch(e) {}
+        try {
+          if(this.type == qwebirc.ui.WINDOW_CHANNEL && this.topic) {
+            this.updateTopic(this.topic.topicText || "");
+          }
+        } catch(e) {}
+      }.bind(this));
+    }
+    window.addEventListener('qwebirc:languageChanged', function(){
+      try { this._applyTranslatedTitle(); } catch(e) {}
+      try {
+        if(this.type == qwebirc.ui.WINDOW_CHANNEL && this.topic) {
+          this.updateTopic(this.topic.topicText || "");
+        }
+      } catch(e) {}
     }.bind(this));
     
 
@@ -1344,3 +1395,68 @@ window.qwebircConnectStatus = connectStatus;
     }
   }
 });
+
+// Hilfsmethode: Mapping von Fenstertyp / Pane zu i18n-Key
+qwebirc.ui.QUI.Window.prototype._i18nKeyFor = function() {
+  if(this.type == qwebirc.ui.WINDOW_STATUS) return 'TAB_STATUS';
+  if(this.type == qwebirc.ui.WINDOW_CONNECT || this.identifier == '_Connect' || (this.pane && this.pane.type == 'connectpane')) return 'TAB_CONNECT';
+  if(this.pane && this.pane.type == 'optionspane') return 'TAB_OPTIONS';
+  if(this.pane && this.pane.type == 'embeddedwizard') return 'TAB_EMBED';
+  if(this.pane && this.pane.type == 'aboutpane') return 'TAB_ABOUT';
+  return null;
+};
+
+qwebirc.ui.QUI.Window.prototype._applyTranslatedTitle = function() {
+  var key = this._i18nKeyFor();
+  if(!key) return; // Nicht systemdefiniert
+  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+  if(i18n && i18n.options && i18n.options[key]) {
+    this.setTitle(i18n.options[key]);
+  }
+};
+
+// setTitle überschreiben um Tab-Text live zu aktualisieren
+qwebirc.ui.QUI.Window.prototype.setTitle = function(newTitle) {
+  this.name = newTitle;
+  if(this.tab) {
+    // Falls Close-Button verloren ging (z.B. durch vorherige Manipulation), neu erzeugen
+  var prevent = false; // wieder alle (außer Status/Connect) mit Close-Button
+  if(!this.tabclose && this.type != qwebirc.ui.WINDOW_STATUS && this.type != qwebirc.ui.WINDOW_CONNECT) {
+      var tabclose = new Element("span");
+      try {
+        var svgns = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(svgns, "svg");
+        svg.setAttribute("viewBox", "0 0 14 14");
+        svg.setAttribute("width", "14");
+        svg.setAttribute("height", "14");
+        var l1 = document.createElementNS(svgns, "line");
+        l1.setAttribute("x1", "3"); l1.setAttribute("y1", "3"); l1.setAttribute("x2", "11"); l1.setAttribute("y2", "11");
+        var l2 = document.createElementNS(svgns, "line");
+        l2.setAttribute("x1", "11"); l2.setAttribute("y1", "3"); l2.setAttribute("x2", "3"); l2.setAttribute("y2", "11");
+        l1.setAttribute("stroke", "currentColor"); l2.setAttribute("stroke", "currentColor");
+        l1.setAttribute("stroke-width", "2"); l2.setAttribute("stroke-width", "2");
+        l1.setAttribute("stroke-linecap", "round"); l2.setAttribute("stroke-linecap", "round");
+        svg.appendChild(l1); svg.appendChild(l2);
+        tabclose.appendChild(svg);
+      } catch(e) {
+        tabclose.set("text", "×");
+      }
+      tabclose.addClass("tabclose");
+      tabclose.addEvent("click", function(e) {
+        new Event(e).stop();
+        if(this.closed) return;
+        if(this.type == qwebirc.ui.WINDOW_CHANNEL) this.client.exec("/PART " + this._baseName);
+        this.close();
+      }.bind(this));
+      this.tabclose = tabclose;
+    }
+    var close = this.tabclose;
+    this.tab.empty();
+    this.tab.appendText(newTitle);
+  if(close) this.tab.appendChild(close);
+  }
+  if(this.active) {
+    try { document.title = newTitle + ' - ' + this.parentObject.options.appTitle; } catch(e) {}
+  }
+};

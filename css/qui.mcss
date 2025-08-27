@@ -119,6 +119,25 @@ html {
   background: #232634;
 }
 
+/* Zwei-spaltiges Options-Layout (auto-breite, jetzt links ausgerichtet) */
+.qwebirc-optionspane { text-align:left; }
+/* Tabelle nicht mehr zentriert (kein margin auto, kein inline-table) */
+.qwebirc-optionspane table.qwebirc-options-table { border-collapse:separate; border-spacing:4px 6px; margin:0; width:auto; max-width:100%; }
+.qwebirc-optionspane table.qwebirc-options-table .option-row td { padding:4px 10px; }
+.qwebirc-optionspane table.qwebirc-options-table .label-cell { text-align:left; white-space:nowrap; font-weight:600; }
+.qwebirc-optionspane table.qwebirc-options-table .value-cell { text-align:left; }
+.qwebirc-optionspane table.qwebirc-options-table label { font-weight:600; }
+.qwebirc-optionspane table.qwebirc-options-table .wide-option .label-cell { vertical-align:top; }
+.qwebirc-optionspane table.qwebirc-options-table input[type="text"],
+.qwebirc-optionspane table.qwebirc-options-table select { max-width:220px; }
+.qwebirc-optionspane .qwebirc-options-save, .qwebirc-optionspane .qwebirc-options-cancel { margin-right:8px; }
+/* Mobile Fallback: einspaltig */
+@media (max-width: 620px) {
+  .qwebirc-optionspane table.qwebirc-options-table { display:block; }
+  .qwebirc-optionspane table.qwebirc-options-table tr { display:block; }
+  .qwebirc-optionspane table.qwebirc-options-table td.options-cell { display:block; width:auto !important; }
+}
+
 #ircui {
   position: absolute;
   left: 0px;
@@ -423,7 +442,7 @@ html {
   padding-left: 3px;
   border-radius: 3px;
   font-weight: normal;
-  color: $(tab_text);
+  color: #e05c5c; /* explizite Standardfarbe für das X */
   width: 18px;
   height: 18px;
   display: inline-flex;
@@ -434,6 +453,7 @@ html {
   border: none;
   box-shadow: none;
   transition: background 0.15s;
+  position: relative;
 }
 .qwebirc-qui .tabclose:hover {
   background: #2a2d3a;
@@ -459,6 +479,23 @@ html {
 .qwebirc-qui .tabclose:hover svg {
   stroke: #ff2d2d;
   filter: drop-shadow(0 0 4px #ff2d2d88);
+}
+/* Fallback falls SVG aus irgendeinem Grund nicht gerendert wird */
+.qwebirc-qui .tabclose:empty:before {
+  content: "×";
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 600;
+  color: #e05c5c;
+}
+/* Falls Übersetzungs-Update das SVG verliert (kurzes Rebuild) */
+.qwebirc-qui .tabclose:not(:empty) svg:only-child { visibility: visible; }
+/* Aktiver Tab: Close-Button etwas heller */
+.qwebirc-qui .tab-selected .tabclose svg {
+  stroke: #ff8080;
+}
+.qwebirc-qui .tab-selected .tabclose:hover svg {
+  stroke: #ffaaaa;
 }
 
 @media screen and (max-device-width:1024px) {

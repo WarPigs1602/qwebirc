@@ -52,6 +52,8 @@ qwebirc.ui.Window = new Class({
   },
   setSubWindow: function(window) {
     this.subWindow = window;
+  // Für i18n: Referenz unter einheitlichem Namen
+  this.pane = window;
   },
   select: function() {
     if(this.lastPositionLineInserted && !this.parentObject.uiOptions.LASTPOS_LINE) {
