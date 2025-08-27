@@ -1,9 +1,14 @@
 <!-- qwebirc Connect Dialog (bereinigt) -->
 <table class="qwebirc-centrebox">
 <script type="text/javascript">
-  // Diese Werte werden aus der Python-Konfiguration generiert (z.B. per Template-Engine oder Build-Skript)
-  window.CAPTCHA_TYPE = "{{CAPTCHA_TYPE}}";
-  window.CAPTCHA_SITE_KEY = "{{CAPTCHA_SITE_KEY}}";
+  // Automatisch aus config.py generiert (wird von run.py oder einem Build-Skript ersetzt)
+  try {
+    window.CAPTCHA_TYPE = (typeof CAPTCHA_TYPE !== 'undefined') ? CAPTCHA_TYPE : null;
+    window.CAPTCHA_SITE_KEY = (typeof CAPTCHA_SITE_KEY !== 'undefined') ? CAPTCHA_SITE_KEY : '';
+  } catch (e) {
+    window.CAPTCHA_TYPE = null;
+    window.CAPTCHA_SITE_KEY = '';
+  }
 </script>
   <tr>
     <td>
