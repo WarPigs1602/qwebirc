@@ -50,7 +50,19 @@ qwebirc.ui.ConnectPane = new Class({
               captchaRow.appendChild(td);
               var table = loginForm.querySelector('table');
               if (table) {
-                table.appendChild(captchaRow);
+                // Finde die Zeile mit dem Button
+                var rows = table.getElementsByTagName('tr');
+                var inserted = false;
+                for (var i = 0; i < rows.length; i++) {
+                  if (rows[i].getAttribute('name') === 'connectbutton') {
+                    table.insertBefore(captchaRow, rows[i]);
+                    inserted = true;
+                    break;
+                  }
+                }
+                if (!inserted) {
+                  table.appendChild(captchaRow);
+                }
               }
             }
           }
