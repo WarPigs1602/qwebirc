@@ -163,6 +163,23 @@ NICKNAME_MAXIMUM_LENGTH = 15
 #         Default: False
 SASL_LOGIN_ENABLED = False
 
+# CAPTCHA OPTIONS (OPTIONAL)
+# ---------------------------------------------------------------------
+# OPTION: CAPTCHA_TYPE
+#         Set to 'recaptcha', 'turnstile', or None to disable captcha on login.
+#         Example: CAPTCHA_TYPE = 'recaptcha' or CAPTCHA_TYPE = 'turnstile' or CAPTCHA_TYPE = None
+CAPTCHA_TYPE = None
+
+# OPTION: CAPTCHA_SITE_KEY
+#         The site key for reCAPTCHA or Turnstile (provided by Google/Cloudflare).
+#         Example: CAPTCHA_SITE_KEY = 'your-site-key-here'
+CAPTCHA_SITE_KEY = ''
+
+# OPTION: CAPTCHA_SECRET_KEY
+#         The secret key for reCAPTCHA or Turnstile (provided by Google/Cloudflare).
+#         Example: CAPTCHA_SECRET_KEY = 'your-secret-key-here'
+CAPTCHA_SECRET_KEY = ''
+
 # ADMIN ENGINE OPTIONS
 # ---------------------------------------------------------------------
 #

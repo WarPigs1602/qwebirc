@@ -4,6 +4,10 @@ import qwebirc.util.rijndael, qwebirc.util.ciphers
 import qwebirc.util
 import qwebirc.util.qjson as json
 
+import urllib.request
+import urllib.parse
+import ssl
+
 authgate = config.AUTHGATEPROVIDER.twisted
 BLOCK_SIZE = 128/8
 
@@ -20,6 +24,48 @@ class AuthgateEngine(resource.Resource):
   def render_GET(self, request):
     if request.args.get("logout"):
       self.deleteCookie(request, "user")
+
+    # CAPTCHA check for login (only if enabled)
+    captcha_type = getattr(config, 'CAPTCHA_TYPE', None)
+    captcha_secret = getattr(config, 'CAPTCHA_SECRET_KEY', None)
+    if captcha_type in ('recaptcha', 'turnstile'):
+      # Accept token from POST or GET (for AJAX or form)
+      token = None
+      if b'captcha_token' in request.args:
+        token = request.args[b'captcha_token'][0].decode('utf-8')
+      elif hasattr(request, 'content') and hasattr(request.content, 'read'):
+        # Try to read from POST body if available
+        try:
+          body = request.content.read().decode('utf-8')
+          params = urllib.parse.parse_qs(body)
+          token = params.get('captcha_token', [None])[0]
+        except Exception:
+          token = None
+      if not token:
+        request.setResponseCode(400)
+        return b"Missing captcha token."
+
+      # Validate token with external API
+      if captcha_type == 'recaptcha':
+        verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+      else:
+        verify_url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+      data = urllib.parse.urlencode({
+        'secret': captcha_secret,
+        'response': token,
+        'remoteip': request.getClientIP(),
+      }).encode('utf-8')
+      try:
+        context = ssl.create_default_context()
+        req = urllib.request.Request(verify_url, data=data)
+        with urllib.request.urlopen(req, context=context, timeout=5) as resp:
+          result = json.loads(resp.read().decode('utf-8'))
+        if not result.get('success'):
+          request.setResponseCode(403)
+          return b"Captcha validation failed."
+      except Exception as e:
+        request.setResponseCode(500)
+        return b"Captcha validation error."
       
     a = authgate(request, config.AUTHGATEDOMAIN)
     try:

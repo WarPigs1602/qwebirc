@@ -14,6 +14,46 @@ qwebirc.ui.ConnectPane = new Class({
       url: qwebirc.global.staticBaseURL + "panes/connect.html",
       update: parent,
       onSuccess: function() {
+          // CAPTCHA-Widget dynamisch einfügen, wenn aktiviert
+          var captchaType = window.CAPTCHA_TYPE;
+          var captchaSiteKey = window.CAPTCHA_SITE_KEY;
+          if (captchaType && captchaSiteKey) {
+            var loginForm = parent.getElement('tr[name=loginbox] form');
+            if (loginForm) {
+              var captchaRow = document.createElement('tr');
+              captchaRow.className = 'captcha-row';
+              var td = document.createElement('td');
+              td.colSpan = 2;
+              if (captchaType === 'recaptcha') {
+                td.innerHTML = '<div id="recaptcha-container"></div>';
+                var script = document.createElement('script');
+                script.src = 'https://www.google.com/recaptcha/api.js';
+                script.async = true;
+                script.defer = true;
+                document.body.appendChild(script);
+                window.renderRecaptcha = function() {
+                  if (window.grecaptcha) {
+                    window.grecaptcha.render('recaptcha-container', {
+                      'sitekey': captchaSiteKey
+                    });
+                  }
+                };
+                script.onload = function() { setTimeout(window.renderRecaptcha, 100); };
+              } else if (captchaType === 'turnstile') {
+                td.innerHTML = '<div class="cf-turnstile" data-sitekey="' + captchaSiteKey + '"></div>';
+                var script = document.createElement('script');
+                script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+                script.async = true;
+                script.defer = true;
+                document.body.appendChild(script);
+              }
+              captchaRow.appendChild(td);
+              var table = loginForm.querySelector('table');
+              if (table) {
+                table.appendChild(captchaRow);
+              }
+            }
+          }
         // SASL-Login-Felder und Checkbox initial ausblenden, wenn SASL_LOGIN_ENABLED nicht aktiv
         if(typeof window.SASL_LOGIN_ENABLED !== 'undefined' && !window.SASL_LOGIN_ENABLED) {
           // Login-Formular
@@ -236,6 +276,25 @@ qwebirc.ui.ConnectPane = new Class({
       if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
       return;
     }
+      // CAPTCHA-Token holen, falls aktiviert
+      var captchaType = window.CAPTCHA_TYPE;
+      if (captchaType) {
+        var token = null;
+        if (captchaType === 'recaptcha' && window.grecaptcha) {
+          token = window.grecaptcha.getResponse();
+        } else if (captchaType === 'turnstile' && window.turnstile) {
+          var widgets = document.getElementsByClassName('cf-turnstile');
+          if (widgets.length > 0) {
+            token = window.turnstile.getResponse(widgets[0]);
+          }
+        }
+        if (!token) {
+          alert('Please complete the CAPTCHA.');
+          if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
+          return;
+        }
+        data['captcha_token'] = token;
+      }
     this.__cancelLogin();
     this.fireEvent("close");
     // SASL speichern oder löschen je nach Checkbox
