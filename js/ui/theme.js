@@ -96,7 +96,8 @@ qwebirc.ui.themes.Default = {
 qwebirc.ui.Theme = new Class({
   initialize: function(themeDict) {
     this.__theme = qwebirc.util.dictCopy(qwebirc.ui.themes.Default);
-    
+    this.__prefixed = {};
+
     if(themeDict)
       for(var k in themeDict)
         this.__theme[k] = themeDict[k];
@@ -104,15 +105,16 @@ qwebirc.ui.Theme = new Class({
     for(var k in this.__theme) {
       if(k == "PREFIX")
         continue;
-
       var data = this.__theme[k];
+      // Speichere Prefix-Flag separat für spätere dynamische Übersetzung
+      if(data[1]) this.__prefixed[k] = true;
       if(data[1]) {
         this.__theme[k] = this.__theme["PREFIX"] + data[0];
       } else {
         this.__theme[k] = data[0];
       }
     }
-    
+
     this.__ccmap = qwebirc.util.dictCopy(qwebirc.ui.themes.ThemeControlCodeMap);
     this.__ccmaph = qwebirc.util.dictCopy(this.__ccmap);
 
@@ -142,15 +144,18 @@ qwebirc.ui.Theme = new Class({
     return msg.join("");
   },
   message: function(type, data, hilight) {
-    var map;
-    if(hilight) {
-      map = this.__ccmaph;
+    var map = hilight ? this.__ccmaph : this.__ccmap;
+    if(data && data["n"]) data["N"] = "qwebirc://whois/" + data.n + "/";
+
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var transKey = 'THEME_' + type;
+    var template;
+    if(i18n && i18n[transKey]) {
+      template = (this.__prefixed[type] ? this.__theme["PREFIX"] : '') + i18n[transKey];
     } else {
-      map = this.__ccmap;
+      template = this.__theme[type];
     }
-    
-    if(data && data["n"])
-      data["N"] = "qwebirc://whois/" + data.n + "/";
-    return this.__dollarSubstitute(this.__theme[type], data, map);
+    return this.__dollarSubstitute(template, data, map);
   }
 });

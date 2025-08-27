@@ -53,6 +53,14 @@ def remove_python(dest, ignore=[]):
         os.unlink(rfile)
         
 def main():
+  # Locales kopieren
+  src_locales = os.path.join(os.path.dirname(__file__), "..", "locales")
+  dest_locales = os.path.join(DEST, "static", "locales")
+  if not os.path.exists(dest_locales):
+    os.makedirs(dest_locales)
+  for fname in os.listdir(src_locales):
+    if fname.endswith(".json"):
+      shutil.copy2(os.path.join(src_locales, fname), os.path.join(dest_locales, fname))
   if len(sys.argv) < 2:
     print("syntax: %s [destination directory]" % sys.argv[0], file=sys.stderr)
     sys.exit(0)

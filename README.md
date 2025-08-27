@@ -44,6 +44,14 @@ Make sure to set at least the IRC server address and port, and review other opti
 ./compile.py
 ```
 
+JavaScript is minified using [uglify-js](https://github.com/mishoo/UglifyJS) if available. Ensure the `uglifyjs` binary is on your PATH. Global install:
+
+```
+npm install -g uglify-js
+```
+
+If `uglifyjs` is missing or fails, a warning is printed and unminified (larger) files are served.
+
 ### 6. Start qwebirc
 
 ```
@@ -70,3 +78,9 @@ ln -s ../../css static/css/debug
 ```
 
 ... then you can browse to http://instance/quidebug.html and use your favourite JavaScript debugger, as well as not having to compile each time you make a change!
+
+### Minifier / Build Details
+
+The script `bin/compile.py` will attempt to minify JS with `uglifyjs`. On failure it falls back to the original sources. Locales (`locales/*.json`) are copied to `static/locales/` so language switching does not require a rebuild.
+
+For fast development cycles use the debug symlinks and skip compilation; for production run `./compile.py` (optionally after cleaning output dirs) and ensure `uglifyjs` is installed.

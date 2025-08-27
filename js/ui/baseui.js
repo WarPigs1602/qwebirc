@@ -54,6 +54,33 @@ qwebirc.ui.BaseUI = new Class({
         this.getActiveWindow().addLine(null, x);
       }
     }.bind(this);
+
+    // Register translator to update existing window titles when language changes
+    if (window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
+      window.qwebirc.registerTranslator(function(){
+        try {
+          var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+          var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+          if(!i18n || !i18n.options) return;
+          var map = i18n.options;
+          // Iterate through windows and apply new labels
+          for (var i=0;i<this.windowArray.length;i++) {
+            var w = this.windowArray[i];
+            if(!w) continue;
+            var key = null;
+            if(w.type == qwebirc.ui.WINDOW_STATUS) key = 'TAB_STATUS';
+            else if(w.identifier == '_Connect' || w.pane && w.pane.type == 'connectpane') key = 'TAB_CONNECT';
+            else if(w.pane && w.pane.type == 'optionspane') key = 'TAB_OPTIONS';
+            else if(w.pane && w.pane.type == 'embeddedwizard') key = 'TAB_EMBED';
+            else if(w.pane && w.pane.type == 'aboutpane') key = 'TAB_ABOUT';
+            if(key && map[key] && w.setTitle) {
+              w.setTitle(map[key]);
+              if(w.active) this.updateTitle(map[key] + ' - ' + this.options.appTitle);
+            }
+          }
+        } catch(e) {}
+      }.bind(this));
+    }
   },
   // Delegates tagmsg events to the appropriate channel window
     onTagmsg: function(event) {
@@ -87,7 +114,10 @@ qwebirc.ui.BaseUI = new Class({
     }.bind(this));
     this.windows.put(client.id, new QHash());
     this.clients.put(client.id, client);
-    var w = this.newWindow(client, qwebirc.ui.WINDOW_STATUS, "Status");
+  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+  var labelStatus = (i18n && i18n.options && i18n.options.TAB_STATUS) ? i18n.options.TAB_STATUS : "Status";
+  var w = this.newWindow(client, qwebirc.ui.WINDOW_STATUS, labelStatus);
     this.selectWindow(w);
     if(!this.firstClient) {
   this.firstClient = true;
@@ -249,7 +279,10 @@ qwebirc.ui.BaseUI = new Class({
       callback(data);
     };
 
-    this.addCustomWindow("Connect", qwebirc.ui.ConnectPane, "connectpane", {
+  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+  var labelConnect = (i18n && i18n.options && i18n.options.TAB_CONNECT) ? i18n.options.TAB_CONNECT : "Connect";
+  this.addCustomWindow(labelConnect, qwebirc.ui.ConnectPane, "connectpane", {
       initialNickname: initialNickname, initialChannels: initialChannels, autoConnect: autoConnect, callback: wrappedCallback, autoNick: autoNick,
       uiOptions: this.options
     }, qwebirc.ui.WINDOW_CONNECT);
@@ -294,7 +327,15 @@ qwebirc.ui.StandardUI = new Class({
     this.__styleValues = {hue: qwebirc.ui.DEFAULT_HUE, saturation: 0, lightness: 0, textHue: null, textSaturation: null, textLightness: null};
     if($defined(this.options.hue)) this.__styleValues.hue = this.options.hue;
     this.tabCompleter = new qwebirc.ui.TabCompleterFactory(this);
-    this.uiOptions = new qwebirc.ui.DefaultOptionsClass(this, options.uiOptionsArg);
+  this.uiOptions = new qwebirc.ui.DefaultOptionsClass(this, options.uiOptionsArg);
+  // Sprache aus gespeicherten Optionen übernehmen, falls vorhanden
+  if (this.uiOptions && this.uiOptions.optionHash && this.uiOptions.optionHash["LANGUAGE"] && this.uiOptions.optionHash["LANGUAGE"].value) {
+    window.qwebirc = window.qwebirc || {};
+    window.qwebirc.config = window.qwebirc.config || {};
+    window.qwebirc.config.LANGUAGE = this.uiOptions.optionHash["LANGUAGE"].value;
+  }
+  if (typeof setInitialLanguageOnOptions === "function") setInitialLanguageOnOptions(this.uiOptions);
+  if (typeof afterOptionsInit === "function") afterOptionsInit();
     this.customWindows = new QHash();
 
     if($defined(this.options.saturation)) this.__styleValues.saturation = this.options.saturation;
@@ -313,40 +354,40 @@ qwebirc.ui.StandardUI = new Class({
     document.addEvent("keydown", this.__handleHotkey.bind(this));
   },
   __build_menu_items: function(options) {
-    var r = [];
+    var collected = [];
     var seenAbout = null;
+    // Gather preset blocks
+    for(var i=0;i<qwebirc.ui.UI_COMMANDS_P1.length;i++) collected.push([true, qwebirc.ui.UI_COMMANDS_P1[i]]);
+    for(var i=0;i<options.customMenuItems.length;i++) collected.push([false, options.customMenuItems[i]]);
+    for(var i=0;i<qwebirc.ui.UI_COMMANDS_P2.length;i++) collected.push([true, qwebirc.ui.UI_COMMANDS_P2[i]]);
 
-    for(var i=0;i<qwebirc.ui.UI_COMMANDS_P1.length;i++)
-      r.push([true, qwebirc.ui.UI_COMMANDS_P1[i]]);
-    for(var i=0;i<options.customMenuItems.length;i++)
-      r.push([false, options.customMenuItems[i]]);
-    for(var i=0;i<qwebirc.ui.UI_COMMANDS_P2.length;i++)
-      r.push([true, qwebirc.ui.UI_COMMANDS_P2[i]]);
-
-    var r2 = []
-    for(var i=0;i<r.length;i++) {
-      var preset = r[i][0], c = r[i][1];
-
-      if(c[0] == "About qwebirc") { /* HACK */
-        if(!preset) {
-          seenAbout = c;
-          continue;
-        } else if(seenAbout) {
-          c = seenAbout;
-          preset = false;
-        }
+    var result = [];
+    for(var i=0;i<collected.length;i++) {
+      var preset = collected[i][0];
+      var c = collected[i][1];
+      // c[0] can be function (dynamic label) or string
+      var labelCurrent = (typeof c[0] === 'function') ? c[0]() : c[0];
+      if(labelCurrent == "About qwebirc") { /* HACK preserve user-specified 'About' ordering */
+        if(!preset) { seenAbout = c; continue; }
+        else if(seenAbout) { c = seenAbout; preset = false; }
       }
-
       if(preset) {
-        r2.push([c[0], this[c[1] + "Window"].bind(this)]);
+        // store original callable so we can re-evaluate later
+        result.push([c[0], this[c[1] + 'Window'].bind(this)]);
       } else {
-        r2.push([c[0], (function(c) { return function() {
-          this.addCustomWindow(c[0], qwebirc.ui.URLPane, "urlpane", {url: c[1]});
-        }.bind(this); }).call(this, c)]);
+        // custom URL item; evaluate label at click to reflect new language
+        result.push([c[0], (function(item){ return function(){
+          var lbl = (typeof item[0] === 'function') ? item[0]() : item[0];
+          this.addCustomWindow(lbl, qwebirc.ui.URLPane, 'urlpane', {url: item[1]});
+        }.bind(this); })(c)]);
       }
     }
-
-    return r2;
+    this.__menuCache = result; // cache for dynamic re-rendering
+    return result.map(function(entry){
+      // Materialize label now (dropdown will convert to <a>)
+      var lbl = (typeof entry[0] === 'function') ? entry[0]() : entry[0];
+      return [lbl, entry[1]];
+    });
   },
   __handleHotkey: function(x) {
     var success = false;
@@ -442,15 +483,24 @@ qwebirc.ui.StandardUI = new Class({
     d.setSubWindow(ew);
   },
   embeddedWindow: function() {
-    this.addCustomWindow("Add webchat to your site", qwebirc.ui.EmbedWizard, "embeddedwizard", {baseURL: this.options.baseURL, uiOptions: this.uiOptions, optionsCallback: function() {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+    var labelEmbed = (i18n && i18n.options && i18n.options.TAB_EMBED) ? i18n.options.TAB_EMBED : "Add webchat to your site";
+    this.addCustomWindow(labelEmbed, qwebirc.ui.EmbedWizard, "embeddedwizard", {baseURL: this.options.baseURL, uiOptions: this.uiOptions, optionsCallback: function() {
       this.optionsWindow();
     }.bind(this)});
   },
   optionsWindow: function() {
-    this.addCustomWindow("Options", qwebirc.ui.OptionsPane, "optionspane", this.uiOptions);
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+    var labelOptions = (i18n && i18n.options && i18n.options.TAB_OPTIONS) ? i18n.options.TAB_OPTIONS : "Options";
+    this.addCustomWindow(labelOptions, qwebirc.ui.OptionsPane, "optionspane", this.uiOptions);
   },
   aboutWindow: function() {
-    this.addCustomWindow("About qwebirc", qwebirc.ui.AboutPane, "aboutpane", this.uiOptions);
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+    var labelAbout = (i18n && i18n.options && i18n.options.TAB_ABOUT) ? i18n.options.TAB_ABOUT : "About qwebirc";
+    this.addCustomWindow(labelAbout, qwebirc.ui.AboutPane, "aboutpane", this.uiOptions);
   },
   urlDispatcher: function(name, window) {
     if(name == "embedded")
@@ -575,7 +625,11 @@ qwebirc.ui.QuakeNetUI = new Class({
       this.getActiveWindow().errorMessage("Not logged in!");
       return;
     }
-    if(confirm("Log out?")) {
+  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+  var msg = (i18n && i18n.LOG_OUT_CONFIRM) ? i18n.LOG_OUT_CONFIRM : 'Log out?';
+  if(confirm(msg)) {
+  // i18n: eigentlich in QUI.logout verschieben, aber hier belassen falls override
       this.clients.each(function(k, v) {
         v.quit("Logged out");
       }, this);

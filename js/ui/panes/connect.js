@@ -5,15 +5,87 @@ qwebirc.ui.ConnectPane = new Class({
     this.options = options;
     this.cookie = new Hash.Cookie("optconn", {duration: 3650, autoSave: false});
     var uiOptions = options.uiOptions;
-    this.__windowName = "authgate_" + Math.floor(Math.random() * 100000);
+  this.__windowName = "authgate_" + Math.floor(Math.random() * 100000);
+  // Methode an Instanz binden, damit sie im asynchronen Callback verfügbar ist
+  this.__buildPrettyChannels = this.__buildPrettyChannels.bind(this);
+
+
+    // util-Objekt MUSS vor dem asynchronen Callback initialisiert werden!
+    this.util = {
+      makeVisible: function(x) { x.setStyle("display", ""); },
+      setVisible: function(y) { return function(x) { x.setStyle("display", y ? "" : "none"); }; },
+      focus: function(x) { try { x.focus(); } catch (e) { } },
+      attachClick: function(fn) { return function(x) { x.addListener("click", fn); } },
+      setText: function(x) { return function(y) {
+        if(typeof y.value === "undefined") {
+          y.set("text", x);
+        } else {
+          y.value = x === null ? "" : x;
+        }
+      } }
+    };
 
     var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
     var cb = delayfn.delay(500);
 
-    var r = qwebirc.ui.RequestTransformHTML({
-      url: qwebirc.global.staticBaseURL + "panes/connect.html",
-      update: parent,
-      onSuccess: function() {
+  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  // Registriere Übersetzer für späteren Sprachwechsel
+  var register = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n.registerTranslator;
+  var self = this;
+  function translateCurrent(l){
+    if(!self.rootElement) return;
+    try {
+      // Verwende vorhandene Übersetzungslogik falls vorhanden
+      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[l] && window.qwebirc.i18n[l].options;
+      function t(key, fallback) { return (i18n && i18n[key]) ? i18n[key] : (fallback || key); }
+      var parent = self.rootElement.getParent ? self.rootElement.getParent() : document;
+      var header = parent.querySelector('tr[name=nologologinheader] h1');
+      if(header) header.innerHTML = t('CONNECT_TITLE', header.innerHTML).replace(/<span name="networkname"><\/span>/, '<span name="networkname"></span>');
+      var nickLabel = parent.querySelector('label[for=loginnickname]');
+      if(nickLabel) nickLabel.textContent = t('NICKNAME', nickLabel.textContent);
+      var chanLabel = parent.querySelector('label[for=loginchannels]');
+      if(chanLabel) chanLabel.textContent = t('CHANNELS', chanLabel.textContent);
+      var userLabels = parent.querySelectorAll('label[for=sasl_username], label[for=confirm_sasl_username]');
+      userLabels.forEach(function(lab){ lab.textContent = t('USERNAME', lab.textContent); });
+      var passLabels = parent.querySelectorAll('label[for=sasl_password], label[for=confirm_sasl_password]');
+      passLabels.forEach(function(lab){ lab.textContent = t('PASSWORD', lab.textContent); });
+      var pwCheckboxes = parent.querySelectorAll('input#show_sasl_fields, input#show_sasl_fields_confirm');
+      pwCheckboxes.forEach(function(box){ var label = box.parentNode; if(label && label.tagName==='LABEL' && label.childNodes[1]) label.childNodes[1].textContent = ' ' + t('I_HAVE_PASSWORD', label.childNodes[1].textContent.trim()); });
+      var showPwSpans = parent.querySelectorAll('span[title="Show password"]');
+      showPwSpans.forEach(function(span){
+        span.set('html', '<svg style="width:14px;height:14px;vertical-align:middle" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5m0 13c-3.04 0-5.5-2.46-5.5-5.5S8.96 6.5 12 6.5s5.5 2.46 5.5 5.5S15.04 17.5 12 17.5m0-9A3.5 3.5 0 0 0 8.5 12 3.5 3.5 0 0 0 12 15.5 3.5 3.5 0 0 0 15.5 12 3.5 3.5 0 0 0 12 8.5Z"/></svg>');
+      });
+      var joinButtons = parent.querySelectorAll('input[type=submit][name=connect]');
+      joinButtons.forEach(function(btn){ btn.value = t('JOIN_CHAT', btn.value); });
+    } catch(e) {}
+  }
+  if(typeof register === 'function') register(translateCurrent);
+  window.addEventListener('qwebirc:languageChanged', function(ev){ translateCurrent(ev.detail.lang); });
+  // Referenz auf Instanz für alle Callbacks (self bereits definiert)
+  // Lade Sprachdatei, falls noch nicht geladen
+  (window.loadLocale ? window.loadLocale(lang) : Promise.resolve()).then(function() {
+        // util-Objekt im Callback erneut setzen, damit es garantiert im richtigen Kontext ist
+        self.util = self.util || {
+          makeVisible: function(x) { x.setStyle("display", ""); },
+          setVisible: function(y) { return function(x) { x.setStyle("display", y ? "" : "none"); }; },
+          focus: function(x) { try { x.focus(); } catch (e) { } },
+          attachClick: function(fn) { return function(x) { x.addListener("click", fn); } },
+          setText: function(x) { return function(y) {
+            if(typeof y.value === "undefined") {
+              y.set("text", x);
+            } else {
+              y.value = x === null ? "" : x;
+            }
+          } }
+        };
+        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+        function t(key, fallback) { return (i18n && i18n[key]) ? i18n[key] : (fallback || key); }
+  // self.cookie wird im Konstruktor gesetzt und darf hier nicht überschrieben werden
+
+        var r = qwebirc.ui.RequestTransformHTML({
+          url: qwebirc.global.staticBaseURL + "panes/connect.html",
+          update: parent,
+          onSuccess: function() {
           // CAPTCHA-Widget dynamisch einfügen, wenn aktiviert
           var captchaType = window.CAPTCHA_TYPE;
           var captchaSiteKey = window.CAPTCHA_SITE_KEY;
@@ -73,6 +145,41 @@ qwebirc.ui.ConnectPane = new Class({
               }
             }
           }
+        // Labels und Buttons übersetzen
+        // Headline ohne Logo
+        var header = parent.querySelector('tr[name=nologologinheader] h1');
+        if(header) header.innerHTML = t('CONNECT_TITLE', header.innerHTML).replace(/<span name="networkname"><\/span>/, '<span name="networkname"></span>');
+
+        // Nickname/Channels Labels
+        var nickLabel = parent.querySelector('label[for=loginnickname]');
+        if(nickLabel) nickLabel.textContent = t('NICKNAME', nickLabel.textContent);
+        var chanLabel = parent.querySelector('label[for=loginchannels]');
+        if(chanLabel) chanLabel.textContent = t('CHANNELS', chanLabel.textContent);
+
+        // Passwort/Username Labels
+        var userLabels = parent.querySelectorAll('label[for=sasl_username], label[for=confirm_sasl_username]');
+        userLabels.forEach(function(l){ l.textContent = t('USERNAME', l.textContent); });
+        var passLabels = parent.querySelectorAll('label[for=sasl_password], label[for=confirm_sasl_password]');
+        passLabels.forEach(function(l){ l.textContent = t('PASSWORD', l.textContent); });
+
+        // Checkbox "I have a password"
+        var pwCheckboxes = parent.querySelectorAll('input#show_sasl_fields, input#show_sasl_fields_confirm');
+        pwCheckboxes.forEach(function(box){
+          var label = box.parentNode;
+          if(label && label.tagName === 'LABEL') label.childNodes[1].textContent = ' ' + t('I_HAVE_PASSWORD', label.childNodes[1].textContent);
+        });
+
+        // Passwort anzeigen (nur Icon, kein Text)
+        var showPwSpans = parent.querySelectorAll('span[title="Show password"]');
+        showPwSpans.forEach(function(span){
+          span.set('html', '<svg style="width:14px;height:14px;vertical-align:middle" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5m0 13c-3.04 0-5.5-2.46-5.5-5.5S8.96 6.5 12 6.5s5.5 2.46 5.5 5.5S15.04 17.5 12 17.5m0-9A3.5 3.5 0 0 0 8.5 12 3.5 3.5 0 0 0 12 15.5 3.5 3.5 0 0 0 15.5 12 3.5 3.5 0 0 0 12 8.5Z"/></svg>');
+        });
+
+        // Button "Join chat"
+        var joinButtons = parent.querySelectorAll('input[type=submit][name=connect]');
+        joinButtons.forEach(function(btn){ btn.value = t('JOIN_CHAT', btn.value); });
+
+        // ...bestehender Code...
         // SASL-Login-Felder und Checkbox initial ausblenden, wenn SASL_LOGIN_ENABLED nicht aktiv
         if(typeof window.SASL_LOGIN_ENABLED !== 'undefined' && !window.SASL_LOGIN_ENABLED) {
           // Login-Formular
@@ -108,7 +215,7 @@ qwebirc.ui.ConnectPane = new Class({
 
         // SASL-Felder erst nach Laden des HTML und Setzen des Flags einblenden
         // Checkbox-Logik für SASL-Felder
-        var self = this;
+  // self ist bereits korrekt auf die Instanz gesetzt
         // Login-Formular (Nickname/Channels)
         var loginForm = parent.getElement('tr[name=loginbox] form');
         if (loginForm) {
@@ -171,11 +278,11 @@ qwebirc.ui.ConnectPane = new Class({
         }
         $clear(cb);
 
-        var rootElement = parent.getElement("[name=connectroot]");
-        this.rootElement = rootElement;
+  var rootElement = parent.getElement("[name=connectroot]");
+  self.rootElement = rootElement;
 
-        this.util.exec = function(n, x) { rootElement.getElements(n).each(x); };
-        var util = this.util;
+  self.util.exec = function(n, x) { rootElement.getElements(n).each(x); };
+  var util = self.util;
         var exec = util.exec;
 
         var box = (autoConnect ? "confirm" : "login");
@@ -205,12 +312,12 @@ qwebirc.ui.ConnectPane = new Class({
         }
       }
 
-      if(initialNickname === null && initialChannels === null) {
-        var n2 = this.cookie.get("nickname");
+  if(initialNickname === null && initialChannels === null) {
+  var n2 = self.cookie.get("nickname");
         if(n2 !== null)
           initialNickname = n2;
 
-        var c2 = this.cookie.get("autojoin");
+  var c2 = self.cookie.get("autojoin");
         if(c2 !== null)
           initialChannels = c2;
       }
@@ -221,7 +328,7 @@ qwebirc.ui.ConnectPane = new Class({
 
       exec("[name=nickname]", util.setText(initialNickname));
       exec("[name=channels]", util.setText(initialChannels));
-      exec("[name=prettychannels]", function(node) { this.__buildPrettyChannels(node, initialChannels); }.bind(this));
+  exec("[name=prettychannels]", function(node) { self.__buildPrettyChannels(node, initialChannels); });
       exec("[name=networkname]", util.setText(uiOptions.networkName));
 
       var focus = "connect";
@@ -229,7 +336,7 @@ qwebirc.ui.ConnectPane = new Class({
         if(!autoNick)
           exec("[name=nickselected]", util.makeVisible);
 
-        this.__validate = this.__validateConfirmData;
+  self.__validate = self.__validateConfirmData;
       } else {
 	if(!initialNickname) {
           focus = "nickname";
@@ -237,7 +344,7 @@ qwebirc.ui.ConnectPane = new Class({
           focus = "channels";
         }
 
-        this.__validate = this.__validateLoginData;
+  self.__validate = self.__validateLoginData;
       }
 
       var login = qwebirc.auth.loggedin(true);
@@ -260,15 +367,16 @@ qwebirc.ui.ConnectPane = new Class({
 
       if(window == window.top) /* don't focus when we're iframe'd */
         exec("[name=" + focus + "]", util.focus);
-      exec("[name=connect]", util.attachClick(this.__connect.bind(this)));
-      exec("[name=loginconnect]", util.attachClick(this.__loginConnect.bind(this)));
+        exec("[name=connect]", util.attachClick(self.__connect.bind(self)));
+      exec("[name=loginconnect]", util.attachClick(self.__loginConnect.bind(self)));
 
-      exec("[name=login]", util.attachClick(this.__login.bind(this)));
+      exec("[name=login]", util.attachClick(self.__login.bind(self)));
 
       if(qwebirc.ui.isHideAuth())
        exec("[name=login]", util.setVisible(false));
-    }.bind(this)});
-    r.get();
+    }});
+        r.get();
+      });
   },
   util: {
     makeVisible: function(x) { x.setStyle("display", ""); },
@@ -308,7 +416,9 @@ qwebirc.ui.ConnectPane = new Class({
           }
         }
         if (!token) {
-          alert('Please complete the CAPTCHA.');
+          var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+          var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
+          alert((i18n2 && i18n2.ALERT_CAPTCHA_REQUIRED) ? i18n2.ALERT_CAPTCHA_REQUIRED : 'Please complete the CAPTCHA.');
           if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
           return;
         }
@@ -405,7 +515,9 @@ qwebirc.ui.ConnectPane = new Class({
     __qwebircAuthCallback = function(qticket, qticketUsername, realExpiry) {
       if (typeof sessionStorage === "undefined")
       {
-        alert("No session storage support in this browser -- login not supported");
+  var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
+  alert((i18n2 && i18n2.ALERT_NO_SESSION_STORAGE) ? i18n2.ALERT_NO_SESSION_STORAGE : "No session storage support in this browser -- login not supported");
         this.__cancelLoginCallback(false);
         return;
       }
@@ -445,14 +557,18 @@ qwebirc.ui.ConnectPane = new Class({
     var chans = chan.value;
     if(chans == "#") chans = "";
     if(!nickname) {
-      alert("You must supply a nickname.");
+  var lang3 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n3 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang3] && window.qwebirc.i18n[lang3].options;
+  alert((i18n3 && i18n3.ALERT_NICK_REQUIRED) ? i18n3.ALERT_NICK_REQUIRED : 'You must supply a nickname.');
       nick.focus();
       return false;
     }
     var stripped = qwebirc.global.nicknameValidator.validate(nickname);
     if(stripped != nickname) {
       nick.value = stripped;
-      alert("Your nickname was invalid and has been corrected; please check your altered nickname and try again.");
+  var lang3 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n3 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang3] && window.qwebirc.i18n[lang3].options;
+  alert((i18n3 && i18n3.ALERT_NICK_CORRECTED) ? i18n3.ALERT_NICK_CORRECTED : 'Your nickname was invalid and has been corrected; please check your altered nickname and try again.');
       nick.focus();
       return false;
     }
@@ -516,14 +632,18 @@ qwebirc.ui.LoginBox2 = function(parentElement, callback, initialNickname, initia
       chans = "";
 
     if(!nickname) {
-      alert("You must supply a nickname.");
+  var lang4 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n4 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang4] && window.qwebirc.i18n[lang4].options;
+  alert((i18n4 && i18n4.ALERT_NICK_REQUIRED) ? i18n4.ALERT_NICK_REQUIRED : 'You must supply a nickname.');
       nick.focus();
       return;
     }
     var stripped = qwebirc.global.nicknameValidator.validate(nickname);
     if(stripped != nickname) {
       nick.value = stripped;
-      alert("Your nickname was invalid and has been corrected; please check your altered nickname and press Connect again.");
+  var lang4 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n4 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang4] && window.qwebirc.i18n[lang4].options;
+  alert((i18n4 && i18n4.ALERT_NICK_CORRECTED_CONNECT) ? i18n4.ALERT_NICK_CORRECTED_CONNECT : 'Your nickname was invalid and has been corrected; please check your altered nickname and press Connect again.');
       nick.focus();
       return;
     }
@@ -532,7 +652,9 @@ qwebirc.ui.LoginBox2 = function(parentElement, callback, initialNickname, initia
     if(qwebirc.auth.enabled()) {
       if(qwebirc.auth.passAuth() && authCheckBox.checked) {
           if(!usernameBox.value || !passwordBox.value) {
-            alert("You must supply your username and password in auth mode.");
+            var lang5 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+            var i18n5 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang5] && window.qwebirc.i18n[lang5].options;
+            alert((i18n5 && i18n5.ALERT_AUTH_USERPASS_REQUIRED) ? i18n5.ALERT_AUTH_USERPASS_REQUIRED : 'You must supply your username and password in auth mode.');
             if(!usernameBox.value) {
               usernameBox.focus();
             } else {
@@ -544,7 +666,9 @@ qwebirc.ui.LoginBox2 = function(parentElement, callback, initialNickname, initia
           data["serverPassword"] = usernameBox.value + " " + passwordBox.value;
       } else if(qwebirc.auth.bouncerAuth()) {
         if(!passwordBox.value) {
-          alert("You must supply a password.");
+          var lang6 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+          var i18n6 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang6] && window.qwebirc.i18n[lang6].options;
+          alert((i18n6 && i18n6.ALERT_PASSWORD_REQUIRED) ? i18n6.ALERT_PASSWORD_REQUIRED : 'You must supply a password.');
           passwordBox.focus();
           return;
         }

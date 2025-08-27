@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 import sys
 import os
 import subprocess
@@ -29,16 +30,16 @@ COPYRIGHT = open("js/copyright.js", "rb").read()
 class MinifyException(Exception):
   pass
   
-def jarit(src):
+
+# Neue Minify-Funktion mit UglifyJS
+def minify_with_uglify(src):
   try:
-    p = subprocess.Popen(["java", "-jar", "bin/yuicompressor-2.4.8.jar", src], stdout=subprocess.PIPE, shell=os.name == "nt")
+    p = subprocess.Popen(["uglifyjs", src], stdout=subprocess.PIPE)
   except Exception as e:
-    if hasattr(e, "errno") and e.errno == 2:
-      raise MinifyException("unable to run java")
-    raise
-  data = p.communicate()[0]
+    raise MinifyException("unable to run uglifyjs: %s" % e)
+  data, _ = p.communicate()
   if p.wait() != 0:
-    raise MinifyException("an error occured")
+    raise MinifyException("uglifyjs failed")
   return data
 
 JAVA_WARNING_SURPRESSED = False
@@ -47,27 +48,32 @@ def jmerge_files(prefix, suffix, output, files, *args, **kwargs):
   output = output + "." + suffix
   o = os.path.join(prefix, "compiled", output)
   merge_files(o, files, *args)
-  
-  # cough hack
-  try:
-    compiled = jarit(o)
-  except MinifyException as e:
-    global JAVA_WARNING_SURPRESSED
-    if not JAVA_WARNING_SURPRESSED:
-      JAVA_WARNING_SURPRESSED = True
-      print("warning: minify: %s (not minifying -- javascript will be HUGE)." % e, file=sys.stderr)
+
+  # Nur JS minifizieren
+  is_js = suffix == "js"
+  if is_js:
     try:
-      f = open(o, "rb")
+      compiled = minify_with_uglify(o)
+    except MinifyException as e:
+      global JAVA_WARNING_SURPRESSED
+      if not JAVA_WARNING_SURPRESSED:
+        JAVA_WARNING_SURPRESSED = True
+        print("warning: minify: %s (not minifying -- javascript will be HUGE)." % e, file=sys.stderr)
+      try:
+        with open(o, "rb") as f:
+          compiled = f.read()
+      except Exception as e2:
+        raise MinifyException("could not read unminified file: %s" % e2)
+  else:
+    with open(o, "rb") as f:
       compiled = f.read()
-    finally:
-      f.close()
 
   try:
     os.unlink(o)
   except:
-    time.sleep(1) # windows sucks
+    time.sleep(1)
     os.unlink(o)
-    
+
   with open(os.path.join(prefix, "static", suffix, output), "w", encoding="utf-8") as f:
     # COPYRIGHT is bytes, so decode it
     if isinstance(COPYRIGHT, bytes):
@@ -90,9 +96,20 @@ def merge_files(output, files, root_path=lambda x: x):
       if x.startswith("//"):
         continue
       with open(root_path(x), "r", encoding="utf-8") as f2:
-        f.write(f2.read() + "\n")
+        content = f2.read().rstrip()
+        if not content.endswith(";"):
+          content += ";"
+        f.write(content + "\n")
 
 def main(outputdir=".", produce_debug=True):
+  # Locales kopieren
+  src_locales = os.path.join(os.path.dirname(__file__), "..", "locales")
+  dest_locales = os.path.join(outputdir, "static", "locales")
+  if not os.path.exists(dest_locales):
+    os.makedirs(dest_locales)
+  for fname in os.listdir(src_locales):
+    if fname.endswith(".json"):
+      shutil.copy2(os.path.join(src_locales, fname), os.path.join(dest_locales, fname))
   ID = pagegen.getgitid()
   
   pagegen.main(outputdir, produce_debug=produce_debug)

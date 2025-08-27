@@ -27,7 +27,7 @@ qwebirc.xdomain.Poller = new Class({
     if(len != message.length)
       return;
 
-    message = message.replaceAll("\000", "").replaceAll("\n", "").replaceAll("\r", "");
+  message = message.replaceAll("\x00", "").replaceAll("\n", "").replaceAll("\r", "");
     this._callback(message);
   }
 });

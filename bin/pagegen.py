@@ -85,6 +85,15 @@ def producehtml(name, debug):
   ui = pages.UIs[name]
   js = jslist(name, debug)
   css = csslist(name, debug, gen=True)
+
+  # Locales-JSON-Dateien als preload verlinken
+  locales_dir = os.path.join(os.path.dirname(__file__), "..", "locales")
+  preload_locales = ""
+  if os.path.exists(locales_dir):
+    for fname in os.listdir(locales_dir):
+      if fname.endswith(".json"):
+        preload_locales += '  <link rel="preload" href="%slocales/%s" as="fetch" type="application/json" crossorigin>\n' % (config.STATIC_BASE_URL, fname)
+
   csshtml = "\n".join("  <link rel=\"stylesheet\" href=\"%s%s\" type=\"text/css\"/>" % (config.STATIC_BASE_URL, x) for x in css)
 
   def toscript(xxx_todo_changeme):
@@ -120,7 +129,7 @@ def producehtml(name, debug):
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="icon" sizes="192x192" href="%simages/highresicon.png"/>
   <link rel="shortcut icon" type="image/png" href="%simages/favicon.png"/>
-%s%s<script type="text/javascript">QWEBIRC_DEBUG=%s;</script>%s
+%s%s%s<script type="text/javascript">QWEBIRC_DEBUG=%s;</script>%s
 %s
   <script type="text/javascript">
     var ui = new qwebirc.ui.Interface("ircui", qwebirc.ui.%s, %s);
@@ -134,7 +143,7 @@ def producehtml(name, debug):
   </div>
 </body>
 </html>
-""" % (ui["doctype"], config.APP_TITLE, config.STATIC_BASE_URL, config.STATIC_BASE_URL, csshtml, captcha_js, debug and "true" or "false", customjs, jshtml, ui["class"], optionsgen.get_options(), div)
+""" % (ui["doctype"], config.APP_TITLE, config.STATIC_BASE_URL, config.STATIC_BASE_URL, preload_locales, csshtml, captcha_js, debug and "true" or "false", customjs, jshtml, ui["class"], optionsgen.get_options(), div)
 
 def main(outputdir=".", produce_debug=True):
   p = os.path.join(outputdir, "static")

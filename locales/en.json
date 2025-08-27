@@ -1,0 +1,157 @@
+{
+  "language_name": "English",
+  "greeting": "Hello, world!",
+  "farewell": "Goodbye!",
+  "options": {
+    "LANGUAGE": "Language",
+    "BEEP_ON_MENTION": "Beep on activity",
+    "NOTIFICATIONS": "Show HTML5 notifications on activity",
+    "FLASH_ON_MENTION": "Flash titlebar on mention or query activity",
+    "DEDICATED_MSG_WINDOW": "Show private messages in a separate window",
+    "DEDICATED_NOTICE_WINDOW": "Show notices in a separate window",
+    "NICK_OV_STATUS": "Show status (@/+) before nicknames",
+    "LASTPOS_LINE": "Show last position for each window",
+    "NICK_COLOURS": "Automatically color nicknames",
+    "HIDE_JOINPARTS": "Hide JOINS/PARTS/QUITS",
+    "STYLE_HUE": "Adjust UI color hue",
+    "QUERY_ON_NICK_CLICK": "Open query on nickname click in channel",
+    "SHOW_NICKLIST": "Show nicklist in channel",
+    "SHOW_TIMESTAMPS": "Show timestamps",
+  "SIDE_TABS": "Show tabs on the side",
+  "SAVE": "Save",
+  "CANCEL": "Cancel",
+  "CONNECT": "Connect",
+  "CONNECT_TITLE": "Connect to IRC",
+  "JOIN_CHAT": "Join chat",
+  "NICKNAME": "Nickname",
+  "CHANNELS": "Channels",
+  "PASSWORD": "Password",
+  "USERNAME": "Username",
+  "I_HAVE_PASSWORD": "I have a password:",
+  "SHOW_PASSWORD": "Show password",
+  "EMBED_MENU": "Add webchat to your site",
+  "EMBED_WIZ_TITLE": "Add webchat to your website",
+  "EMBED_WIZ_WELCOME": "This wizard will help you create an embedded client by asking you questions then giving you the code to add to your website.<br/><br/>You can use the <b>Next</b> and <b>Back</b> buttons to navigate through the wizard; click <b>Next</b> to continue.",
+  "EMBED_SET_CHANNELS": "Set channels",
+  "EMBED_ENTER_CHANNELS": "Enter the channels you would like the client to join on startup:",
+  "EMBED_CHANNELS_HINT": "You can supply multiple channels by seperating them with a comma, e.g.:",
+  "EMBED_CHOOSE_NICK_MODE": "Choose a nickname mode",
+  "EMBED_CHOOSE_NICK_DESC": "At startup would you like the client to use a random nickname, a preset nickname or a nickname of the users choice?",
+  "EMBED_CHOOSE_NICK_HINT": "It is recommended that you only use a preset nickname if the client is for your own personal use.",
+  "EMBED_NICK_USER_CHOOSE": "Make the user choose a nickname.",
+  "EMBED_NICK_RANDOM": "Use a random nickname, e.g. qwebirc12883.",
+  "EMBED_NICK_PRESET": "Use a preset nickname of your choice.",
+  "EMBED_CONNECT_DIALOG_TITLE": "Display connect dialog?",
+  "EMBED_CONNECT_DIALOG_QUESTION": "Do you want the user to be shown the connect dialog (with the values you have supplied pre-entered) or just a connect confirmation?",
+  "EMBED_CONNECT_DIALOG_HINT": "You need to display the dialog if you want the user to be able to set their nickname before connecting.",
+  "EMBED_USE_CURRENT_LF": "Use the current look and feel (",
+  "EMBED_ALTER": "alter",
+  "EMBED_USE_DEFAULT_LF": "Use the default look and feel.",
+  "EMBED_CONFIGURE_LF": "Configure look and feel",
+  "EMBED_CONFIGURE_LF_DESC": "The look and feel will be copied from the current settings.",
+  "EMBED_CONNECT_WITHOUT_DIALOG": "Connect without displaying the dialog.",
+  "EMBED_SHOW_DIALOG": "Show the connect dialog.",
+  "EMBED_SET_NICK": "Set nickname",
+  "EMBED_ENTER_NICK": "Enter the nickname you would like the client to use by default:",
+  "EMBED_NICK_REQUIRED": "You must supply a nickname.",
+  "EMBED_NICK_CORRECTED": "The supplied nickname was invalid and has been corrected.",
+  "EMBED_NICK_HINT": "If you use a . (dot/period) then it will be substituted with a random number.",
+  "EMBED_FINISHED": "Finished!",
+  "EMBED_CUSTOM_LINK": "Your custom link is:",
+  "EMBED_EMBED_CODE": "You can embed this into your page with the following code:",
+  "EMBED_BTN_BACK": "< Back",
+  "EMBED_BTN_NEXT": "Next >",
+  "EMBED_BTN_CLOSE": "Close",
+  "TAB_OPTIONS": "Options",
+  "TAB_EMBED": "Add webchat to your site",
+  "TAB_ABOUT": "About qwebirc",
+  "TAB_CONNECT": "Connect",
+  "TAB_STATUS": "Status"
+  ,"NICKMENU_OWNER": "owner"
+  ,"NICKMENU_DEOWNER": "deowner"
+  ,"NICKMENU_ADMIN": "admin"
+  ,"NICKMENU_DEADMIN": "deadmin"
+  ,"NICKMENU_OP": "op"
+  ,"NICKMENU_DEOP": "deop"
+  ,"NICKMENU_HALFOP": "halfop"
+  ,"NICKMENU_DEHALFOP": "dehalfop"
+  ,"NICKMENU_VOICE": "voice"
+  ,"NICKMENU_DEVOICE": "devoice"
+  ,"NICKMENU_WHOIS": "whois"
+  ,"NICKMENU_QUERY": "query"
+  ,"NICKMENU_SLAP": "slap"
+  ,"NICKMENU_KICK": "kick"
+  ,"NICKMENU_IGNORE": "ignore"
+  ,"NICKMENU_UNIGNORE": "unignore"
+  ,"NO_TOPIC": "(no topic set)"
+  ,"NEED_CHANOP": "Sorry, you need to be a channel operator to change the topic!"
+  ,"CHANGE_TOPIC_OF": "Change topic of {name} to:"
+  ,"LOG_OUT_CONFIRM": "Log out?"
+  ,"TRYING_TO_CONNECT": "Trying to connect server"
+  ,"THEME_SIGNON": "Signed on!"
+  ,"THEME_CONNECTING": "Connecting to server, please wait..."
+  ,"THEME_CONNECT": "Logging in, please wait..."
+  ,"THEME_CONNECTED": "Connected and logged in -- ready to go!"
+  ,"THEME_DISCONNECT": "Disconnected from server: $m"
+  ,"THEME_ERROR": "ERROR: $m"
+  ,"THEME_SERVERNOTICE": "$m"
+  ,"THEME_JOIN": "${$N$} [$h] has joined $c"
+  ,"THEME_OURJOIN": "${$N$} [$h] has joined $c"
+  ,"THEME_PART": "${$N$} [$h] has left $c [$m]"
+  ,"THEME_KICK": "${$v$} was kicked from $c by ${$N$} [$m]"
+  ,"THEME_MODE": "mode/$c [$m] by ${$N$}"
+  ,"THEME_QUIT": "${$N$} [$h] has quit [$m]"
+  ,"THEME_NICK": "${$n$} has changed nick to ${$[$w$]$}"
+  ,"THEME_TOPIC": "${$N$} changed the topic of $c to: $m"
+  ,"THEME_UMODE": "Usermode change: $m"
+  ,"THEME_INVITE": "$N invites you to join $c"
+  ,"THEME_WHOISUSER": "$B$N$B [$h]"
+  ,"THEME_WHOISREALNAME": " realname : $m"
+  ,"THEME_WHOISCHANNELS": " channels : $m"
+  ,"THEME_WHOISSERVER": " server   : $x [$m]"
+  ,"THEME_WHOISACCOUNT": " account  : qwebirc://qwhois/$m"
+  ,"THEME_WHOISIDLE": " idle     : $x [connected: $m]"
+  ,"THEME_WHOISAWAY": " away     : $m"
+  ,"THEME_WHOISOPER": "          : $BIRC Operator$B"
+  ,"THEME_WHOISOPERNAME": " operedas : $m"
+  ,"THEME_WHOISACTUALLY": " realhost : $m [ip: $x]"
+  ,"THEME_WHOISGENERICTEXT": "          : $m"
+  ,"THEME_WHOISEND": "End of WHOIS"
+  ,"THEME_AWAY": "$N is away: $m"
+  ,"THEME_GENERICERROR": "$m: $t"
+  ,"THEME_GENERICMESSAGE": "$m"
+  ,"THEME_WALLOPS": "WALLOP $n: $t"
+  ,"THEME_CHANNELCREATIONTIME": "Channel $c was created at: $m"
+  ,"THEME_CHANNELMODEIS": "Channel modes on $c are: $m"
+  ,"THEME_IGNORED": "Ignored $n, to unignore type: /UNIGNORE $n"
+  ,"THEME_UNIGNORED": "Unignored $n."
+  ,"THEME_IGNOREHEADER": "Ignore list:"
+  ,"THEME_IGNOREENTRY": "- $h"
+  ,"THEME_IGNOREEMPTY": "Ignore list is empty."
+  ,"THEME_SILENCE": "Silenced: $h"
+  ,"THEME_MODEMSG": "$m"
+  ,"THEME_NOTIFYCHANMSGTITLE": "Mentioned on $c:"
+  ,"THEME_NOTIFYCHANMSGBODY": "<$@$n> $m"
+  ,"THEME_NOTIFYCHANACTIONTITLE": "Mentioned on $c:"
+  ,"THEME_NOTIFYCHANACTIONBODY": " * $n $m"
+  ,"THEME_NOTIFYPRIVMSGTITLE": "Private message from $n:"
+  ,"THEME_NOTIFYPRIVMSGBODY": "$m"
+  ,"THEME_NOTIFYPRIVACTIONTITLE": "Private message from $n:"
+  ,"THEME_NOTIFYPRIVACTIONBODY": " * $n $m"
+  ,"THEME_NOTIFYCHANNOTICETITLE": "Mentioned on $c:"
+  ,"THEME_NOTIFYCHANNOTICEBODY": "-$n- $m"
+  ,"THEME_NOTIFYPRIVNOTICETITLE": "Private notice from $n:"
+  ,"THEME_NOTIFYPRIVNOTICEBODY": "$m"
+  ,"UNLOAD_CLOSE_CONNECTIONS": "This action will close all active IRC connections."
+  ,"QUIT_PAGE_CLOSED": "Page closed"
+  ,"BAD_IRC_URL": "Bad IRC URL scheme."
+  ,"INPUT_PLACEHOLDER": "Chat here! You can also use commands like /JOIN"
+  ,"MODEMSG_PRIV_GRANT": "{setter} granted {priv} to {target} in {channel}"
+  ,"MODEMSG_PRIV_REMOVE": "{setter} removed {priv} from {target} in {channel}"
+  ,"MODEMSG_BAN_SET": "{setter} set ban for {mask} in {channel}"
+  ,"MODEMSG_BAN_REMOVE": "{setter} removed ban for {mask} in {channel}"
+  ,"MODEMSG_BANEX_SET": "{setter} set ban-exception for {mask} in {channel}"
+  ,"MODEMSG_BANEX_REMOVE": "{setter} removed ban-exception for {mask} in {channel}"
+  ,"MODEMSG_GENERIC": "{setter} set mode {modestring} on {channel}"
+  }
+}

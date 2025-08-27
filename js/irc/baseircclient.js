@@ -402,7 +402,7 @@ qwebirc.irc.BaseIRCClient = new Class({
       
       // Einzelne Modes nacheinander anzeigen und Rechteänderungen speziell behandeln
       var self = this;
-      data.forEach(function(modeArr) {
+  data.forEach(function(modeArr) {
         var cmode = modeArr[0];
         var mode = modeArr[1];
         var arg = modeArr[2];
@@ -430,16 +430,30 @@ qwebirc.irc.BaseIRCClient = new Class({
           return '\x00' + nick + '\x00';
         }
         var msg;
+        var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+        function tr(key, fallback){ return (i18n && i18n[key]) || fallback; }
         // Ban und Ban-Exception speziell behandeln
         if ((mode === 'b' || mode === 'e') && arg) {
-          var action = (cmode === '+') ? 'set' : 'removed';
-          var type = (mode === 'b') ? 'ban' : 'ban-exception';
-          msg = colourNick(userNick) + ' ' + action + ' ' + type + ' for ' + arg + ' in ' + channel;
+          if(mode === 'b') {
+            msg = (cmode === '+') ? tr('MODEMSG_BAN_SET', colourNick(userNick) + ' set ban for ' + arg + ' in ' + channel) : tr('MODEMSG_BAN_REMOVE', colourNick(userNick) + ' removed ban for ' + arg + ' in ' + channel);
+            msg = msg.replace('{setter}', colourNick(userNick)).replace('{mask}', arg).replace('{channel}', channel);
+          } else { // e
+            msg = (cmode === '+') ? tr('MODEMSG_BANEX_SET', colourNick(userNick) + ' set ban-exception for ' + arg + ' in ' + channel) : tr('MODEMSG_BANEX_REMOVE', colourNick(userNick) + ' removed ban-exception for ' + arg + ' in ' + channel);
+            msg = msg.replace('{setter}', colourNick(userNick)).replace('{mask}', arg).replace('{channel}', channel);
+          }
         } else if (isPrivilege && arg) {
-          var action = (cmode === '+') ? 'granted' : 'removed';
-          msg = colourNick(userNick) + ' ' + action + ' ' + privilegeName + ' to ' + colourNick(arg) + ' in ' + channel;
+          if(cmode === '+') {
+            msg = tr('MODEMSG_PRIV_GRANT', colourNick(userNick) + ' granted ' + privilegeName + ' to ' + colourNick(arg) + ' in ' + channel);
+          } else {
+            msg = tr('MODEMSG_PRIV_REMOVE', colourNick(userNick) + ' removed ' + privilegeName + ' from ' + colourNick(arg) + ' in ' + channel);
+          }
+          msg = msg.replace('{setter}', colourNick(userNick)).replace('{priv}', privilegeName).replace('{target}', colourNick(arg)).replace('{channel}', channel);
         } else {
-          msg = colourNick(userNick) + ' set mode ' + cmode + mode + (arg ? ' ' + arg : '') + ' on ' + channel;
+          msg = tr('MODEMSG_GENERIC', colourNick(userNick) + ' set mode ' + cmode + mode + (arg ? ' ' + arg : '') + ' on ' + channel)
+            .replace('{setter}', colourNick(userNick))
+            .replace('{modestring}', cmode + mode + (arg ? ' ' + arg : ''))
+            .replace('{channel}', channel);
         }
         if (self.ui && self.ui.getWindow) {
           var win = self.ui.getWindow(self, qwebirc.ui.WINDOW_CHANNEL, channel);

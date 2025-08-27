@@ -1,0 +1,164 @@
+{
+  "language_name": "Deutsch",
+  "greeting": "Hallo Welt!",
+  "farewell": "Auf Wiedersehen!",
+  "options": {
+    "LANGUAGE": "Sprache",
+    "BEEP_ON_MENTION": "Bei Aktivität piepen",
+    "NOTIFICATIONS": "HTML5-Benachrichtigungen bei Aktivität anzeigen",
+    "FLASH_ON_MENTION": "Titelleiste blinken, wenn Nick erwähnt wird oder bei Query-Aktivität",
+    "DEDICATED_MSG_WINDOW": "Privatnachrichten in eigenem Fenster anzeigen",
+    "DEDICATED_NOTICE_WINDOW": "Notices in eigenem Fenster anzeigen",
+    "NICK_OV_STATUS": "Status (@/+) vor Nicknames anzeigen",
+    "LASTPOS_LINE": "Letzte Position für jedes Fenster anzeigen",
+    "NICK_COLOURS": "Nicknames automatisch einfärben",
+    "HIDE_JOINPARTS": "JOINS/PARTS/QUITS ausblenden",
+    "STYLE_HUE": "Farbton der Benutzeroberfläche anpassen",
+    "QUERY_ON_NICK_CLICK": "Query bei Klick auf Nickname im Channel",
+    "SHOW_NICKLIST": "Nickliste im Channel anzeigen",
+    "SHOW_TIMESTAMPS": "Zeitstempel anzeigen",
+  "SIDE_TABS": "Tabs an der Seite anzeigen",
+  "SAVE": "Speichern",
+  "CANCEL": "Abbrechen",
+  "CONNECT": "Verbinden",
+  "CONNECT_TITLE": "Verbinden mit IRC",
+  "JOIN_CHAT": "Chat betreten",
+  "NICKNAME": "Nickname",
+  "CHANNELS": "Channels",
+  "PASSWORD": "Passwort",
+  "USERNAME": "Benutzername",
+  "I_HAVE_PASSWORD": "Ich habe ein Passwort:",
+  "SHOW_PASSWORD": "Passwort anzeigen",
+  "EMBED_MENU": "Webchat auf deiner Seite einbinden",
+  "EMBED_WIZ_TITLE": "Webchat zu deiner Website hinzufügen",
+  "EMBED_WIZ_WELCOME": "Dieser Assistent hilft dir, einen eingebetteten Client zu erstellen, indem er Fragen stellt und dir anschließend den Code zum Einfügen in deine Website gibt.<br/><br/>Du kannst mit den Buttons <b>Weiter</b> und <b>Zurück</b> navigieren; klicke auf <b>Weiter</b>, um fortzufahren.",
+  "EMBED_SET_CHANNELS": "Channels festlegen",
+  "EMBED_ENTER_CHANNELS": "Gib die Channels ein, die der Client beim Start betreten soll:",
+  "EMBED_CHANNELS_HINT": "Mehrere Channels mit Komma trennen, z.B.:",
+  "EMBED_CHOOSE_NICK_MODE": "Nickname-Modus wählen",
+  "EMBED_CHOOSE_NICK_DESC": "Soll der Client beim Start einen zufälligen, einen vorgegebenen oder einen vom Benutzer gewählten Nick verwenden?",
+  "EMBED_CHOOSE_NICK_HINT": "Einen festen Nick nur verwenden, wenn der Client ausschließlich für dich selbst ist.",
+  "EMBED_NICK_USER_CHOOSE": "Benutzer soll einen Nick wählen.",
+  "EMBED_NICK_RANDOM": "Zufälligen Nick verwenden, z.B. qwebirc12883.",
+  "EMBED_NICK_PRESET": "Vorgegebenen Nick deiner Wahl verwenden.",
+  "EMBED_CONNECT_DIALOG_TITLE": "Verbindungsdialog anzeigen?",
+  "EMBED_CONNECT_DIALOG_QUESTION": "Soll dem Benutzer der Verbindungsdialog (mit vorausgefüllten Werten) oder nur eine Bestätigung gezeigt werden?",
+  "EMBED_CONNECT_DIALOG_HINT": "Der Dialog ist nötig, wenn der Benutzer seinen Nick vor dem Verbinden wählen soll.",
+  "EMBED_USE_CURRENT_LF": "Aktuelles Look & Feel verwenden (",
+  "EMBED_ALTER": "ändern",
+  "EMBED_USE_DEFAULT_LF": "Standard-Look & Feel verwenden.",
+  "EMBED_CONFIGURE_LF": "Look & Feel konfigurieren",
+  "EMBED_CONFIGURE_LF_DESC": "Das aktuelle Look & Feel wird übernommen.",
+  "EMBED_CONNECT_WITHOUT_DIALOG": "Ohne Dialog verbinden.",
+  "EMBED_SHOW_DIALOG": "Verbindungsdialog anzeigen.",
+  "EMBED_SET_NICK": "Nickname festlegen",
+  "EMBED_ENTER_NICK": "Gib den Standard-Nickname ein:",
+  "EMBED_NICK_REQUIRED": "Du musst einen Nick angeben.",
+  "EMBED_NICK_CORRECTED": "Der angegebene Nick war ungültig und wurde korrigiert.",
+  "EMBED_NICK_HINT": "Ein Punkt (.) wird durch eine Zufallszahl ersetzt.",
+  "EMBED_FINISHED": "Fertig!",
+  "EMBED_CUSTOM_LINK": "Dein individueller Link:",
+  "EMBED_EMBED_CODE": "Du kannst dies mit folgendem Code einbinden:",
+  "EMBED_BTN_BACK": "< Zurück",
+  "EMBED_BTN_NEXT": "Weiter >",
+  "EMBED_BTN_CLOSE": "Schließen",
+  "TAB_OPTIONS": "Optionen",
+  "TAB_EMBED": "Webchat einbinden",
+  "TAB_ABOUT": "Über qwebirc",
+  "TAB_CONNECT": "Verbinden",
+  "TAB_STATUS": "Status"
+  ,"NICKMENU_OWNER": "owner"
+  ,"NICKMENU_DEOWNER": "deowner"
+  ,"NICKMENU_ADMIN": "admin"
+  ,"NICKMENU_DEADMIN": "deadmin"
+  ,"NICKMENU_OP": "op"
+  ,"NICKMENU_DEOP": "deop"
+  ,"NICKMENU_HALFOP": "halfop"
+  ,"NICKMENU_DEHALFOP": "dehalfop"
+  ,"NICKMENU_VOICE": "voice"
+  ,"NICKMENU_DEVOICE": "devoice"
+  ,"NICKMENU_WHOIS": "whois"
+  ,"NICKMENU_QUERY": "query"
+  ,"NICKMENU_SLAP": "slap"
+  ,"NICKMENU_KICK": "kick"
+  ,"NICKMENU_IGNORE": "ignore"
+  ,"NICKMENU_UNIGNORE": "unignore"
+  ,"NO_TOPIC": "(kein Topic gesetzt)"
+  ,"NEED_CHANOP": "Du musst Channel-Operator sein, um das Topic zu ändern!"
+  ,"CHANGE_TOPIC_OF": "Topic von {name} ändern zu:"
+  ,"LOG_OUT_CONFIRM": "Abmelden?"
+  ,"TRYING_TO_CONNECT": "Verbinde mit Server"
+  ,"ALERT_CAPTCHA_REQUIRED": "Bitte CAPTCHA ausfüllen."
+  ,"ALERT_NO_SESSION_STORAGE": "Keine Session-Storage-Unterstützung im Browser – Login nicht möglich"
+  ,"ALERT_NICK_REQUIRED": "Du musst einen Nick angeben."
+  ,"ALERT_NICK_CORRECTED": "Dein Nick war ungültig und wurde korrigiert; bitte prüfe den geänderten Nick und versuche erneut."
+  ,"ALERT_NICK_CORRECTED_CONNECT": "Dein Nick war ungültig und wurde korrigiert; bitte prüfe den geänderten Nick und klicke erneut auf Verbinden."
+  ,"ALERT_AUTH_USERPASS_REQUIRED": "Du musst Benutzername und Passwort im Auth-Modus angeben."
+  ,"ALERT_PASSWORD_REQUIRED": "Du musst ein Passwort angeben."
+  ,"THEME_SIGNON": "Angemeldet!"
+  ,"THEME_CONNECTING": "Verbinde mit Server, bitte warten..."
+  ,"THEME_CONNECT": "Melde an, bitte warten..."
+  ,"THEME_CONNECTED": "Verbunden und eingeloggt -- es kann losgehen!"
+  ,"THEME_DISCONNECT": "Verbindung zum Server getrennt: $m"
+  ,"THEME_ERROR": "FEHLER: $m"
+  ,"THEME_SERVERNOTICE": "$m"
+  ,"THEME_JOIN": "${$N$} [$h] ist $c beigetreten"
+  ,"THEME_OURJOIN": "${$N$} [$h] ist $c beigetreten"
+  ,"THEME_PART": "${$N$} [$h] hat $c verlassen [$m]"
+  ,"THEME_KICK": "${$v$} wurde aus $c von ${$N$} gekickt [$m]"
+  ,"THEME_MODE": "mode/$c [$m] von ${$N$}"
+  ,"THEME_QUIT": "${$N$} [$h] hat quit gemacht [$m]"
+  ,"THEME_NICK": "${$n$} heißt jetzt ${$[$w$]$}"
+  ,"THEME_TOPIC": "${$N$} änderte das Topic von $c zu: $m"
+  ,"THEME_UMODE": "Usermode geändert: $m"
+  ,"THEME_INVITE": "$N lädt dich ein $c zu betreten"
+  ,"THEME_WHOISUSER": "$B$N$B [$h]"
+  ,"THEME_WHOISREALNAME": " realname : $m"
+  ,"THEME_WHOISCHANNELS": " channels : $m"
+  ,"THEME_WHOISSERVER": " server   : $x [$m]"
+  ,"THEME_WHOISACCOUNT": " account  : qwebirc://qwhois/$m"
+  ,"THEME_WHOISIDLE": " idle     : $x [verbunden: $m]"
+  ,"THEME_WHOISAWAY": " away     : $m"
+  ,"THEME_WHOISOPER": "          : $BIRC Operator$B"
+  ,"THEME_WHOISOPERNAME": " operedas : $m" 
+  ,"THEME_WHOISACTUALLY": " realhost : $m [ip: $x]"
+  ,"THEME_WHOISGENERICTEXT": "          : $m"
+  ,"THEME_WHOISEND": "Ende von WHOIS"
+  ,"THEME_AWAY": "$N ist abwesend: $m"
+  ,"THEME_GENERICERROR": "$m: $t"
+  ,"THEME_GENERICMESSAGE": "$m"
+  ,"THEME_WALLOPS": "WALLOP $n: $t"
+  ,"THEME_CHANNELCREATIONTIME": "Channel $c wurde erstellt am: $m"
+  ,"THEME_CHANNELMODEIS": "Channel-Modi auf $c sind: $m"
+  ,"THEME_IGNORED": "$n ignoriert, zum Aufheben tippe: /UNIGNORE $n"
+  ,"THEME_UNIGNORED": "$n wird nicht mehr ignoriert."
+  ,"THEME_IGNOREHEADER": "Ignorierliste:"
+  ,"THEME_IGNOREENTRY": "- $h"
+  ,"THEME_IGNOREEMPTY": "Ignorierliste ist leer."
+  ,"THEME_SILENCE": "Stumm: $h"
+  ,"THEME_MODEMSG": "$m"
+  ,"THEME_NOTIFYCHANMSGTITLE": "Erwähnung in $c:"
+  ,"THEME_NOTIFYCHANMSGBODY": "<$@$n> $m"
+  ,"THEME_NOTIFYCHANACTIONTITLE": "Erwähnung in $c:"
+  ,"THEME_NOTIFYCHANACTIONBODY": " * $n $m"
+  ,"THEME_NOTIFYPRIVMSGTITLE": "Private Nachricht von $n:"
+  ,"THEME_NOTIFYPRIVMSGBODY": "$m"
+  ,"THEME_NOTIFYPRIVACTIONTITLE": "Private Aktion von $n:"
+  ,"THEME_NOTIFYPRIVACTIONBODY": " * $n $m"
+  ,"THEME_NOTIFYCHANNOTICETITLE": "Erwähnung in $c:"
+  ,"THEME_NOTIFYCHANNOTICEBODY": "-$n- $m"
+  ,"THEME_NOTIFYPRIVNOTICETITLE": "Privater Hinweis von $n:"
+  ,"THEME_NOTIFYPRIVNOTICEBODY": "$m"
+  ,"UNLOAD_CLOSE_CONNECTIONS": "Diese Aktion beendet alle aktiven IRC-Verbindungen."
+  ,"QUIT_PAGE_CLOSED": "Seite geschlossen"
+  ,"BAD_IRC_URL": "Ungültiges IRC-URL-Schema."
+  ,"INPUT_PLACEHOLDER": "Hier chatten! Du kannst auch Befehle wie /JOIN benutzen"
+  ,"MODEMSG_PRIV_GRANT": "{setter} gab {priv} an {target} in {channel}"
+  ,"MODEMSG_PRIV_REMOVE": "{setter} entzog {priv} von {target} in {channel}"
+  ,"MODEMSG_BAN_SET": "{setter} setzte Ban für {mask} in {channel}"
+  ,"MODEMSG_BAN_REMOVE": "{setter} entfernte Ban für {mask} in {channel}"
+  ,"MODEMSG_BANEX_SET": "{setter} setzte Ban-Ausnahme für {mask} in {channel}"
+  ,"MODEMSG_BANEX_REMOVE": "{setter} entfernte Ban-Ausnahme für {mask} in {channel}"
+  ,"MODEMSG_GENERIC": "{setter} setzte Mode {modestring} auf {channel}"
+  }
+}

@@ -1,9 +1,10 @@
 function qwebirc_ui_onbeforeunload(e) { /* IE sucks */
   if(qwebirc.connected) {
-    var message = "This action will close all active IRC connections.";
-    var e = e || window.event;
-    if(e)
-      e.returnValue = message;
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var message = (i18n && i18n.UNLOAD_CLOSE_CONNECTIONS) || "This action will close all active IRC connections.";
+    var ev = e || window.event;
+    if(ev) ev.returnValue = message;
     return message;
   }
 }
@@ -75,7 +76,9 @@ qwebirc.ui.Interface = new Class({
         IRC.connect();
         window.onbeforeunload = qwebirc_ui_onbeforeunload;
         window.addEvent("unload", function() {
-          IRC.quit("Page closed");
+          var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+          var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+          IRC.quit((i18n && i18n.QUIT_PAGE_CLOSED) || "Page closed");
         });
       };
 
@@ -209,7 +212,9 @@ qwebirc.ui.Interface = new Class({
       return;
     var schemeComponents = url.splitMax(":", 2);
     if(schemeComponents[0].toLowerCase() != "irc" && schemeComponents[0].toLowerCase() != "ircs") {
-      alert("Bad IRC URL scheme.");
+  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+  alert((i18n && i18n.BAD_IRC_URL) || "Bad IRC URL scheme.");
       return;
     }
 

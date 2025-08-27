@@ -109,18 +109,35 @@ qwebirc.ui.QUI = new Class({
     dropdownMenu.hide();
     this.parentElement.appendChild(dropdownMenu);
     
-    this.UICommands.forEach(function(x) {
-      var text = x[0];
-      var fn = x[1];
-      var e = new Element("a");
-      e.addEvent("mousedown", function(e) { new Event(e).stop(); });
-      e.addEvent("click", function() {
-        dropdownMenu.hide();
-        fn();
-      });
-      e.set("text", text);
-      dropdownMenu.appendChild(e);
-    }.bind(this));
+    var buildEntries = function() {
+      dropdownMenu.empty();
+      this.UICommands.forEach(function(x) {
+        var label = (typeof x[0] === 'function') ? x[0]() : x[0];
+        var fn = x[1];
+        var e = new Element("a");
+        e.addEvent("mousedown", function(ev) { new Event(ev).stop(); });
+        e.addEvent("click", function() {
+          dropdownMenu.hide();
+          fn();
+        });
+        e.set("text", label);
+        dropdownMenu.appendChild(e);
+      }.bind(this));
+    }.bind(this);
+    buildEntries();
+    // Rebuild on language change
+    if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
+      window.qwebirc.registerTranslator(function(){
+        // Recreate UICommands from cache in BaseUI if available
+        if(this.__menuCache) {
+          // Convert cached entries into materialized labels
+          this.UICommands = this.__menuCache.map(function(entry){
+            return [(typeof entry[0] === 'function') ? entry[0] : entry[0], entry[1]];
+          });
+        }
+        buildEntries();
+      }.bind(this));
+    }
     
     var dropdown = new Element("div");
     dropdown.addClass("dropdown-tab");
@@ -161,7 +178,9 @@ qwebirc.ui.QUI = new Class({
     inputbox.setStyle("paddingLeft", "32px");
     this.addEvent("signedOn", function(client) {
       this.getStatusWindow(client).lines.removeClass("spinner");
-      inputbox.placeholder = "chat here! you can also use commands, like /JOIN";
+      var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+      inputbox.placeholder = (i18n && i18n.INPUT_PLACEHOLDER) || "chat here! you can also use commands, like /JOIN";
       var d = function() { inputbox.addClass("input-flash"); }.delay(250);
       var d = function() { inputbox.removeClass("input-flash"); }.delay(500);
       var d = function() { inputbox.addClass("input-flash"); }.delay(750);
@@ -172,6 +191,14 @@ qwebirc.ui.QUI = new Class({
     form.appendChild(inputbox);
     this.inputbox = inputbox;
     this.inputbox.maxLength = 470;
+    // Sprache ändern -> Placeholder aktualisieren
+    if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
+      window.qwebirc.registerTranslator(function(){
+        var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+        if(i18n && i18n.INPUT_PLACEHOLDER) inputbox.placeholder = i18n.INPUT_PLACEHOLDER;
+      });
+    }
 
     // Emoji Picker Overlay
   var emojiOverlay = new Element("div");
@@ -972,7 +999,10 @@ var connectStatus = {
     typingBar.addClass('active');
     var self = this;
   // Keine Animation, sondern wie Typing-Bar
-  typingBar.set('html', 'Trying to connect server <span class="typing-dots">' + getTypingBarDots() + '</span>');
+  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+  var lbl = (i18n && i18n.TRYING_TO_CONNECT) ? i18n.TRYING_TO_CONNECT : 'Trying to connect server';
+  typingBar.set('html', lbl + ' <span class="typing-dots">' + getTypingBarDots() + '</span>');
 // Automatisch Statusmeldung ausblenden, wenn signedOn-Event kommt
 if (window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.QUI) {
   var QUIproto = qwebirc.ui.QUI.prototype;
@@ -1045,15 +1075,16 @@ window.qwebircConnectStatus = connectStatus;
   editTopic: function() {
     if(this.type != qwebirc.ui.WINDOW_CHANNEL)
       return;
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var t = function(key, fallback){ return (i18n && i18n[key]) ? i18n[key] : (fallback || key); };
 
     if(!this.client.nickOnChanHasPrefix(this.client.nickname, this.name, "@")) {
-/*      var cmodes = this.client.getChannelModes(channel);
-      if(cmodes.indexOf("t")) {*/
-        alert("Sorry, you need to be a channel operator to change the topic!");
-        return;
-      /*}*/
+      alert(t('NEED_CHANOP','Sorry, you need to be a channel operator to change the topic!'));
+      return;
     }
-    var newTopic = prompt("Change topic of " + this.name + " to:", this.topic.topicText);
+    var promptMsg = t('CHANGE_TOPIC_OF','Change topic of {name} to:').replace('{name}', this.name);
+    var newTopic = prompt(promptMsg, this.topic.topicText);
     if(newTopic === null)
       return;
 
@@ -1089,8 +1120,8 @@ window.qwebircConnectStatus = connectStatus;
       
       var e2 = new Element("a");
       e.appendChild(e2);
-
-      e2.set("text", "- " + x.text);
+  var label = (typeof x.text === 'function') ? x.text() : x.text;
+  e2.set("text", "- " + label);
 
       e2.addEvent("focus", function() { this.blur() }.bind(e2));
       e2.addEvent("click", function(ev) { new Event(ev.stop()); this.menuClick(x.fn); }.bind(this));
@@ -1204,11 +1235,14 @@ window.qwebircConnectStatus = connectStatus;
     qwebirc.ui.Colourise(this.name + suffix, t, null, null, this);
 
     if(this.type == qwebirc.ui.WINDOW_CHANNEL) {
+      var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+      var tt = function(key, fallback){ return (i18n && i18n[key]) ? i18n[key] : (fallback || key); };
       t.topicText = topic;
       if (topic) {
         this.parent(topic, t);
       } else {
-        t.appendChild(document.createTextNode("(no topic set)"));
+        t.appendChild(document.createTextNode(tt('NO_TOPIC','(no topic set)')));
       }
     }
 

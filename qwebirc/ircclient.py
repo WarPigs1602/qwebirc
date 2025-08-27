@@ -2,6 +2,7 @@ import sys
 print("[qwebirc][DEBUG] ircclient.py wurde geladen", file=sys.stderr)
 CAP_END = "CAP END"
 import twisted, sys, codecs, traceback
+import os
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol, abstract
 from twisted.web import resource, server
@@ -37,7 +38,19 @@ def irc_decode(x):
       return x.decode("iso-8859-1", "ignore")
   return x
 
+from qwebirc.util.i18n import I18n
+
 class QWebIRCClient(basic.LineReceiver):
+  def handle_LANG(self, params):
+    if not params:
+      self.write(":qwebirc NOTICE * :Usage: /LANG <code>")
+      return
+    lang = params[0].lower()
+    if lang in self.i18n.translations:
+      self.set_language(lang)
+      self.write(f":qwebirc NOTICE * :Language set to {lang}")
+    else:
+      self.write(f":qwebirc NOTICE * :Unknown language code: {lang}")
   delimiter = b"\n"
   def __init__(self, *args, **kwargs):
     self.__nickname = "(unregistered)"
@@ -50,6 +63,19 @@ class QWebIRCClient(basic.LineReceiver):
     self._capabilities = set()  # alle vom Server angebotenen CAPs (LS)
     self._cap_available = set() # explizit für LS
     self._cap_set = set()       # explizit für ACK
+    # i18n
+    locales_dir = os.path.join(os.path.dirname(__file__), "../locales")
+    self.i18n = I18n(locales_dir, default_lang="en")
+    self.language = "en"  # Default, kann pro Session gesetzt werden
+
+  def set_language(self, lang):
+    if lang in self.i18n.translations:
+      self.language = lang
+    else:
+      self.language = self.i18n.default_lang
+
+  def _(self, key):
+    return self.i18n.gettext(key, lang=self.language)
     
   def dataReceived(self, data):
     basic.LineReceiver.dataReceived(self, data.replace(b"\r", b""))
@@ -87,6 +113,10 @@ class QWebIRCClient(basic.LineReceiver):
 
     try:
       prefix, command, params = irc.parsemsg(line)
+      # Sprachumschaltung per /LANG
+      if command.upper() == "LANG":
+        self.handle_LANG(params)
+        return
       self.handleCommand(command, prefix, params, tags=tags)
     except irc.IRCBadMessage:
       return

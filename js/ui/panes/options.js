@@ -14,6 +14,10 @@ qwebirc.ui.supportsFocus = function() {
  * settableByURL...
  */
 qwebirc.config.DEFAULT_OPTIONS = [
+  [20, "LANGUAGE", "Language", 0, null, [
+    ["Deutsch", "de"],
+    ["English", "en"]
+  ]],
   [1, "BEEP_ON_MENTION", "Beep on activity", true],
   [16, "NOTIFICATIONS", "Emit HTML5 notifications on activity", false, {
     enabled: function() {
@@ -196,30 +200,39 @@ qwebirc.config.RadioInput = new Class({
   Extends: qwebirc.config.Input,
   render: function() {
     var value = this.option.options;
-    
-    this.elements = [];
-     
+    var select = document.createElement('select');
+    select.disabled = !this.enabled;
+    this.mainElement = select;
     for(var i=0;i<value.length;i++) {
-      var d = this.FE("div", this.parentObject);
-      var e = this.createInput("radio", d, "options_radio" + this.position, i == this.option.position);
-      this.elements.push(e);
-      e.disabled = !this.enabled;
-   
-      if(i == 0)
-        this.mainElement = e;
-      
-      d.appendChild(document.createTextNode(value[i][0]));
-    };
+      var opt = document.createElement('option');
+      opt.value = value[i][1];
+      opt.textContent = value[i][0];
+      if(this.option.value == value[i][1]) {
+        opt.selected = true;
+        this.option.position = i;
+      }
+      select.appendChild(opt);
+    }
+    this.parentElement.appendChild(select);
+    select.addEventListener('change', function() {
+      this.value = select.value;
+      this.option.value = select.value;
+      for(var i=0;i<value.length;i++) {
+        if(value[i][1] == select.value) {
+          this.option.position = i;
+          break;
+        }
+      }
+      if(this.option.prefix === "LANGUAGE" && window.qwebirc && window.qwebirc.config) {
+        window.qwebirc.config.LANGUAGE = select.value;
+        if(typeof afterOptionsInit === "function") afterOptionsInit();
+      }
+      this.applyChanges();
+    }.bind(this));
     this.parent();
   },
   get: function() {
-    for(var i=0;i<this.elements.length;i++) {
-      var x = this.elements[i];
-      if(x.checked) {
-        this.option.position = i;
-        return this.option.options[i][1];
-      }
-    }
+    return this.mainElement.value;
   }
 });
 
@@ -330,10 +343,13 @@ qwebirc.ui.Options = new Class({
       var default_ = x[3];
       var moreextras = x[4];
       var extras = x[5];
-      
+
       var stype = typeof(default_);
-      if(stype == "number") {
-        return new qwebirc.config.RadioOption(optionId, prefix, label, default_, moreextras, extra);
+      if(prefix === "LANGUAGE") {
+        // extras ist hier die Optionsliste, nicht das extras-Objekt
+        return new qwebirc.config.RadioOption(optionId, prefix, label, default_, moreextras, extras);
+      } else if(stype == "number") {
+        return new qwebirc.config.RadioOption(optionId, prefix, label, default_, moreextras, extras);
       } else {
         var type;
         if(stype == "boolean") {
@@ -352,6 +368,12 @@ qwebirc.ui.Options = new Class({
   setValue: function(option, value) {
     this.optionHash[option.prefix].value = value;
     this[option.prefix] = value;
+    if(option.prefix === "LANGUAGE") {
+      if(window.qwebirc && window.qwebirc.config) {
+        window.qwebirc.config.LANGUAGE = value;
+        if(typeof afterOptionsInit === "function") afterOptionsInit();
+      }
+    }
   },
   setValueByPrefix: function(prefix, value) {
     this.optionHash[prefix].value = value;
@@ -374,7 +396,13 @@ qwebirc.ui.OptionsPane = new Class({
   initialize: function(parentElement, optionObject) {
     this.parentElement = parentElement;
     this.optionObject = optionObject;
-    
+    this.createElements();
+  },
+  rebuild: function() {
+    // Panel komplett neu rendern
+    while (this.parentElement.firstChild) {
+      this.parentElement.removeChild(this.parentElement.firstChild);
+    }
     this.createElements();
   },
   createElements: function() {
@@ -417,16 +445,20 @@ qwebirc.ui.OptionsPane = new Class({
     
     var r = FE("tr", tb);
     var cella = FE("td", r);
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+    var saveLabel = (i18n && i18n.options && i18n.options.SAVE) ? i18n.options.SAVE : "Save";
+    var cancelLabel = (i18n && i18n.options && i18n.options.CANCEL) ? i18n.options.CANCEL : "Cancel";
+
     var save = qwebirc.util.createInput("submit", cella);
-    save.value = "Save";
-    
+    save.value = saveLabel;
     save.addEvent("click", function() {
       this.save();
       this.fireEvent("close");
     }.bind(this));
-    
+
     var cancel = qwebirc.util.createInput("submit", cella);
-    cancel.value = "Cancel";
+    cancel.value = cancelLabel;
     cancel.addEvent("click", function() {
       this.cancel();
       this.fireEvent("close");
