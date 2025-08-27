@@ -155,5 +155,14 @@
   ,"MODEMSG_GENERIC": "{setter} set mode {modestring} on {channel}"
   ,"CAP_ACTIVE": "Active capabilities:"
   ,"CAP_AVAILABLE": "Available capabilities:"
+  ,"SASL_LOGGED_IN": "You are now logged in as {account}"
+  ,"SASL_SUCCESS": "SASL authentication successful"
+  ,"SASL_LOGGED_OUT": "You are now logged out (was {account})"
+  ,"SASL_NICK_LOCKED": "Nickname is locked"
+  ,"SASL_FAIL": "SASL authentication failed"
+  ,"SASL_TOO_LONG": "SASL message too long"
+  ,"SASL_ABORTED": "SASL authentication aborted"
+  ,"SASL_ALREADY": "SASL authentication already complete"
+  ,"SASL_MECHS": "Available SASL mechanisms: {mechanisms}"
   }
 }

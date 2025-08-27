@@ -79,13 +79,10 @@ qwebirc.ui.QUI = new Class({
 
     this.setSideTabs(this.uiOptions.SIDE_TABS);
 
-    // Verbindungsstatus in Typing-Bar automatisch ausblenden, wenn signedOn kommt
+  // Hide connect status in typing bar when signedOn fires
     this.addEvent && this.addEvent('signedOn', function() {
       if(window.qwebircConnectStatus) {
-  // Debug-Ausgabe entfernt
         window.qwebircConnectStatus.hide();
-      } else {
-  // Debug-Ausgabe entfernt
       }
     });
 
@@ -1016,7 +1013,7 @@ if (window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.QUI) {
 }
   },
   hide: function() {
-  // Debug-Ausgabe entfernt
+  // hide typing status
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;

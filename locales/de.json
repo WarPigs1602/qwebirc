@@ -162,5 +162,14 @@
   ,"MODEMSG_GENERIC": "{setter} setzte Mode {modestring} auf {channel}"
   ,"CAP_ACTIVE": "Aktive Capabilities:"
   ,"CAP_AVAILABLE": "Verfügbare Capabilities:"
+  ,"SASL_LOGGED_IN": "Du bist jetzt eingeloggt als {account}"
+  ,"SASL_SUCCESS": "SASL-Authentifizierung erfolgreich"
+  ,"SASL_LOGGED_OUT": "Du bist jetzt ausgeloggt (war {account})"
+  ,"SASL_NICK_LOCKED": "Nickname ist gesperrt"
+  ,"SASL_FAIL": "SASL-Authentifizierung fehlgeschlagen"
+  ,"SASL_TOO_LONG": "SASL-Nachricht zu lang"
+  ,"SASL_ABORTED": "SASL-Authentifizierung abgebrochen"
+  ,"SASL_ALREADY": "SASL-Authentifizierung bereits abgeschlossen"
+  ,"SASL_MECHS": "Verfügbare SASL-Mechanismen: {mechanisms}"
   }
 }

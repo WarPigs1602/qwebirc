@@ -147,6 +147,77 @@ qwebirc.irc.BaseIRCClient = new Class({
     this.__signedOn = true;
     this.signedOn(this.nickname);
   },
+  irc_RPL_LOGGEDIN: function(prefix, params) {
+    // :server 900 <nick> <nick/account> <account> :You are now logged in as <account>
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var account = params[2];
+    var msgTemplate = (i18n && i18n.SASL_LOGGED_IN) || 'You are now logged in as {account}';
+    var msg = msgTemplate.replace('{account}', account);
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
+  irc_RPL_SASLSUCCESS: function(prefix, params) {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var msg = (i18n && i18n.SASL_SUCCESS) || 'SASL authentication successful';
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
+  irc_RPL_LOGGEDOUT: function(prefix, params) {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var account = params[2];
+    var msgTemplate = (i18n && i18n.SASL_LOGGED_OUT) || 'You are now logged out (was {account})';
+    var msg = msgTemplate.replace('{account}', account || '');
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
+  irc_ERR_NICKLOCKED: function(prefix, params) {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var msg = (i18n && i18n.SASL_NICK_LOCKED) || 'Nick is locked';
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
+  irc_ERR_SASLFAIL: function(prefix, params) {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var msg = (i18n && i18n.SASL_FAIL) || 'SASL authentication failed';
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
+  irc_ERR_SASLTOOLONG: function(prefix, params) {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var msg = (i18n && i18n.SASL_TOO_LONG) || 'SASL message too long';
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
+  irc_ERR_SASLABORTED: function(prefix, params) {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var msg = (i18n && i18n.SASL_ABORTED) || 'SASL authentication aborted';
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
+  irc_ERR_SASLALREADY: function(prefix, params) {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var msg = (i18n && i18n.SASL_ALREADY) || 'SASL authentication already complete';
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
+  irc_RPL_SASLMECHS: function(prefix, params) {
+    // last param contains list of mechanisms
+    var mechs = params.indexFromEnd(-1);
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var template = (i18n && i18n.SASL_MECHS) || 'Available SASL mechanisms: {mechanisms}';
+    var msg = template.replace('{mechanisms}', mechs || '');
+  this.newServerLine("GENERICMESSAGE", {m: msg});
+    return true;
+  },
   irc_ERR_NICKNAMEINUSE: function(prefix, params) {
     this.genericError(params[1], params.indexFromEnd(-1).replace("in use.", "in use"));
     
