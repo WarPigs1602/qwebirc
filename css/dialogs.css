@@ -31,38 +31,52 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   overflow-y: visible !important;
   scrollbar-width: none;
 }
-/* Passwort-Auge-Icon im Eingabefeld platzieren */
-.qwebirc-loginbox td[style*="position:relative"] label {
+/* Passwort-Auge-Icon im Eingabefeld platzieren (größere Klickfläche, sauber zentriert) */
+.qwebirc-loginbox td[style*="position:relative"] label { /* Container für das Icon + unsichtbares Checkbox-Toggle */
   position: absolute;
-  right: 0.7em;
   top: 50%;
+  right: 8px; /* etwas Seitenabstand */
   transform: translateY(-50%);
-  height: 1.5em;
+  width: 1.6em; /* definierte Fläche */
+  height: 1.6em;
   display: flex;
   align-items: center;
-  z-index: 3;
+  justify-content: center;
   padding: 0;
-  pointer-events: auto;
-}
-.qwebirc-loginbox td[style*="position:relative"] label span[title="Show password"] {
-  font-size: 1.2em;
-  color: #888;
-  transition: color 0.2s;
-  pointer-events: none;
-}
-.qwebirc-loginbox td[style*="position:relative"] label:hover span[title="Show password"] {
-  color: #7a6ff0;
-}
-.qwebirc-loginbox td[style*="position:relative"] input[type="checkbox"] {
-  opacity: 0;
-  width: 1.5em;
-  height: 1.5em;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 2;
-  cursor: pointer;
   margin: 0;
+  z-index: 3;
+  cursor: pointer;
+  border-radius: 4px;
+  background: transparent;
+  transition: background 0.15s;
+}
+.qwebirc-loginbox td[style*="position:relative"] label:hover { background: #2a2d3a; }
+.qwebirc-loginbox td[style*="position:relative"] label:active { background: #323646; }
+.qwebirc-loginbox td[style*="position:relative"] label span[title="Show password"] {
+  font-size: 1.05em; /* an Input-Höhe angepasst */
+  line-height: 1;
+  color: #8a8f99;
+  transition: color 0.2s, transform 0.2s;
+  pointer-events: none; /* Klick geht an die Checkbox */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.qwebirc-loginbox td[style*="position:relative"] label:hover span[title="Show password"] { color: #b3d4fc; }
+.qwebirc-loginbox td[style*="position:relative"] label:active span[title="Show password"] { transform: scale(0.9); }
+/* Unsichtbare Checkbox über die Fläche legen */
+.qwebirc-loginbox td[style*="position:relative"] input[type="checkbox"] {
+  position: absolute;
+  inset: 0; /* füllt die gesamte Label-Fläche */
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+/* Fokus über Tastatur sichtbar machen (wenn Checkbox fokussiert) */
+.qwebirc-loginbox td[style*="position:relative"] input[type="checkbox"]:focus + span[title="Show password"] {
+  outline: 2px solid #7a6ff0;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 /* About-Dialog: Links besser sichtbar */
 .mainbody a {
@@ -159,10 +173,11 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   border-radius: 6px;
   background: #232634;
   color: #e0e0e0;
-  padding: 6px 2.2em 6px 10px;
+  padding: 6px 2.6em 6px 10px; /* etwas mehr Platz rechts für Icon */
   font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px #0002;
+  line-height: 1.2;
 }
 .qwebirc-loginbox input#sasl_username:focus,
 .qwebirc-loginbox input#sasl_password:focus,
@@ -304,7 +319,6 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   box-shadow: 0 2px 12px #0003;
   border: 1.5px solid #3a3f4b;
   padding: 24px 18px;
-}
 }
 
 /**************** CONFIRM LOGIN BOX *******************/
@@ -461,8 +475,7 @@ div.qwebirc-embeddedwizard {
   box-shadow: 0 0 0 2px #7a6ff033;
 }
 
-.qwebirc-embeddedwizard div.wizardcontrols {
-}
+
 
 .qwebirc-embeddedwizard .wizardcontrols input,
 .qwebirc-embeddedwizard input[type="submit"],
