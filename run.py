@@ -3,7 +3,64 @@
 import bin.configcheck
 import bin.compile
 import sys
+import re
+import warnings
+
+# Install a lightweight wrapper so Twisted's timestamped log lines get a [debug] prefix
+class _PrefixedStream:
+  _ts = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+  def __init__(self, original, prefix):
+    self._orig = original
+    self._buf = ""
+    self._prefix = prefix
+  def write(self, data):
+    if not isinstance(data, str):
+      data = str(data)
+    self._buf += data
+    lines = self._buf.splitlines(keepends=True)
+    self._buf = ""
+    for line in lines:
+      if not line.endswith("\n"):
+        # keep partial
+        self._buf = line
+        continue
+      out = line
+      # Only prefix lines that look like Twisted log (start with ISO8601 timestamp) and not already prefixed
+      if self._ts.match(line) and not line.startswith(self._prefix):
+        out = f"{self._prefix} {line}"
+      self._orig.write(out)
+  def flush(self):
+    try:
+      self._orig.flush()
+    except Exception:
+      pass
+
+if not getattr(sys, "_qwebirc_run_prefix_installed", False):
+  sys.stdout = _PrefixedStream(sys.stdout, "[debug]")
+  sys.stderr = _PrefixedStream(sys.stderr, "[debug]")
+  sys._qwebirc_run_prefix_installed = True
+
+# Custom warning formatter: prefix service_identity related warning with [warn]
+_orig_showwarning = warnings.showwarning
+def _showwarning(message, category, filename, lineno, file=None, line=None):
+  text = warnings.formatwarning(message, category, filename, lineno, line)
+  for ln in text.rstrip().splitlines():
+    # Verhindere doppeltes Präfix
+    if not ln.startswith('[warn]'):
+      sys.stderr.write(f"[warn] {ln}\n")
+    else:
+      sys.stderr.write(ln + "\n")
+warnings.showwarning = _showwarning
+
+def log_run(msg):
+  try:
+    print(f"[run] {msg}")
+  except Exception:
+    pass
+
+log_run("Initializing qwebirc ...")
 bin.compile.vcheck()
+log_run("Dependency/build check passed.")
 
 DEFAULT_PORT = 9090
 
@@ -64,6 +121,7 @@ if "ARGS" in dir(config):
   sargs = shlex.split(config.ARGS) + sargs
 
 (options, args) = parser.parse_args(args=sargs)
+log_run("Parsed command line arguments.")
 
 args1, args2 = [], []
 
@@ -74,6 +132,9 @@ if not options.daemonise:
 if options.reactor != DEFAULT_REACTOR:
   rn = options.reactor + "reactor"
   getattr(__import__("twisted.internet", fromlist=[rn]), rn).install()
+  log_run(f"Installed custom reactor: {options.reactor}")
+else:
+  log_run(f"Using default reactor: {DEFAULT_REACTOR}")
 if options.logfile:
   args1+=["--logfile", options.logfile]
 if options.pidfile:
@@ -98,13 +159,18 @@ if options.sslcertificate and options.sslkey:
   args2+=["--certificate", options.sslcertificate, "--privkey", options.sslkey, "--https", options.port]
   if options.sslchain:
     args2+=["--certificate-chain", options.sslchain]
+  log_run("SSL enabled (HTTPS mode)")
 else:
   args2+=["--port", options.port]
+  log_run("Running without SSL (plain HTTP)")
 
 args2+=["--ip", options.ip]
 
 if os.name == "posix" and os.getuid() == 0:
   print("refusing to run as root", file=sys.stderr)
   sys.exit(1)
-
-run_twistd(args1, args2)
+log_run(f"Starting server on {options.ip}:{options.port} (daemon={'yes' if options.daemonise else 'no'})")
+try:
+  run_twistd(args1, args2)
+finally:
+  log_run("Server process terminated.")

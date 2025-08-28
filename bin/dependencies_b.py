@@ -24,7 +24,7 @@ def check_dependencies():
   i+=check_git()
   
   print("0 errors, %d warnings." % i)
-  
+
   if i == 0:
     print("looks like you've got everything you need to run qwebirc!")
   else:

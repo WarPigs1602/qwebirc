@@ -1574,6 +1574,6 @@ qwebirc.ui.QUI.Window.prototype._ensureTabClose = function(type, originalName) {
     }
   } catch(e) {}
   if(!created) {
-  try { console.debug('[qwebirc][qui] Close button fallback without SVG for tab', this.name); } catch(e) {}
+  try { console.debug('[debug][qwebirc][qui] Close button fallback without SVG for tab', this.name); } catch(e) {}
   }
 };
