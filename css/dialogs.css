@@ -1,4 +1,4 @@
-/* Globale Scrollbar-Anpassung für alle Dialoge außer Connect- und Chat-Dialog */
+/* Global scrollbar styling for all dialogs except Connect and Chat */
 body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) ::-webkit-scrollbar {
   width: 12px;
   background: #232634;
@@ -31,13 +31,13 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   overflow-y: visible !important;
   scrollbar-width: none;
 }
-/* Passwort-Auge-Icon im Eingabefeld platzieren (größere Klickfläche, sauber zentriert) */
-.qwebirc-loginbox td[style*="position:relative"] label { /* Container für das Icon + unsichtbares Checkbox-Toggle */
+/* Position password eye icon inside input (larger click target, cleanly centered) */
+.qwebirc-loginbox td[style*="position:relative"] label { /* Container for the icon + invisible checkbox toggle */
   position: absolute;
   top: 50%;
   right: 8px; /* etwas Seitenabstand */
   transform: translateY(-50%);
-  width: 1.6em; /* definierte Fläche */
+  width: 1.6em; /* defined area */
   height: 1.6em;
   display: flex;
   align-items: center;
@@ -53,7 +53,7 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 .qwebirc-loginbox td[style*="position:relative"] label:hover { background: #2a2d3a; }
 .qwebirc-loginbox td[style*="position:relative"] label:active { background: #323646; }
 .qwebirc-loginbox td[style*="position:relative"] label span[title="Show password"] {
-  font-size: 1.05em; /* an Input-Höhe angepasst */
+  font-size: 1.05em; /* matched to input height */
   line-height: 1;
   color: #8a8f99;
   transition: color 0.2s, transform 0.2s;
@@ -64,15 +64,15 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 }
 .qwebirc-loginbox td[style*="position:relative"] label:hover span[title="Show password"] { color: #b3d4fc; }
 .qwebirc-loginbox td[style*="position:relative"] label:active span[title="Show password"] { transform: scale(0.9); }
-/* Unsichtbare Checkbox über die Fläche legen */
+/* Place invisible checkbox over the area */
 .qwebirc-loginbox td[style*="position:relative"] input[type="checkbox"] {
   position: absolute;
-  inset: 0; /* füllt die gesamte Label-Fläche */
+  inset: 0; /* fills entire label area */
   opacity: 0;
   margin: 0;
   cursor: pointer;
 }
-/* Fokus über Tastatur sichtbar machen (wenn Checkbox fokussiert) */
+/* Show focus via keyboard (when checkbox focused) */
 .qwebirc-loginbox td[style*="position:relative"] input[type="checkbox"]:focus + span[title="Show password"] {
   outline: 2px solid #7a6ff0;
   outline-offset: 2px;
@@ -173,7 +173,7 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   border-radius: 6px;
   background: #232634;
   color: #e0e0e0;
-  padding: 6px 2.6em 6px 10px; /* etwas mehr Platz rechts für Icon */
+  padding: 6px 2.6em 6px 10px; /* extra right space for icon */
   font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px #0002;
@@ -502,7 +502,7 @@ div.qwebirc-embeddedwizard {
   background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
   box-shadow: 0 4px 16px #0003;
 }
-/* Kompaktere Zeilenabstände für den Wizard */
+/* More compact line spacing for the wizard */
 .qwebirc-embeddedwizard > div {
   margin-bottom: 4px;
 }

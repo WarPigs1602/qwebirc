@@ -53,14 +53,14 @@ qwebirc.irc.IRCConnection = new Class({
     this.transportStatus = "unknown";
   },
   __error: function(text) {
-    // Lokalisierung häufiger Fehlerpräfixe und spezieller Invalid-Session-Meldung
+  // Localize common error prefixes and specific invalid-session message
     try {
       var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
       var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
       if(i18n) {
         var prefixEn = "An error occurred:";
         if(text.indexOf(prefixEn) === 0 && i18n.ERROR_OCCURRED) {
-          // Ersetze Präfix
+          // Replace prefix
             text = i18n.ERROR_OCCURRED + text.substring(prefixEn.length);
         }
         var invalidSessionEn = "Invalid session, this most likely means the server has restarted; close this dialog and then try refreshing the page.";

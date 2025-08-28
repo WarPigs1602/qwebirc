@@ -18,7 +18,7 @@ class I18n:
                     with open(path, "r", encoding="utf-8") as f:
                         self.translations[lang] = json.load(f)
                 except Exception as e:
-                    print(f"Fehler beim Laden von {filename}: {e}")
+                    print(f"Error loading {filename}: {e}")
 
     def gettext(self, key: str, lang: Optional[str] = None) -> str:
         lang = lang or self.default_lang
@@ -27,8 +27,8 @@ class I18n:
         elif self.default_lang in self.translations and key in self.translations[self.default_lang]:
             return self.translations[self.default_lang][key]
         else:
-            return key  # Fallback: Schlüssel selbst zurückgeben
+            return key  # Fallback: return key itself
 
-# Beispiel für die Nutzung:
-# i18n = I18n("/pfad/zu/locales", default_lang="de")
+# Example usage:
+# i18n = I18n("/path/to/locales", default_lang="en")
 # print(i18n.gettext("greeting"))

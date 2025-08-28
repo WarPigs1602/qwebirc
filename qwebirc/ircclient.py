@@ -1,5 +1,5 @@
 import sys
-print("[qwebirc][DEBUG] ircclient.py wurde geladen", file=sys.stderr)
+# Debug log removed
 CAP_END = "CAP END"
 import twisted, sys, codecs, traceback
 import os
@@ -41,6 +41,8 @@ def irc_decode(x):
 from qwebirc.util.i18n import I18n
 
 class QWebIRCClient(basic.LineReceiver):
+  delimiter = b"\n"
+
   def handle_LANG(self, params):
     if not params:
       self.write(":qwebirc NOTICE * :Usage: /LANG <code>")
@@ -51,7 +53,7 @@ class QWebIRCClient(basic.LineReceiver):
       self.write(f":qwebirc NOTICE * :Language set to {lang}")
     else:
       self.write(f":qwebirc NOTICE * :Unknown language code: {lang}")
-  delimiter = b"\n"
+
   def __init__(self, *args, **kwargs):
     self.__nickname = "(unregistered)"
     self._cap_active = False
@@ -60,13 +62,13 @@ class QWebIRCClient(basic.LineReceiver):
     self._sasl_authenticating = False
     self._sasl_username = None
     self._sasl_password = None
-    self._capabilities = set()  # alle vom Server angebotenen CAPs (LS)
-    self._cap_available = set() # explizit für LS
-    self._cap_set = set()       # explizit für ACK
+    self._capabilities = set()  # all capabilities offered by server (LS)
+    self._cap_available = set() # explicitly for LS
+    self._cap_set = set()       # explicitly for ACK
     # i18n
     locales_dir = os.path.join(os.path.dirname(__file__), "../locales")
     self.i18n = I18n(locales_dir, default_lang="en")
-    self.language = "en"  # Default, kann pro Session gesetzt werden
+    self.language = "en"  # default; can be set per session
 
   def set_language(self, lang):
     if lang in self.i18n.translations:
@@ -76,19 +78,17 @@ class QWebIRCClient(basic.LineReceiver):
 
   def _(self, key):
     return self.i18n.gettext(key, lang=self.language)
-    
+
   def dataReceived(self, data):
     basic.LineReceiver.dataReceived(self, data.replace(b"\r", b""))
 
-
   def lineReceived(self, line):
-    import datetime
     if isinstance(line, bytes):
       line = line.decode("utf-8", "replace")
     line = irc_decode(irc.lowDequote(line))
 
     tags = None
-    # Parse IRCv3 message-tags if present (inkl. draft/message-tags)
+    # Parse IRCv3 message-tags if present (including draft/message-tags)
     if line.startswith("@"):
       try:
         tags_str, rest = line[1:].split(" ", 1)
@@ -100,10 +100,10 @@ class QWebIRCClient(basic.LineReceiver):
             k, v = tag.split("=", 1)
           else:
             k, v = tag, None
-          # draft/message-tags Kompatibilität: entferne "draft/"-Präfix
+          # draft/message-tags compatibility: remove "draft/" prefix
           if k.startswith("draft/"):
             k = k[6:]
-          # Normalisiere alle typing-Tags auf 'typing'
+          # Normalise all typing tags to 'typing'
           if k.lstrip("+").endswith("typing"):
             k = "typing"
           tags[k] = v
@@ -113,7 +113,7 @@ class QWebIRCClient(basic.LineReceiver):
 
     try:
       prefix, command, params = irc.parsemsg(line)
-      # Sprachumschaltung per /LANG
+      # Language switch via /LANG
       if command.upper() == "LANG":
         self.handle_LANG(params)
         return
@@ -127,7 +127,7 @@ class QWebIRCClient(basic.LineReceiver):
       if subcmd == "LS":
         caps = set(params[-1].split())
         self._capabilities = caps
-        self._cap_available = caps.copy()  # speichere alle verfügbaren CAPs
+        self._cap_available = caps.copy()  # store all available CAPs
         self("capabilities", list(caps))
         # Request message-tags if available
         cap_req = []
@@ -141,16 +141,16 @@ class QWebIRCClient(basic.LineReceiver):
           self.write(CAP_END)
           self._cap_end_sent = True
       elif subcmd == "ACK":
-        # ACK kann mehrere CAPs enthalten, z.B. "ACK :multi-prefix sasl"
+        # ACK can contain multiple CAPs, e.g. "ACK :multi-prefix sasl"
         ack_caps = set(params[-1].split())
         self._cap_set.update(ack_caps)
         if "sasl" in ack_caps:
           self._cap_sasl = True
           self._sasl_authenticating = True
           self.write("AUTHENTICATE PLAIN")
-        # Event für gesetzte CAPs
+        # Event for set CAPs
         self("cap_set", list(self._cap_set))
-        # Sende ein 'capabilities'-Event mit ['ACK', ...] für das Frontend
+        # Send a 'capabilities' event with ['ACK', ...] to the frontend
         self("capabilities", ["ACK"] + list(ack_caps))
         # If no further negotiation (e.g. no SASL in progress), end CAP
         if not ("sasl" in ack_caps and self._sasl_authenticating):
@@ -188,33 +188,32 @@ class QWebIRCClient(basic.LineReceiver):
       nick = prefix.split("!", 1)[0]
       if nick == self.__nickname:
         self.__nickname = params[0]
-        
+
   def handleCommand(self, command, prefix, params, tags=None):
-    # Für TAGMSG: Nur Event erzeugen, wenn relevante Tags (z.B. typing) vorhanden sind
-    # Unterstütze auch draft/message-tags (bereits beim Parsen entfernt)
+    # For TAGMSG: only emit event if relevant tags (e.g. typing) are present
+    # Also support draft/message-tags (already stripped when parsing)
     if command == "TAGMSG":
       if not (tags and "typing" in tags and tags["typing"]):
         return
-    # CAP LS und CAP ACK nicht an das Eventsystem weitergeben (ausblenden)
+    # Hide CAP LS and CAP ACK from event system
     if command == "CAP":
       subcmd = params[1].upper() if len(params) > 1 else ""
       if subcmd in ("LS", "ACK"):
         return
-    # 005/PREFIX-Handling: Sende PREFIX-Info als Event an das Frontend
+    # 005/PREFIX handling: send PREFIX info as event to frontend
     if command == "005":
-      # Suche PREFIX=... in params
       for p in params:
         if isinstance(p, str) and p.startswith("PREFIX="):
           self("prefixes", p[7:])
           break
     self("c", command, prefix, params, tags)
-    
+
   def __call__(self, *args):
     self.factory.publisher.event(args)
-    
+
   def write(self, data):
     self.transport.write((irc.lowQuote(data) + "\r\n").encode("utf-8"))
-      
+
   def connectionMade(self):
     basic.LineReceiver.connectionMade(self)
     self.lastError = None
@@ -225,12 +224,11 @@ class QWebIRCClient(basic.LineReceiver):
     self._sasl_username = f.get("sasl_username")
     self._sasl_password = f.get("sasl_password")
 
-
-    # CAP-Handshake für alle User
+    # CAP handshake for all users
     self._cap_active = True
     self.write("CAP LS")
 
-    # Normaler Verbindungsaufbau wie bisher
+    # Regular connection setup as before
     if not hasattr(config, "WEBIRC_MODE"):
       self.write("USER %s bleh bleh %s :%s" % (ident, ip, realname))
     elif config.WEBIRC_MODE == "hmac":
@@ -258,7 +256,7 @@ class QWebIRCClient(basic.LineReceiver):
 
   def __str__(self):
     return "<QWebIRCClient: %s!%s@%s>" % (self.__nickname, self.factory.ircinit["ident"], self.factory.ircinit["ip"])
-    
+
   def connectionLost(self, reason):
     if self.lastError:
       self.disconnect("Connection to IRC server lost: %s" % self.lastError)
@@ -269,7 +267,7 @@ class QWebIRCClient(basic.LineReceiver):
 
   def error(self, message):
     self.lastError = message
-    # Wenn die Nachricht 'Session disconnect' ist, sende einen neutralen QUIT-Text
+    # If message is 'Session disconnect', send a neutral QUIT text
     if message == "Session disconnect":
       self.write("QUIT :Disconnected")
     else:
@@ -279,7 +277,7 @@ class QWebIRCClient(basic.LineReceiver):
   def disconnect(self, reason):
     self("disconnect", reason)
     self.factory.publisher.disconnect()
-    # Erzwinge das Schließen der TCP-Verbindung
+    # Force closing of the TCP connection
     if hasattr(self, "transport"):
       try:
         self.transport.loseConnection()
@@ -306,7 +304,7 @@ class QWebIRCFactory(protocol.ClientFactory):
 
 def create_irc(*args, **kwargs):
   import sys
-  print("[qwebirc][DEBUG] create_irc() wurde aufgerufen", file=sys.stderr)
+  # Debug log removed
   f = QWebIRCFactory(*args, **kwargs)
   tcpkwargs = {}
   if hasattr(config, "OUTGOING_IP"):
@@ -316,21 +314,15 @@ def create_irc(*args, **kwargs):
   if CONNECTION_RESOLVER is None:
     if hasattr(config, "SSLPORT"):
       from .novverify import NoVerifyClientContextFactory
-      print(f"[qwebirc][SSL] Versuche Verbindung zu {config.IRCSERVER}:{config.SSLPORT} (TLS)", file=sys.stderr)
       try:
         reactor.connectSSL(config.IRCSERVER, config.SSLPORT, f, NoVerifyClientContextFactory(), **tcpkwargs)
-        print(f"[qwebirc][SSL] Verbindungsversuch zu {config.IRCSERVER}:{config.SSLPORT} (TLS) initiiert", file=sys.stderr)
-      except Exception as e:
-        print("[qwebirc][SSL] Fehler beim Aufbau der TLS-Verbindung:", e, file=sys.stderr)
+      except Exception:
         import traceback
         traceback.print_exc()
     else:
-      print(f"[qwebirc][TCP] Versuche Verbindung zu {config.IRCSERVER}:{config.IRCPORT} (TCP)", file=sys.stderr)
       try:
         reactor.connectTCP(config.IRCSERVER, config.IRCPORT, f, **tcpkwargs)
-        print(f"[qwebirc][TCP] Verbindungsversuch zu {config.IRCSERVER}:{config.IRCPORT} (TCP) initiiert", file=sys.stderr)
-      except Exception as e:
-        print("[qwebirc][TCP] Fehler beim Aufbau der TCP-Verbindung:", e, file=sys.stderr)
+      except Exception:
         import traceback
         traceback.print_exc()
     return f

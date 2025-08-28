@@ -286,7 +286,7 @@ qwebirc.ui.BaseUI = new Class({
       initialNickname: initialNickname, initialChannels: initialChannels, autoConnect: autoConnect, callback: wrappedCallback, autoNick: autoNick,
       uiOptions: this.options
     }, qwebirc.ui.WINDOW_CONNECT);
-  // Falls Übersetzung erst nach Erstellung geladen wird oder jetzt schon abweicht: Fenster-Titel aktualisieren
+  // If translation loads after creation or already differs: update window title
   try {
     var currentLang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[currentLang] && window.qwebirc.i18n[currentLang].options;
@@ -343,17 +343,17 @@ qwebirc.ui.StandardUI = new Class({
     if($defined(this.options.hue)) this.__styleValues.hue = this.options.hue;
     this.tabCompleter = new qwebirc.ui.TabCompleterFactory(this);
   this.uiOptions = new qwebirc.ui.DefaultOptionsClass(this, options.uiOptionsArg);
-  // Global verfügbar machen für Persistenz (LANGUAGE Cookie)
+  // Make globally available for persistence (LANGUAGE cookie)
   try { if(window.qwebirc && window.qwebirc.ui) window.qwebirc.ui.uiOptions = this.uiOptions; } catch(e) {}
   /* debug log entfernt */
-  // Sprache aus gespeicherten Optionen übernehmen, falls vorhanden
+  // Adopt language from stored options if present
   if (this.uiOptions && this.uiOptions.optionHash && this.uiOptions.optionHash["LANGUAGE"] && this.uiOptions.optionHash["LANGUAGE"].value) {
     window.qwebirc = window.qwebirc || {};
     window.qwebirc.config = window.qwebirc.config || {};
     window.qwebirc.config.LANGUAGE = this.uiOptions.optionHash["LANGUAGE"].value;
   }
-  // Früh persistieren falls Cookie noch nicht gesetzt
-  // WICHTIG: Keine frühe Persistierung hier – sonst wird Cookie gesetzt bevor Browser-Sprache erkannt werden kann
+  // Early persist if cookie not yet set
+  // IMPORTANT: no early persistence here otherwise cookie set before browser language can be detected
   if (typeof setInitialLanguageOnOptions === "function") setInitialLanguageOnOptions(this.uiOptions);
   if (typeof afterOptionsInit === "function") afterOptionsInit();
     this.customWindows = new QHash();
@@ -501,20 +501,20 @@ qwebirc.ui.StandardUI = new Class({
     }.bind(this));
     
     d.setSubWindow(ew);
-    // Falls Fenster direkt übersetzbar ist (Options/Embed/About/Connect), Titel aktualisieren
+  // If window directly translatable (Options/Embed/About/Connect) update title
     if(d._applyTranslatedTitle) {
       try { d._applyTranslatedTitle(); } catch(e) {}
     }
-    // Sicherstellen, dass der SVG-Tab-Close-Button für Custom-Panes aufgebaut wurde
+  // Ensure SVG tab close button for custom panes got built
     try {
       if(d._ensureTabClose) {
         d._ensureTabClose(d.type, d._baseName || d.name);
-        // Falls weiterhin leer: erzwinge direkten SVG-Markup-Einbau
+  // If still empty: force direct SVG markup insertion
         if(d.tabclose && !d.tabclose.getElement('svg')) {
           d.tabclose.set('html','<svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
         }
       }
-    } catch(e) { try { console.debug('[qwebirc][qui] pane close rebuild error', e); } catch(_) {} }
+  } catch(e) { try { console.debug('[qwebirc][qui] pane close rebuild error', e); } catch(_) {} }
   },
   embeddedWindow: function() {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';

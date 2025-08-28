@@ -44,7 +44,7 @@ qwebirc.ui.EmbedWizard = new Class({
     this.options.optionsCallback = options.optionsCallback;
     this.create(parent);
     this.addSteps();
-    // Registrierung für Sprachwechsel
+  // Register for language change
     var self = this;
     this.__refreshBound = this.refreshTranslations.bind(this);
     if(window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n.registerTranslator) {
@@ -362,7 +362,7 @@ qwebirc.ui.EmbedWizard = new Class({
   }
 });
 
-// Close-Button für Embed Wizard
+// Close button for embed wizard
 qwebirc.ui.EmbedWizard.prototype.__injectCloseButton = function() {
   var host = this.t;
   if(!host || host.getElement('.pane-close')) return;

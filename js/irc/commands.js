@@ -252,10 +252,10 @@ qwebirc.irc.Commands = new Class({
     
     this.send("PART " + channel + " :" + message);
   }],
-  // /LANG <code>  -> Sprache umschalten (UI + Cookie) oder ohne Argument: verfügbare Sprachen anzeigen
+  // /LANG <code>  -> switch language (UI + cookie) or without argument: list available languages
   cmd_LANG: [false, 1, 0, function(args) {
     var w = this.getActiveWindow();
-    // Ermittle unterstützte Sprachen aus LANGUAGE Option
+  // Determine supported languages from LANGUAGE option
     var supported = [];
     try {
       if(window.qwebirc && window.qwebirc.config && window.qwebirc.config.DefaultOptions) {
@@ -264,7 +264,7 @@ qwebirc.irc.Commands = new Class({
       }
     } catch(e) {}
     if(!supported.length) {
-      // Fallback: bereits geladene Locale Keys
+  // Fallback: already loaded locale keys
       try {
         if(window.qwebirc && window.qwebirc.i18n) {
           supported = Object.keys(window.qwebirc.i18n).filter(function(k){ return k && k !== '__translators'; });
@@ -281,9 +281,9 @@ qwebirc.irc.Commands = new Class({
       w.errorMessage("Unsupported language code: " + desired + (supported.length? (" | Available: " + supported.join(", ")): ""));
       return;
     }
-    // Interne Set-Funktion nutzen (persistiert auch Cookie via persistLanguageRobust)
+  // Use internal setter (also persists cookie via persistLanguageRobust)
     try { setLanguageInternal(desired, supported); } catch(e) { w.errorMessage("Failed to set language."); return; }
-    // Locale laden (falls noch nicht) und Events feuern
+  // Load locale (if not yet loaded) and fire events
     try {
       loadLocale(desired).then(function(){
         try { localizeOptionsLabels(); } catch(_e) {}

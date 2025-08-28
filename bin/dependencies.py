@@ -8,7 +8,7 @@ def check_dependencies():
     sys.stderr.flush()
     sys.exit(1)
     
-  # Python 3 Migration: Versionsprüfung entfernt
+  # Python 3 migration: version check removed
   from . import dependencies_b
   dependencies_b.check_dependencies()
 

@@ -1,4 +1,4 @@
-// Hilfsfunktion: Übersetztes Optionslabel holen
+// Helper: fetch translated option label
 function getOptionLabel(key) {
   var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
@@ -8,7 +8,7 @@ function getOptionLabel(key) {
   return key;
 }
 
-// Patch: Überschreibe Optionslabels nach Laden der Übersetzungen
+// Patch: overwrite option labels after translations loaded
 function localizeOptionsLabels() {
   var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
@@ -24,7 +24,7 @@ function localizeOptionsLabels() {
   }
 }
 
-// Automatisches Laden der Sprachdatei erst nach Initialisierung der Optionen
+// Automatic loading of language file only after options initialization
 window.qwebirc = window.qwebirc || {};
 window.qwebirc.i18n = window.qwebirc.i18n || {};
 if(!window.qwebirc.i18n.__translators) {
@@ -35,24 +35,24 @@ if(!window.qwebirc.i18n.__translators) {
     }
   };
 }
-// Alias für ältere Aufrufe, die window.qwebirc.registerTranslator verwendeten
+// Alias for legacy calls that used window.qwebirc.registerTranslator
 if(!window.qwebirc.registerTranslator && window.qwebirc.i18n && window.qwebirc.i18n.registerTranslator) {
   window.qwebirc.registerTranslator = function(fn){ return window.qwebirc.i18n.registerTranslator(fn); };
 }
 
-// Sprache beim ersten Laden automatisch erkennen und setzen, auch wenn Optionen später initialisiert werden
+// Automatically detect and set language on first load even if options init later
 var _qwebirc_detectedLang = null;
 function detectAndSetInitialLanguage() {
-  // Prüfe, ob Sprache schon gesetzt ist (z.B. aus Cookie)
+  // Check if language already set (e.g. from cookie)
   var lang = null;
-  // Falls Cookie-Optionen schon geladen, dort zuerst nachschauen
+  // If cookie options already loaded, check there first
   try {
     if(window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.uiOptions) {
       var opt = window.qwebirc.ui.uiOptions.optionHash && window.qwebirc.ui.uiOptions.optionHash['LANGUAGE'];
       if(opt && opt.value) lang = opt.value;
     }
   } catch(e) {}
-  // Falls noch nicht gesetzt -> Auto-Detect
+  // If still not set -> auto-detect
   if(!lang || lang === 'undefined') {
     lang = (navigator.language || navigator.userLanguage || 'en').split('-')[0];
   }
@@ -62,13 +62,13 @@ function detectAndSetInitialLanguage() {
       window.qwebirc.config.LANGUAGE = lang;
     }
   }
-  // Falls Optionen schon existieren, direkt setzen
+  // If options already exist, set directly
   if(window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.uiOptions && window.qwebirc.ui.uiOptions.setValueByPrefix) {
     window.qwebirc.ui.uiOptions.setValueByPrefix('LANGUAGE', lang);
   }
 }
 
-// Hook: Wenn Optionen initialisiert werden, Sprache übernehmen
+// Hook: when options initialized, apply language
 function setInitialLanguageOnOptions(optionsObj) {
   if(_qwebirc_detectedLang && optionsObj && optionsObj.setValueByPrefix) {
     optionsObj.setValueByPrefix('LANGUAGE', _qwebirc_detectedLang);
@@ -97,7 +97,7 @@ function setLanguageInternal(lang, supportedList) {
   } catch(e) {}
   var sel = document.getElementById('qwebirc-language-select');
   if(sel) sel.value = lang;
-  // Direkt persistieren
+  // Persist immediately
   persistLanguageRobust(lang);
   return lang;
 }
@@ -111,13 +111,13 @@ function persistLanguage(lang) {
     }
   } catch(e) { /* still ignore */ }
 }
-// Robustere Variante mit Retry & zusätzlichem Debugging
+// More robust variant with retry & extra debug tracing
 function persistLanguageRobust(lang) {
   lang = (lang||'en').toLowerCase();
-  // Wenn Cookie schon identischen Wert hat -> nichts tun
+  // If cookie already has identical value -> no-op
   try {
     var existing = window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.uiOptions && window.qwebirc.ui.uiOptions.__cookie && window.qwebirc.ui.uiOptions.__cookie.get(20);
-    if(existing && String(existing).toLowerCase() === lang) return; // keine unnötigen writes
+  if(existing && String(existing).toLowerCase() === lang) return; // no unnecessary writes
   } catch(_ignore) {}
   var attempts = 0;
   var maxAttempts = 4; // 0 + 3 retries
@@ -127,20 +127,20 @@ function persistLanguageRobust(lang) {
     try {
       var uiOpts = window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.uiOptions;
       if(!uiOpts || !uiOpts.__cookie) {
-        // Versuch: wenn uiOptions existiert aber kein __cookie (noch nicht _setup ausgeführt?), initialisieren
+  // Attempt: if uiOptions exists but no __cookie (not _setup yet?) initialize
         try {
           if(uiOpts && !uiOpts.__cookie && typeof Hash !== 'undefined' && Hash.Cookie) {
             uiOpts.__cookie = new Hash.Cookie('opt1', {duration:3650, autoSave:false});
-    /* cookie on-the-fly erstellt */
+  /* cookie created on-the-fly */
           }
         } catch(_ce) {}
       } else {
         uiOpts.__cookie.set(20, lang);
         var saved = uiOpts.__cookie.save();
-        // Validierung: direkt wieder lesen
+  // Validation: read back immediately
         var readBack = null;
         try { readBack = uiOpts.__cookie.get(20); } catch(_e) {}
-        if(readBack && String(readBack).toLowerCase() === lang) return; // Erfolg -> stoppen
+  if(readBack && String(readBack).toLowerCase() === lang) return; // success -> stop
       }
     } catch(e) {
   /* ignore */
@@ -155,11 +155,11 @@ function afterOptionsInit() {
     var filtered = __filterLocaleEntries(list);
     try { integrateLanguagesIntoOptions(filtered); } catch(e) {}
     var supported = filtered.map(function(e){ return e.code; });
-    // Reihenfolge: Cookie -> Browser -> vorhandene Config -> en -> erste
+  // Order: Cookie -> Browser -> existing config -> en -> first
     var cookieLang = null; 
     try { var oc = window.qwebirc.ui.uiOptions.__cookie; cookieLang = oc && oc.get(20); } catch(e) {}
     var current = null;
-    // 1. Manuelle Auswahl (Session-Flag) hat höchste Priorität
+  // 1. Manual selection (session flag) has highest priority
     if(window.__qwebircManualLanguage && supported.indexOf(window.__qwebircManualLanguage) !== -1) {
       current = window.__qwebircManualLanguage;
   }
@@ -186,7 +186,7 @@ function afterOptionsInit() {
     }
     if(!current) current = supported.indexOf('en')!==-1?'en':(supported[0]||'en');
     current = setLanguageInternal(current, supported);
-  // Manuelles Flag einmalig verbrauchen
+  // Consume manual flag once
   if(window.__qwebircManualLanguage) try { delete window.__qwebircManualLanguage; } catch(e) { window.__qwebircManualLanguage = null; }
     return loadLocale(current).then(function(){ return {lang: current, supported: supported}; });
   }).then(function(ctx){
@@ -199,7 +199,7 @@ function afterOptionsInit() {
     if(window.qwebirc.ui.activeWindow && window.qwebirc.ui.activeWindow.identifier === 'optionspane') {
       if(window.qwebirc.ui.activeWindow.translate) try { window.qwebirc.ui.activeWindow.translate(ctx.lang); } catch(e) {}
     }
-    // Übersetzer feuern
+  // Fire translators
     try { if(window.qwebirc.i18n.__translators) window.qwebirc.i18n.__translators.forEach(function(fn){ try{ fn(ctx.lang); }catch(e){} }); } catch(e) {}
     try { window.dispatchEvent(new CustomEvent('qwebirc:languageChanged', {detail:{lang:ctx.lang}})); } catch(e) {}
   });
@@ -271,15 +271,15 @@ function integrateLanguagesIntoOptions(list) {
   if(!list || !list.length) return;
   list = __filterLocaleEntries(list);
   if(!list.length) return;
-  // Finde LANGUAGE Option in qwebirc.config.DEFAULT_OPTIONS (ursprüngliche Struktur) und in DefaultOptions Instanzen
+  // Find LANGUAGE option in qwebirc.config.DEFAULT_OPTIONS (original structure) and in DefaultOptions instances
   var applyList = function(optArr) {
     if(!optArr) return;
     for(var i=0;i<optArr.length;i++) {
       var o = optArr[i];
       if(o[1] === 'LANGUAGE') {
-        // Ersetze Options-Liste
+  // Replace options list
         o[5] = list.map(function(entry){ return [entry.name, entry.code]; });
-        // Standardposition anpassen falls aktuelle Sprache nicht vorhanden
+  // Adjust default position if current language not present
         var current = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
         var idx = o[5].findIndex(function(x){ return x[1] === current; });
         if(idx < 0) idx = 0;
@@ -294,7 +294,7 @@ function integrateLanguagesIntoOptions(list) {
     window.qwebirc.config.DefaultOptions.forEach(function(inst){
       if(inst && inst.prefix === 'LANGUAGE') {
         inst.options = list.map(function(entry){ return [entry.name, entry.code]; });
-        // Value erhalten wenn möglich
+  // Keep value if possible
         var cur = inst.value || (window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
         var found = inst.options.findIndex(function(x){ return x[1] === cur; });
         if(found < 0) found = 0;
@@ -307,7 +307,7 @@ function integrateLanguagesIntoOptions(list) {
   var sel = document.getElementById('qwebirc-language-select');
   if(sel) {
     var currentLang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-    // Falls currentLang nicht in neuer Liste vorhanden, auf erste gültige Sprache fallen und config aktualisieren
+  // If currentLang not present in new list, fall back to first valid language and update config
     if(!list.some(function(e){ return e.code === currentLang; })) {
   /* fallback to first entry */
       currentLang = list[0].code;
@@ -325,10 +325,10 @@ function integrateLanguagesIntoOptions(list) {
       sel.appendChild(opt);
     });
     try {
-      sel.value = currentLang; // sicherstellen
+    sel.value = currentLang; // ensure
     } catch(e) {}
   }
-  // Falls OptionsPane offen, Select neu bauen
+  // If OptionsPane open, rebuild select
   if(window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.activeWindow && window.qwebirc.ui.activeWindow.identifier === 'optionspane') {
     if(window.qwebirc.ui.activeWindow.rebuild) window.qwebirc.ui.activeWindow.rebuild();
   }

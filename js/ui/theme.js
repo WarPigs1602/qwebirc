@@ -106,7 +106,7 @@ qwebirc.ui.Theme = new Class({
       if(k == "PREFIX")
         continue;
       var data = this.__theme[k];
-      // Speichere Prefix-Flag separat für spätere dynamische Übersetzung
+  // Store prefix flag separately for future dynamic translation
       if(data[1]) this.__prefixed[k] = true;
       if(data[1]) {
         this.__theme[k] = this.__theme["PREFIX"] + data[0];

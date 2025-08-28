@@ -25,9 +25,9 @@ qwebirc.ui.Window = new Class({
     this.lastSelected = null;
     this.subWindow = null;
     this.closed = false;
-    // Gespeicherte Metadaten für Event-Linien zur Live-Neuübersetzung
+  // Stored metadata for event lines for live re-translation
     this.__storedEventLines = [];
-    // Set von Nachrichtentypen, die über i18n neu gerendert werden können
+  // Set of message types that can be re-rendered via i18n
     this.__translatableTypes = {
       JOIN:1, OURJOIN:1, PART:1, QUIT:1, KICK:1, MODE:1, NICK:1, TOPIC:1, UMODE:1, INVITE:1,
       WHOISUSER:1, WHOISREALNAME:1, WHOISCHANNELS:1, WHOISSERVER:1, WHOISACCOUNT:1, WHOISIDLE:1, WHOISAWAY:1,
@@ -36,7 +36,7 @@ qwebirc.ui.Window = new Class({
       IGNORED:1, UNIGNORED:1, IGNOREHEADER:1, IGNOREENTRY:1, IGNOREEMPTY:1, SILENCE:1, MODEMSG:1,
       SIGNON:1, CONNECTING:1, CONNECT:1, CONNECTED:1, DISCONNECT:1, ERROR:1, SERVERNOTICE:1,
   CAP_ACTIVE:1, CAP_AVAILABLE:1,
-  // Benachrichtigungstitel/-körper (werden zwar nicht als Linien gespeichert, aber zur Vollständigkeit für künftige Nutzung)
+  // Notification title/body (not stored as lines, but kept for future use completeness)
   NOTIFYCHANMSGTITLE:1, NOTIFYCHANMSGBODY:1,
   NOTIFYCHANACTIONTITLE:1, NOTIFYCHANACTIONBODY:1,
   NOTIFYPRIVMSGTITLE:1, NOTIFYPRIVMSGBODY:1,
@@ -44,7 +44,7 @@ qwebirc.ui.Window = new Class({
   NOTIFYCHANNOTICETITLE:1, NOTIFYCHANNOTICEBODY:1,
   NOTIFYPRIVNOTICETITLE:1, NOTIFYPRIVNOTICEBODY:1
     };
-    // Sprachwechsel-Listener (nur einmal binden)
+  // Language change listener (bind only once)
     this.__onLanguageChangedBound = this.__onLanguageChanged.bind(this);
     try { window.addEventListener('qwebirc:languageChanged', this.__onLanguageChangedBound); } catch(e) {}
     
@@ -64,7 +64,7 @@ qwebirc.ui.Window = new Class({
     }
   },
   __purgeOrphanedStoredLines: function() {
-    // Entferne Einträge, deren DOM-Element nicht mehr existiert
+  // Remove entries whose DOM element no longer exists
     if(!this.__storedEventLines.length) return;
     var filtered = [];
     for(var i=0;i<this.__storedEventLines.length;i++) {
@@ -75,12 +75,12 @@ qwebirc.ui.Window = new Class({
   },
   __rerenderStoredLine: function(meta) {
     try {
-      // Timestamp-Span behalten (erstes Kind), rest entfernen
+  // Keep timestamp span (first child), remove the rest
       var el = meta.element;
       if(!el) return;
       var children = Array.prototype.slice.call(el.childNodes);
       for(var i=1;i<children.length;i++) el.removeChild(children[i]);
-      // Neue Zeichenkette basierend auf aktueller Sprache
+  // New string based on current language
       var dataClone = {}; for(var k in meta.data) if(meta.data.hasOwnProperty(k)) dataClone[k] = meta.data[k];
       if(dataClone.__i18nKey) {
         dataClone.m = this.__computeDynamicI18nMessage(dataClone);
@@ -110,7 +110,7 @@ qwebirc.ui.Window = new Class({
   },
   setSubWindow: function(window) {
     this.subWindow = window;
-  // Für i18n: Referenz unter einheitlichem Namen
+  // For i18n: reference under a unified name
   this.pane = window;
   },
   select: function() {
@@ -158,7 +158,7 @@ qwebirc.ui.Window = new Class({
   addLine: function(type, line, colour, element) {
     var hilight = qwebirc.ui.HILIGHT_NONE;
     var lhilight = false;
-  var originalDataObj = null; // Für spätere Re-Übersetzung
+  var originalDataObj = null; // For later re-translation
 
     if(type) {
       hilight = qwebirc.ui.HILIGHT_ACTIVITY;
@@ -198,14 +198,14 @@ qwebirc.ui.Window = new Class({
       this.setHilighted(hilight);
 
     if(type) {
-      // Falls bislang nur ein String übergeben wurde (Status-Messages etc.), in Objekt umbrechen
+  // If only a plain string was provided (status messages etc.) wrap it into an object
       if(typeof line === 'string') {
         line = {m: line};
       }
       if(line && typeof line === 'object') {
-        // Shallow Copy behalten (Originalvariablen behalten für spätere Übersetzung)
+  // Keep shallow copy (preserve original variables for later translation)
         try { originalDataObj = {}; for(var k in line) { if(line.hasOwnProperty(k)) originalDataObj[k] = line[k]; } } catch(e) { originalDataObj = null; }
-        // Falls strukturierte i18n Daten vorhanden -> jetzt initiale Übersetzung erzeugen
+  // If structured i18n data exists -> compute initial translation now
         if(line.__i18nKey) {
           line = Object.assign({}, line); // Mutation vermeiden
           line.m = this.__computeDynamicI18nMessage(line);
@@ -220,11 +220,11 @@ qwebirc.ui.Window = new Class({
     element.appendChild(tsE);
     
     qwebirc.ui.Colourise(line, element, this.client.exec, this.parentObject.urlDispatcher.bind(this.parentObject), this);
-    // Nach dem Colourise ggf. Event-Linie registrieren (auch wenn originalDataObj beim Klonen fehlgeschlagen hat)
+  // After colourise optionally register event line (even if cloning into originalDataObj failed)
     if(type && this.__translatableTypes[type]) {
       if(!originalDataObj) originalDataObj = {}; // Sicherstellen, dass wir etwas Speichernsames haben
       this.__storedEventLines.push({type:type, data:originalDataObj, element:element});
-      // Speicher begrenzen parallel zu MAXIMUM_LINES_PER_WINDOW -> Aufräumen hier grob
+  // Bound storage parallel to MAXIMUM_LINES_PER_WINDOW -> coarse cleanup here
       if(this.__storedEventLines.length > qwebirc.ui.MAXIMUM_LINES_PER_WINDOW + 50) this.__purgeOrphanedStoredLines();
     }
     this.scrollAdd(element);
@@ -236,13 +236,13 @@ qwebirc.ui.Window = new Class({
       var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
       var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
       var template = (i18n && i18n[key]) || dataObj.__i18nFallback || dataObj.m || '';
-      // Platzhalter {var} ersetzen
+  // Replace placeholders {var}
       var out = template.replace(/\{([a-zA-Z0-9_]+)\}/g, function(_, v){ if(v in dataObj) return dataObj[v]; return '{'+v+'}'; });
-      // Falls bestimmte Felder existieren aber nicht im Template vorkommen, anhängen
+  // If certain fields exist but aren't in the template, append them
       function ensure(valKey, label) {
         if(dataObj[valKey] && out.indexOf(dataObj[valKey]) === -1) {
           if(out.indexOf('{'+valKey+'}') === -1 && out.indexOf(dataObj[valKey]) === -1) {
-            // Falls Template keine strukturelle Stelle hat, einfach anhängen
+            // If template has no structural slot, just append
             out += (out.trim().length ? ' ' : '') + dataObj[valKey];
           }
         }
@@ -311,7 +311,7 @@ qwebirc.ui.Window = new Class({
       if(parent.childNodes.length > qwebirc.ui.MAXIMUM_LINES_PER_WINDOW) {
         var removed = parent.firstChild;
         parent.removeChild(removed);
-        // Falls es eine gespeicherte Event-Linie war -> aus Storage löschen
+  // If it was a stored event line -> remove from storage
         if(this.__storedEventLines && this.__storedEventLines.length) {
           for(var i=0;i<this.__storedEventLines.length;i++) {
             if(this.__storedEventLines[i].element === removed) { this.__storedEventLines.splice(i,1); break; }

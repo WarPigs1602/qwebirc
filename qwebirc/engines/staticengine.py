@@ -18,10 +18,10 @@ def clear_cache():
 class StaticEngine(static.File):
 
   def getChild(self, path, request):
-    # Liefere für jede Datei/Verzeichnis wieder eine StaticEngine-Instanz aus
-    # Dadurch wird immer die eigene render()-Methode verwendet
+  # Return a StaticEngine instance for each file/directory
+  # Ensures our own render() method is always used
     child = static.File.getChild(self, path, request)
-    # Wenn es ein Verzeichnis oder eine Datei ist, wandle in StaticEngine um
+  # If it's a directory or file, wrap it in StaticEngine
     if isinstance(child, static.File) and not isinstance(child, StaticEngine):
       # Erzeuge neue StaticEngine-Instanz mit gleichem Pfad
       return StaticEngine(child.path)
@@ -34,12 +34,12 @@ class StaticEngine(static.File):
 
   def render_GET(self, request):
     self.hit(request)
-    # Nur für HTML-Dateien injizieren, sonst Standardverhalten
+  # Inject only for HTML files, otherwise default behaviour
     if self.path.endswith('.html'):
       try:
         with open(self.path, 'rb') as f:
           data = f.read()
-        # Nur bei HTML-Inhalt injizieren
+  # Inject only when HTML content
         try:
           import sys
           import importlib
@@ -64,7 +64,7 @@ class StaticEngine(static.File):
       except Exception as e:
         request.setResponseCode(500)
         return b"Internal Server Error"
-    # Für andere Dateitypen Standardverhalten
+  # Default behaviour for other file types
     return static.File.render_GET(self, request)
     
   @property
@@ -79,5 +79,5 @@ class StaticEngine(static.File):
     }
 
   def directoryListing(self):
-    # Immer static/qui.html ausliefern, egal welches Verzeichnis
+  # Always serve static/qui.html regardless of directory
     return self.getChild("qui.html", None)

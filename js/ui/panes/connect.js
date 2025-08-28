@@ -6,7 +6,7 @@ qwebirc.ui.ConnectPane = new Class({
     this.cookie = new Hash.Cookie("optconn", {duration: 3650, autoSave: false});
     var uiOptions = options.uiOptions;
   this.__windowName = "authgate_" + Math.floor(Math.random() * 100000);
-  // Methode an Instanz binden, damit sie im asynchronen Callback verfügbar ist
+  // Bind method to instance so it is available inside async callback
   this.__buildPrettyChannels = this.__buildPrettyChannels.bind(this);
 
 
@@ -27,7 +27,7 @@ qwebirc.ui.ConnectPane = new Class({
 
     var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
   var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
-    // Einfaches Alert-Overlay für live-übersetzbare Meldungen
+  // Simple alert overlay for live-translatable messages
     if(!document.getElementById('qwebirc-alert-overlay')) {
       var ov = document.createElement('div');
       ov.id = 'qwebirc-alert-overlay';
@@ -56,14 +56,14 @@ qwebirc.ui.ConnectPane = new Class({
       var btn = document.getElementById('qwebirc-alert-close');
       if(!ov || !msg) { alert(text); return; }
       msg.textContent = text;
-      // Button-Label übersetzbar falls SAVE/CANCEL genutzt werden könnte – hier einfache Lokalisierung prüfen
+  // Button label translatable if SAVE/CANCEL available – simple localisation here
       var okKey = 'OK';
       if(i18n && i18n.SAVE) btn.textContent = i18n.SAVE; else btn.textContent = 'OK';
   if(i18n && i18n.SAVE) btn.textContent = i18n.SAVE; else btn.textContent = 'OK';
       ov.style.display='flex';
       window.qwebirc.__lastAlert = {key:key, fallback:fallback};
     }
-    // Übersetzer registrieren um offenes Alert neu zu übersetzen
+  // Register translator to retranslate any open alert
     var regA = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n.registerTranslator;
     if(typeof regA === 'function') regA(function(){
       if(window.qwebirc.__lastAlert) {
@@ -73,13 +73,13 @@ qwebirc.ui.ConnectPane = new Class({
     var cb = delayfn.delay(500);
 
   var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-  // Registriere Übersetzer für späteren Sprachwechsel
+  // Register translator for later language change
   var register = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n.registerTranslator;
   var self = this;
   function translateCurrent(l){
     if(!self.rootElement) return;
     try {
-      // Verwende vorhandene Übersetzungslogik falls vorhanden
+  // Use existing translation logic if present
       var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[l] && window.qwebirc.i18n[l].options;
       function t(key, fallback) { return (i18n && i18n[key]) ? i18n[key] : (fallback || key); }
       var parent = self.rootElement.getParent ? self.rootElement.getParent() : document;
@@ -105,7 +105,7 @@ qwebirc.ui.ConnectPane = new Class({
   }
   if(typeof register === 'function') register(translateCurrent);
   window.addEventListener('qwebirc:languageChanged', function(ev){ translateCurrent(ev.detail.lang); });
-  // Referenz auf Instanz für alle Callbacks (self bereits definiert)
+  // Reference to instance for all callbacks (self already defined)
   // Lade Sprachdatei, falls noch nicht geladen
   (window.loadLocale ? window.loadLocale(lang) : Promise.resolve()).then(function() {
         // util-Objekt im Callback erneut setzen, damit es garantiert im richtigen Kontext ist
@@ -124,13 +124,13 @@ qwebirc.ui.ConnectPane = new Class({
         };
         var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
         function t(key, fallback) { return (i18n && i18n[key]) ? i18n[key] : (fallback || key); }
-  // self.cookie wird im Konstruktor gesetzt und darf hier nicht überschrieben werden
+  // self.cookie is set in the constructor and must not be overwritten here
 
         var r = qwebirc.ui.RequestTransformHTML({
           url: qwebirc.global.staticBaseURL + "panes/connect.html",
           update: parent,
           onSuccess: function() {
-          // CAPTCHA-Widget dynamisch einfügen, wenn aktiviert
+              // Dynamically inject CAPTCHA widget if enabled
           var captchaType = window.CAPTCHA_TYPE;
           var captchaSiteKey = window.CAPTCHA_SITE_KEY;
           if (captchaType && captchaSiteKey) {
@@ -166,12 +166,12 @@ qwebirc.ui.ConnectPane = new Class({
               captchaRow.appendChild(td);
               var table = loginForm.querySelector('table');
               if (table) {
-                // Finde die Zeile mit dem Button
+                // Find the row with the button
                 var rows = table.getElementsByTagName('tr');
                 var inserted = false;
                 for (var i = 0; i < rows.length; i++) {
                   if (rows[i].getAttribute('name') === 'connectbutton') {
-                    // Sicherstellen, dass rows[i] wirklich ein Kind von table ist
+                    // Ensure rows[i] actually belongs to table
                     if (rows[i].parentNode === table) {
                       table.insertBefore(captchaRow, rows[i]);
                       inserted = true;
@@ -189,51 +189,51 @@ qwebirc.ui.ConnectPane = new Class({
               }
             }
           }
-        // Labels und Buttons übersetzen
-        // Headline ohne Logo
+  // Translate labels and buttons
+  // Headline without logo
         var header = parent.querySelector('tr[name=nologologinheader] h1');
         if(header) header.innerHTML = t('CONNECT_TITLE', header.innerHTML).replace(/<span name="networkname"><\/span>/, '<span name="networkname"></span>');
 
-        // Nickname/Channels Labels
+  // Nickname/Channels labels
         var nickLabel = parent.querySelector('label[for=loginnickname]');
         if(nickLabel) nickLabel.textContent = t('NICKNAME', nickLabel.textContent);
         var chanLabel = parent.querySelector('label[for=loginchannels]');
         if(chanLabel) chanLabel.textContent = t('CHANNELS', chanLabel.textContent);
 
-        // Passwort/Username Labels
+  // Password/Username labels
         var userLabels = parent.querySelectorAll('label[for=sasl_username], label[for=confirm_sasl_username]');
         userLabels.forEach(function(l){ l.textContent = t('USERNAME', l.textContent); });
         var passLabels = parent.querySelectorAll('label[for=sasl_password], label[for=confirm_sasl_password]');
         passLabels.forEach(function(l){ l.textContent = t('PASSWORD', l.textContent); });
 
-        // Checkbox "I have a password"
+  // Checkbox "I have a password"
         var pwCheckboxes = parent.querySelectorAll('input#show_sasl_fields, input#show_sasl_fields_confirm');
         pwCheckboxes.forEach(function(box){
           var label = box.parentNode;
           if(label && label.tagName === 'LABEL') label.childNodes[1].textContent = ' ' + t('I_HAVE_PASSWORD', label.childNodes[1].textContent);
         });
 
-        // Passwort anzeigen (nur Icon, kein Text)
+  // Show password (icon only, no text)
         var showPwSpans = parent.querySelectorAll('span[title="Show password"]');
         showPwSpans.forEach(function(span){
           span.set('html', '<svg style="width:14px;height:14px;vertical-align:middle" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5m0 13c-3.04 0-5.5-2.46-5.5-5.5S8.96 6.5 12 6.5s5.5 2.46 5.5 5.5S15.04 17.5 12 17.5m0-9A3.5 3.5 0 0 0 8.5 12 3.5 3.5 0 0 0 12 15.5 3.5 3.5 0 0 0 15.5 12 3.5 3.5 0 0 0 12 8.5Z"/></svg>');
         });
 
-        // Button "Join chat"
+  // "Join chat" button
         var joinButtons = parent.querySelectorAll('input[type=submit][name=connect]');
         joinButtons.forEach(function(btn){ btn.value = t('JOIN_CHAT', btn.value); });
 
-        // ...bestehender Code...
-        // SASL-Login-Felder und Checkbox initial ausblenden, wenn SASL_LOGIN_ENABLED nicht aktiv
+  // ...existing code...
+  // Hide SASL login fields and checkbox initially if SASL_LOGIN_ENABLED not active
         if(typeof window.SASL_LOGIN_ENABLED !== 'undefined' && !window.SASL_LOGIN_ENABLED) {
-          // Login-Formular
+          // Login form
           var loginForm = parent.getElement('tr[name=loginbox] form');
           if(loginForm) {
             var saslCheckbox = loginForm.getElement('#show_sasl_fields');
             if(saslCheckbox) saslCheckbox.parentNode.parentNode.remove();
             loginForm.getElements('.sasl-row').each(function(row){ row.remove(); });
           }
-          // Confirm-Dialog
+          // Confirm dialog
           var confirmForm = parent.getElement('tr[name=confirmbox] form');
           if(confirmForm) {
             var saslCheckboxConfirm = confirmForm.getElement('#show_sasl_fields_confirm');
@@ -241,7 +241,7 @@ qwebirc.ui.ConnectPane = new Class({
             confirmForm.getElements('.sasl-row').each(function(row){ row.remove(); });
           }
         }
-        // Passwort-Einblendfunktion für beide Passwortfelder
+  // Password toggle for both password fields
         var pwToggle = parent.getElement('#show_sasl_password');
         var pwField = parent.getElement('#sasl_password');
         if(pwToggle && pwField) {
@@ -257,18 +257,18 @@ qwebirc.ui.ConnectPane = new Class({
           });
         }
 
-        // SASL-Felder erst nach Laden des HTML und Setzen des Flags einblenden
-        // Checkbox-Logik für SASL-Felder
+  // Show SASL fields only after HTML load and flag set
+  // Checkbox logic for SASL fields
   // self ist bereits korrekt auf die Instanz gesetzt
-        // Login-Formular (Nickname/Channels)
+  // Login form (nickname/channels)
         var loginForm = parent.getElement('tr[name=loginbox] form');
         if (loginForm) {
           var saslCheckbox = loginForm.getElement('#show_sasl_fields');
           var saslUserField = loginForm.getElement('#sasl_username');
           var saslPassField = loginForm.getElement('#sasl_password');
-          // Standardmäßig ausblenden
+          // Hide by default
           loginForm.getElements('.sasl-row').setStyle('display', 'none');
-          // Aus Cookie wiederherstellen
+          // Restore from cookie
           var savedUser = self.cookie.get('sasl_username');
           var savedPass = self.cookie.get('sasl_password');
           if(saslCheckbox && (savedUser || savedPass)) {
@@ -290,15 +290,15 @@ qwebirc.ui.ConnectPane = new Class({
             });
           }
         }
-        // Confirm-Dialog
+  // Confirm dialog
         var confirmForm = parent.getElement('tr[name=confirmbox] form');
         if (confirmForm) {
           var saslCheckboxConfirm = confirmForm.getElement('#show_sasl_fields_confirm');
           var saslUserFieldConfirm = confirmForm.getElement('#confirm_sasl_username');
           var saslPassFieldConfirm = confirmForm.getElement('#confirm_sasl_password');
-          // Standardmäßig ausblenden
+          // Hide by default
           confirmForm.getElements('.sasl-row').setStyle('display', 'none');
-          // Aus Cookie wiederherstellen
+          // Restore from cookie
           var savedUser = self.cookie.get('sasl_username');
           var savedPass = self.cookie.get('sasl_password');
           if(saslCheckboxConfirm && (savedUser || savedPass)) {
@@ -325,7 +325,7 @@ qwebirc.ui.ConnectPane = new Class({
   var rootElement = parent.getElement("[name=connectroot]");
   self.rootElement = rootElement;
 
-  // Nach vollständigem Aufbau sicherstellen, dass die zuletzt gesetzte Sprache angewendet wird
+  // After full build ensure last set language is applied
   try {
     var effectiveLang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || lang;
     translateCurrent(effectiveLang);
@@ -413,7 +413,7 @@ qwebirc.ui.ConnectPane = new Class({
         }
       }
 
-  // ...SASL-Login-Felder werden jetzt rein im HTML verwaltet...
+  // ...SASL login fields are now handled purely in HTML...
 
       if(window == window.top) /* don't focus when we're iframe'd */
         exec("[name=" + focus + "]", util.focus);
@@ -446,14 +446,14 @@ qwebirc.ui.ConnectPane = new Class({
   },
   __connect: function(e) {
     new Event(e).stop();
-    // Zeige Status in Typing-Bar
+  // Show status in typing bar
     if(window.qwebircConnectStatus) window.qwebircConnectStatus.show();
     var data = this.validate();
     if(data === false) {
       if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
       return;
     }
-      // CAPTCHA-Token holen, falls aktiviert
+  // Get CAPTCHA token if enabled
       var captchaType = window.CAPTCHA_TYPE;
       if (captchaType) {
         var token = null;
@@ -476,7 +476,7 @@ qwebirc.ui.ConnectPane = new Class({
       }
     this.__cancelLogin();
     this.fireEvent("close");
-    // SASL speichern oder löschen je nach Checkbox
+  // Save or delete SASL values depending on checkbox
     var saslCheckbox = this.rootElement.getElement('#show_sasl_fields');
     var saslUserField = this.rootElement.getElement('#sasl_username');
     var saslPassField = this.rootElement.getElement('#sasl_password');
@@ -489,7 +489,7 @@ qwebirc.ui.ConnectPane = new Class({
     }
     this.cookie.extend(data);
     this.cookie.save();
-    // Verbindung wird asynchron hergestellt, Status bleibt bis hide() aufgerufen wird
+  // Connection established asynchronously; status remains until hide() is called
     this.options.callback(data);
   },
   __cancelLogin: function(noUIModifications) {
@@ -498,7 +498,7 @@ qwebirc.ui.ConnectPane = new Class({
   },
   __loginConnect: function(e) {
     new Event(e).stop();
-    // Zeige Status in Typing-Bar
+  // Show status in typing bar
     if(window.qwebircConnectStatus) window.qwebircConnectStatus.show();
     if(this.validate() === false) {
       if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
@@ -507,7 +507,7 @@ qwebirc.ui.ConnectPane = new Class({
     this.__performLogin(function() {
       var data = this.validate();
       if(data === false) {
-        /* we're logged in -- show the normal join button */
+  /* We're logged in -- show the normal join button */
         this.util.exec("[name=connectbutton]", this.util.setVisible(true));
         if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
         return;
@@ -587,7 +587,7 @@ qwebirc.ui.ConnectPane = new Class({
     this.util.exec("[name=" + calleename + "]", this.util.setVisible(false));
   },
   __validateConfirmData: function() {
-    // Immer das sichtbare SASL-Feld verwenden (z.B. im Confirm-Dialog)
+  // Always use the visible SASL field (e.g. in confirm dialog)
     var saslUser = Array.from(this.rootElement.querySelectorAll('input[name="sasl_username"]')).find(function(el) {
       return el.offsetParent !== null;
     });
@@ -623,7 +623,7 @@ qwebirc.ui.ConnectPane = new Class({
       return false;
     }
     var data = {nickname: nickname, autojoin: chans};
-    // Immer das sichtbare SASL-Feld verwenden (z.B. im Login-Dialog)
+  // Always use the visible SASL field (e.g. in login dialog)
     var saslUser = Array.from(this.rootElement.querySelectorAll('input[name="sasl_username"]')).find(function(el) {
       return el.offsetParent !== null;
     });

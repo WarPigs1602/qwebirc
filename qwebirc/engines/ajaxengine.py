@@ -181,7 +181,7 @@ class IRCSession:
         pass
       self.cleanupschedule = None
 
-    # Trenne die IRC-Client-Verbindung, falls vorhanden
+  # Disconnect the IRC client if present
     if hasattr(self, "client") and self.client is not None:
       try:
         if hasattr(self.client, "disconnect"):
@@ -235,7 +235,7 @@ class AJAXEngine(resource.Resource):
 
   def newConnection(self, request):
     import sys
-    print("[qwebirc][DEBUG] newConnection() aufgerufen", file=sys.stderr)
+    # Debug log removed
     ticket = login_optional(request)
     
     ip = request.getClientIP()
@@ -281,14 +281,14 @@ class AJAXEngine(resource.Resource):
       kwargs = dict(nick=nick, ident=ident, ip=ip, realname=realname, perform=perform, hostname=hostname)
       if password is not None:
         kwargs["password"] = password
-      # SASL-Login-Felder nur übergeben, wenn sie gesetzt und nicht leer sind
+  # Only include SASL login fields if present and non-empty
       sasl_username = request.args.get("sasl_username") or request.args.get(b"sasl_username")
       sasl_password = request.args.get("sasl_password") or request.args.get(b"sasl_password")
       if sasl_username and ircclient.irc_decode(sasl_username[0]):
         kwargs["sasl_username"] = ircclient.irc_decode(sasl_username[0])
       if sasl_password and ircclient.irc_decode(sasl_password[0]):
         kwargs["sasl_password"] = ircclient.irc_decode(sasl_password[0])
-      print(f"[qwebirc][DEBUG] proceed() called mit kwargs: {kwargs}", file=sys.stderr)
+  # Debug log removed
       client = ircclient.create_irc(session, **kwargs)
       session.client = client
 

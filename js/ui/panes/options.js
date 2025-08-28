@@ -14,7 +14,7 @@ qwebirc.ui.supportsFocus = function() {
  * settableByURL...
  */
 qwebirc.config.DEFAULT_OPTIONS = [
-  // LANGUAGE Optionsliste wird dynamisch aus /locales/index.json befüllt (see integrateLanguagesIntoOptions)
+  // LANGUAGE option list is populated dynamically from /locales/index.json (see integrateLanguagesIntoOptions)
   [20, "LANGUAGE", "Language", 0, null, [ ["English","en"] ]],
   [1, "BEEP_ON_MENTION", "Beep on activity", true],
   [16, "NOTIFICATIONS", "Emit HTML5 notifications on activity", false, {
@@ -284,10 +284,10 @@ qwebirc.config.RadioOption = new Class({
     this.parent(optionId, prefix, label, this.options[default_][1], extras);
   },
   setSavedValue: function(x) {
-    // SPEZIALFALL: LANGUAGE wird dynamisch erweitert (Manifest erst nach Initialisierung geladen).
-    // Wenn der gespeicherte Wert (Cookie) noch nicht in der Optionsliste ist, behalten wir ihn
-    // statt auf den Default zurückzufallen. Später, wenn integrateLanguagesIntoOptions() läuft,
-    // wird die Optionsliste aktualisiert und der Wert korrekt gematcht.
+  // SPECIAL CASE: LANGUAGE is extended dynamically (manifest loaded after initialisation).
+  // If the stored value (cookie) is not yet in the options list we keep it instead of falling
+  // back to default. Later, when integrateLanguagesIntoOptions() runs, the list is updated and
+  // the value is matched properly.
     var found = false;
     for(var i=0;i<this.options.length;i++) {
       var y = this.options[i][1];
@@ -300,8 +300,8 @@ qwebirc.config.RadioOption = new Class({
     }
     if(!found) {
       if(this.prefix === 'LANGUAGE') {
-        // Wert merken, Position auf Default lassen bis Liste verfügbar ist
-        this.value = x; // bewusst kein Fallback, damit späteres Matching klappt
+  // Remember value, keep position at default until list becomes available
+  this.value = x; // intentionally no fallback so later matching works
         this.position = this.defaultposition;
         return;
       } else {
@@ -416,15 +416,15 @@ qwebirc.ui.OptionsPane = new Class({
   this.type = 'optionspane';
     this.parentElement = parentElement;
     this.optionObject = optionObject;
-  // Host für Positionierung des Close-Buttons
+  // Host element for positioning the close button
   try { this.parentElement.addClass('pane-host'); } catch(e) {}
   this.__injectCloseButton();
     this.createElements();
-    // Listener für Sprachwechsel
+  // Listener for language change
     window.addEventListener('qwebirc:languageChanged', function(ev){
       try { this.translate(ev.detail.lang); } catch(e) {}
     }.bind(this));
-    // Sofortige Erstübersetzung, falls Locale für aktuelle Sprache schon geladen wurde
+  // Immediate initial translation if locale already loaded for current language
     try {
       var initialLang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
       this.translate(initialLang);
@@ -483,7 +483,7 @@ qwebirc.ui.OptionsPane = new Class({
       labelCell.appendChild(label);
       x._labelElement = label; x._isWide = !!ele.wide;
       if(ele.wide) {
-        // Bei wide-Option: valueCell über beide Spalten (Label oben links, Value rechts gestreckt)
+  // For wide option: valueCell spans both columns (label top-left, value stretched right)
         valueCell.colSpan = 1; // behalten wir bei zwei Zellen; CSS kann Breite steuern
         row.addClass('wide-option');
       }
@@ -549,7 +549,7 @@ qwebirc.ui.OptionsPane.prototype.__injectCloseButton = function() {
   } catch(e) { btn.set('text','×'); }
   btn.addEvent('click', function(e){ new Event(e).stop(); this.fireEvent('close'); }.bind(this));
   host.appendChild(btn);
-  // Übersetzungstitel aktualisieren bei Sprachwechsel
+  // Update translated title on language change
   var updateTitle = function(){
     try {
       var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';

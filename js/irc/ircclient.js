@@ -10,7 +10,7 @@ qwebirc.irc.IRCClient = new Class({
 
     this.ui = ui;
 
-  // Standardmäßig alle gängigen Prefixe und Modes setzen
+  // Set all common prefixes and modes by default
   this.prefixes = "~&@%+";
   this.modeprefixes = "qaohv";
     this.windows = new QHash();
@@ -245,7 +245,7 @@ qwebirc.irc.IRCClient = new Class({
   
   /* from here down are events */
   rawNumeric: function(numeric, prefix, params) {
-    // SASL Auth: Numeric 900 - schöner anzeigen
+  // SASL auth: numeric 900 - nicer display
     if (numeric == 900 && params.length >= 4) {
       // params: [ourNick, loginNick, account, message]
       var msg = params[3];

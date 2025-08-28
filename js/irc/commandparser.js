@@ -147,7 +147,7 @@ qwebirc.irc.BaseCommandParser = new Class({
     
     return true;
   },
-  // IRC MODE-Kommandos für Rechte
+  // IRC MODE commands for privileges
   cmd_OP: [true, 1, 1, function(args) {
     var channel = this.getActiveWindow().name;
     return ["MODE", channel + " +o " + args];

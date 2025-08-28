@@ -42,7 +42,7 @@ except ImportError:
 parser = OptionParser()
 parser.add_option("-n", "--no-daemon", help="Don't run in the background.", action="store_false", dest="daemonise", default=True)
 parser.add_option("--help-reactors", help="Display a list of reactor names.", action="callback", callback=help_reactors)
-parser.add_option("-b", "--debug", help="Run in the Python Debugger.", action="store_true", dest="debug", default=False)
+## Debug-Option entfernt
 parser.add_option("-t", "--tracebacks", help="Display tracebacks in error pages (this reveals a LOT of information, do NOT use in production!)", action="store_true", dest="tracebacks", default=False)
 parser.add_option("-r", "--reactor", help="Which reactor to use (see --help-reactors for a list).", dest="reactor", default=DEFAULT_REACTOR)
 parser.add_option("-p", "--port", help="Port to start the server on.", type="int", dest="port", default=DEFAULT_PORT)
@@ -69,8 +69,7 @@ args1, args2 = [], []
 
 if not options.daemonise:
   args1.append("-n")
-if options.debug:
-  args1.append("-b")
+## Debug-Option Aufruf entfernt
 
 if options.reactor != DEFAULT_REACTOR:
   rn = options.reactor + "reactor"

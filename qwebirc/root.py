@@ -9,7 +9,7 @@ import re
 
 class RootResource(resource.Resource):
   def getChild(self, name, request):
-    # Leerer Pfad wird intern wie /qui.html behandelt (keine Weiterleitung, sondern echte Verknüpfung)
+  # Empty path internally treated like /qui.html (no redirect, direct mapping)
     if name == "":
       return self.primaryChild.getChild("qui.html", request)
     return self.primaryChild.getChild(name, request)

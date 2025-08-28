@@ -93,7 +93,7 @@ qwebirc.ui.MENU_ITEMS = function() {
     return function(nick) { this.client.exec("/" + cmd + " " + nick); };
   };
   
-  // Hilfsfunktion: Prüft, ob der eigene Prefix mindestens so hoch ist wie der Zielprefix
+  // Helper: checks if our prefix is at least as high as the target prefix
   var hasAtLeastPrefix = function(nick, channel, prefix) {
     var entry = this.client.tracker.getNickOnChannel(nick, channel);
     var myPrefixes = entry ? entry.prefixes : "";
@@ -102,7 +102,7 @@ qwebirc.ui.MENU_ITEMS = function() {
     return myPrio <= targetPrio;
   };
 
-  // Predicate für Rechtevergabe nach Hierarchie
+  // Predicate for privilege assignment based on hierarchy
   var canSet = function(prefix) {
     return function(nick) {
       var channel = this.name;

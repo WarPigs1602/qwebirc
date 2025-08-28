@@ -28,17 +28,17 @@ qwebirc.irc.BaseIRCClient = new Class({
     this.lowerNickname = this.toIRCLower(this.nickname);
 
     this.__signedOn = false;
-    // Standard-Prefixe und Mapping, werden ggf. dynamisch überschrieben
+    // Default prefixes and mapping; may be overridden dynamically
     this.prefixes = "~&@%+";
     this.prefixModes = {"~": "q", "&": "a", "@": "o", "%": "h", "+": "v"};
     this.pmodes = new QHash({b: qwebirc.irc.PMODE_LIST, l: qwebirc.irc.PMODE_SET_ONLY, k: qwebirc.irc.PMODE_SET_UNSET, o: qwebirc.irc.PMODE_SET_UNSET, v: qwebirc.irc.PMODE_SET_UNSET});
     this.channels = new QSet();
-    // Channels persistent speichern
+    // Persist channels locally
     this._loadPersistentChannels();
     this.chanPrefixes = new QSet("#", "&");
     this.nextctcp = 0;
 
-  // Capabilities-Handling
+  // Capabilities handling
   this.activeCaps = [];
 
     this.connection = new qwebirc.irc.IRCConnection({
@@ -69,9 +69,9 @@ qwebirc.irc.BaseIRCClient = new Class({
       }
       this.disconnect();
     } else if(message == "prefixes") {
-      // Dynamische PREFIX-Info vom Backend
+      // Dynamic PREFIX info from backend
       var prefixstr = data[1];
-      // Beispiel: (qaohv)~&@%+
+      // Example: (qaohv)~&@%+
       var m = prefixstr.match(/^\(([^)]+)\)(.+)$/);
       if(m) {
         var modes = m[1].split("");
@@ -272,7 +272,7 @@ qwebirc.irc.BaseIRCClient = new Class({
   __getChannel: function(name) {
     return this.channels.contains(this.toIRCLower(name));
   },
-  // Channels persistent speichern/laden
+  // Persist/load channels
   _loadPersistentChannels: function() {
     try {
       var data = localStorage.getItem("qwebirc_channels");
@@ -385,11 +385,11 @@ qwebirc.irc.BaseIRCClient = new Class({
 
     irc_TAGMSG: function(prefix, params, tags) {
       // params: [target], tags: IRCv3 message tags
-      // Nur verarbeiten, wenn Capability aktiv ist
+      // Only process if capability is active
       if (!this.activeCaps || this.activeCaps.indexOf("message-tags") === -1) {
         return undefined;
       }
-      // Komplett ignorieren, wenn kein typing-Tag vorhanden ist (verhindert leere Zeilen)
+      // Ignore entirely if no typing tag is present (prevents empty lines)
       if(!(tags && tags.typing)) {
         return undefined;
       }
@@ -471,7 +471,7 @@ qwebirc.irc.BaseIRCClient = new Class({
         data.push(d);
       }, this);
       
-      // Einzelne Modes nacheinander anzeigen und Rechteänderungen speziell behandeln
+      // Display individual modes sequentially and handle privilege changes specially
       var self = this;
   data.forEach(function(modeArr) {
         var cmode = modeArr[0];
@@ -496,7 +496,7 @@ qwebirc.irc.BaseIRCClient = new Class({
           }
         }
         var userNick = user && user.hostToNick ? user.hostToNick() : user;
-        // Nicknamen für Colourise mit \x00 umschließen (wie in theme.js und colour.js)
+        // Wrap nicknames for Colourise with \x00 (as in theme.js and colour.js)
         function colourNick(nick) {
           return '\x00' + nick + '\x00';
         }
@@ -504,7 +504,7 @@ qwebirc.irc.BaseIRCClient = new Class({
         var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
         var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
         function tr(key, fallback){ return (i18n && i18n[key]) || fallback; }
-        // Ban und Ban-Exception speziell behandeln
+        // Handle ban and ban-exception specially
         var payload = null;
         if ((mode === 'b' || mode === 'e') && arg) {
           if(mode === 'b') {
@@ -517,16 +517,16 @@ qwebirc.irc.BaseIRCClient = new Class({
         } else {
           payload = {__i18nKey: 'MODEMSG_GENERIC', setter: colourNick(userNick), modestring: cmode + mode + (arg ? ' ' + arg : ''), channel: channel, __i18nFallback: colourNick(userNick) + ' set mode ' + cmode + mode + (arg ? ' ' + arg : '') + ' on ' + channel};
         }
-        payload.m = payload.__i18nFallback; // initial; wird in addLine überschrieben falls Übersetzung existiert
+        payload.m = payload.__i18nFallback; // initial; replaced in addLine if a translation exists
         if (self.ui && self.ui.getWindow) {
           var win = self.ui.getWindow(self, qwebirc.ui.WINDOW_CHANNEL, channel);
           if (win && win.addLine) {
             win.addLine("MODEMSG", payload);
           }
         }
-  // ...kein mode-colour Event mehr...
+  // ...no more mode-colour event...
       });
-      // Die eigentliche Mode-Logik weiterreichen, aber ohne klassische Anzeige
+      // Forward the actual mode logic but suppress the classic display
       if (typeof this.channelMode === 'function') {
         try {
           this.__suppressModeNotify = true;

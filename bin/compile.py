@@ -8,9 +8,9 @@ import shutil
 import time
 import json
 
-# Import-Logik für Direktaufruf oder als Modul
+# Import logic for direct invocation or as module
 
-# Füge das Projekt-Hauptverzeichnis immer zum sys.path hinzu
+# Always add project root to sys.path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if project_root not in sys.path:
   sys.path.insert(0, project_root)
@@ -46,7 +46,7 @@ class MinifyException(Exception):
   pass
   
 
-# Neue Minify-Funktion mit UglifyJS
+# Minify using UglifyJS
 def minify_with_uglify(src):
   try:
     p = subprocess.Popen(["uglifyjs", src], stdout=subprocess.PIPE)
@@ -64,7 +64,7 @@ def jmerge_files(prefix, suffix, output, files, *args, **kwargs):
   o = os.path.join(prefix, "compiled", output)
   merge_files(o, files, *args)
 
-  # Nur JS minifizieren
+  # Only minify JS
   is_js = suffix == "js"
   if is_js:
     try:
@@ -75,7 +75,7 @@ def jmerge_files(prefix, suffix, output, files, *args, **kwargs):
       global JAVA_WARNING_SURPRESSED
       if not JAVA_WARNING_SURPRESSED:
         JAVA_WARNING_SURPRESSED = True
-        print("warning: minify: %s (not minifying -- javascript will be HUGE)." % e, file=sys.stderr)
+        print("[build] warning: minify: %s (not minifying -- javascript will be HUGE)." % e, file=sys.stderr)
       try:
         with open(o, "rb") as f:
           compiled = f.read()
@@ -96,7 +96,7 @@ def jmerge_files(prefix, suffix, output, files, *args, **kwargs):
     try:
       os.unlink(o)
     except OSError:
-      log(f"Warning: could not remove temp file {o}")
+      log(f"warning: could not remove temp file {o}")
 
   with open(os.path.join(prefix, "static", suffix, output), "w", encoding="utf-8") as f:
     # COPYRIGHT is bytes, so decode it
@@ -108,7 +108,7 @@ def jmerge_files(prefix, suffix, output, files, *args, **kwargs):
     if kwargs.get("file_prefix"):
       f.write(kwargs.get("file_prefix"))
 
-    # compiled ist bytes, daher dekodieren
+  # compiled is bytes, so decode
     if isinstance(compiled, bytes):
       f.write(compiled.decode("utf-8"))
     else:
@@ -128,7 +128,7 @@ def merge_files(output, files, root_path=lambda x: x):
 def main(outputdir=".", produce_debug=True):
   log("Starting build ...")
   log(f"Output directory: {os.path.abspath(outputdir)}")
-  # Locales kopieren
+  # Copy locales
   src_locales = os.path.join(os.path.dirname(__file__), "..", "locales")
   dest_locales = os.path.join(outputdir, "static", "locales")
   if not os.path.exists(dest_locales):
@@ -140,7 +140,7 @@ def main(outputdir=".", produce_debug=True):
       dest_file = os.path.join(dest_locales, fname)
       shutil.copy2(src_file, dest_file)
       STATS['locales'] += 1
-      # Versuche language_name zu extrahieren
+  # Try to extract language_name
       try:
         with open(src_file, "r", encoding="utf-8") as lf:
           data = json.load(lf)
@@ -149,12 +149,12 @@ def main(outputdir=".", produce_debug=True):
         name = fname.rsplit(".",1)[0]
       code = fname.rsplit(".",1)[0]
       locale_index.append({"code": code, "name": name})
-  # Manifest schreiben
+  # Write manifest
   try:
     with open(os.path.join(dest_locales, "index.json"), "w", encoding="utf-8") as mf:
       json.dump(locale_index, mf, ensure_ascii=False, indent=2)
   except Exception as e:
-    log(f"Warning: could not write locale index: {e}")
+    log(f"warning: could not write locale index: {e}")
   log(f"Copied {STATS['locales']} locale file(s)")
   ID = pagegen.getgitid()
   log(f"Detected git build id: {ID}")
@@ -166,14 +166,14 @@ def main(outputdir=".", produce_debug=True):
     try:
       os.mkdir(coutputdir)
     except OSError:
-      log(f"Warning: could not create temp dir {coutputdir}")
+      log(f"warning: could not create temp dir {coutputdir}")
     
   css_out_dir = os.path.join(outputdir, "static", "css")
   if not os.path.isdir(css_out_dir):
     try:
       os.mkdir(css_out_dir)
     except OSError:
-      log(f"Warning: could not create css dir {css_out_dir}")
+      log(f"warning: could not create css dir {css_out_dir}")
   
   #jmerge_files(outputdir, "js", "qwebirc", pages.DEBUG_BASE, lambda x: os.path.join("js", x + ".js"))
 
@@ -207,7 +207,7 @@ def main(outputdir=".", produce_debug=True):
   try:
     os.rmdir(coutputdir)
   except OSError:
-    log(f"Warning: could not remove temp dir {coutputdir}")
+    log(f"warning: could not remove temp dir {coutputdir}")
   log("Cleaned temporary compile directory")
   
   with open(MCOMPILED_MARKER, "w") as f:
@@ -235,7 +235,7 @@ def vcheck():
   if has_compiled():
     return
     
-  print("error: not yet compiled, run compile.py first.", file=sys.stderr)
+  print("[build] error: not yet compiled, run compile.py first.", file=sys.stderr)
   sys.exit(1)
   
 if __name__ == "__main__":
