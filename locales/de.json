@@ -39,7 +39,7 @@
   "EMBED_CHOOSE_NICK_DESC": "Soll der Client beim Start einen zufälligen, einen vorgegebenen oder einen vom Benutzer gewählten Nick verwenden?",
   "EMBED_CHOOSE_NICK_HINT": "Einen festen Nick nur verwenden, wenn der Client ausschließlich für dich selbst ist.",
   "EMBED_NICK_USER_CHOOSE": "Benutzer soll einen Nick wählen.",
-  "EMBED_NICK_RANDOM": "Zufälligen Nick verwenden, z.B. qwebirc12883.",
+  "EMBED_NICK_RANDOM": "Zufälligen Nick verwenden, z.B. mwebirc12883.",
   "EMBED_NICK_PRESET": "Vorgegebenen Nick deiner Wahl verwenden.",
   "EMBED_CONNECT_DIALOG_TITLE": "Verbindungsdialog anzeigen?",
   "EMBED_CONNECT_DIALOG_QUESTION": "Soll dem Benutzer der Verbindungsdialog (mit vorausgefüllten Werten) oder nur eine Bestätigung gezeigt werden?",
@@ -64,7 +64,7 @@
   "EMBED_BTN_CLOSE": "Schließen",
   "TAB_OPTIONS": "Optionen",
   "TAB_EMBED": "Webchat einbinden",
-  "TAB_ABOUT": "Über qwebirc",
+  "TAB_ABOUT": "Über mwebirc",
   "TAB_CONNECT": "Verbinden",
   "TAB_STATUS": "Status"
   ,"NICKMENU_OWNER": "owner"
@@ -192,8 +192,8 @@
   ,"EMOJI_SKIN_MEDIUM": "Mittel"
   ,"EMOJI_SKIN_DARK": "Dunkel"
   ,"EMOJI_SKIN_VERYDARK": "Sehr dunkel"
-  ,"STATUS_VERSION": "qwebirc v{version}"
-  ,"STATUS_COPYRIGHT1": "Copyright (C) 2008-2019 Chris Porter und das qwebirc-Projekt."
+  ,"STATUS_VERSION": "mwebirc v{version}"
+  ,"STATUS_COPYRIGHT1": "Ursprünglich qwebirc (C) 2008-2019 Chris Porter und das Projekt."
   ,"STATUS_COPYRIGHT2": "Copyright (C) 2025 WarPigs1602 und Mitwirkende."
   ,"STATUS_PROJECT_URL": "https://github.com/WarPigs1602/qwebirc"
   ,"STATUS_LICENSE": "Lizenziert unter der GNU General Public License Version 2."

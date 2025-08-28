@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">mwebirc Logo</title>
+  <desc id="desc">Stylized speech bubble with lowercase m and signal bars representing chat connectivity.</desc>
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7a6ff0" />
+      <stop offset="100%" stop-color="#5a5fcf" />
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.35" />
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="256" height="256" rx="48" ry="48" fill="#232634"/>
+  <path d="M48 48h160a16 16 0 0 1 16 16v78c0 8.8-7.2 16-16 16h-66.5l-37.8 36.9c-6.9 6.7-18.1 1.9-18.1-7.7V158H48a16 16 0 0 1-16-16V64c0-8.8 7.2-16 16-16z" fill="url(#g1)" filter="url(#shadow)"/>
+  <path d="M74 86c0-11 8.4-20 19.5-20 8.2 0 14.9 3.9 18.1 10.6 3.6-6.9 10.3-10.6 18.4-10.6 16.2 0 26.6 12.2 26.6 30.9V164h-23.4v-66.2c0-8-4.2-12.9-11.3-12.9-7.4 0-11.7 5.2-11.7 13.4V164h-23.4v-65.8c0-8.2-4.6-13.2-11.5-13.2-7 0-11.3 5.4-11.3 13.6V164H62V86h12z" fill="#fff"/>
+  <g transform="translate(180 90)">
+    <rect x="0" y="36" width="8" height="20" rx="2" fill="#fff" opacity="0.4" />
+    <rect x="14" y="28" width="8" height="28" rx="2" fill="#fff" opacity="0.6" />
+    <rect x="28" y="18" width="8" height="38" rx="2" fill="#fff" opacity="0.8" />
+    <rect x="42" y="4" width="8" height="52" rx="2" fill="#fff" />
+  </g>
+  <rect x="48" y="48" width="160" height="96" rx="16" ry="16" fill="url(#g2)" opacity="0.25"/>
+</svg>

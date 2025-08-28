@@ -26,7 +26,6 @@ def jslist(name, debug):
     x = [pages.JS_DEBUG_BASE, ui.get("extra", []), pages.DEBUG, ["debug/ui/frontends/%s" % y for y in ui["uifiles"]]]
     gitid = ""
   else:
-    #x = [pages.JS_BASE, ui.get("buildextra", ui.get("extra", [])), pages.BUILD_BASE, name]
     x = [pages.JS_RAW_BASE, name]
     gitid = "-" + getgitid()  
 
@@ -50,7 +49,7 @@ def csslist(name, debug, gen=False):
   css = ["%s.css" % x for x in css]
   if hasattr(config, "CUSTOM_CSS"):
     css+=[config.CUSTOM_CSS]
-  return list("css/%s%s" % ("debug/" if gen else "", x) for x in css)
+  return ["css/%s%s" % ("debug/" if gen else "", x) for x in css]
 
 def _getgitid():
   try:
@@ -85,6 +84,7 @@ def producehtml(name, debug):
   ui = pages.UIs[name]
   js = jslist(name, debug)
   css = csslist(name, debug, gen=True)
+  gid = getgitid()
 
   # Locales-JSON-Dateien als preload verlinken
   locales_dir = os.path.join(os.path.dirname(__file__), "..", "locales")
@@ -120,30 +120,63 @@ def producehtml(name, debug):
   """ % (getattr(config, "CAPTCHA_TYPE", ""), getattr(config, "CAPTCHA_SITE_KEY", ""))
 
   return """%s
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">
 <head>
   <base />
-  <title>%s (qwebirc)</title>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="icon" sizes="192x192" href="%simages/highresicon.png"/>
-  <link rel="shortcut icon" type="image/png" href="%simages/favicon.png"/>
-%s%s%s<script type="text/javascript">QWEBIRC_DEBUG=%s;</script>%s
+  <title>%s (mwebirc)</title>
+  <meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"/>
+  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0\" />
+  <meta name=\"mobile-web-app-capable\" content=\"yes\" />
+  <!-- New mwebirc favicons (cache-busted); legacy qwebirc fallbacks kept last -->
+  <link rel=\"icon\" type=\"image/svg+xml\" href=\"%simages/mwebirc-favicon.svg?v=%s\" />
+  <link rel=\"icon\" sizes=\"16x16\" href=\"%simages/mwebirc-favicon-16.png?v=%s\" />
+  <link rel=\"icon\" sizes=\"32x32\" href=\"%simages/mwebirc-favicon-32.png?v=%s\" />
+  <link rel=\"icon\" sizes=\"48x48\" href=\"%simages/mwebirc-favicon-48.png?v=%s\" />
+  <link rel=\"icon\" sizes=\"64x64\" href=\"%simages/mwebirc-favicon-64.png?v=%s\" />
+  <link rel=\"icon\" sizes=\"192x192\" href=\"%simages/mwebirc-favicon-192.png?v=%s\" />
+  <link rel=\"apple-touch-icon\" href=\"%simages/mwebirc-favicon-192.png?v=%s\" />
+  <link rel=\"shortcut icon\" href=\"%sfavicon.ico?v=%s\" />
+  <!-- Legacy (will be ignored if new ones cached) -->
+  <link rel=\"icon\" sizes=\"192x192\" href=\"%simages/highresicon.png\"/>
+  <link rel=\"shortcut icon\" type=\"image/png\" href=\"%simages/favicon.png\"/>
+  <meta name=\"theme-color\" content=\"#232634\" />
+%s%s%s<script type=\"text/javascript\">QWEBIRC_DEBUG=%s;</script>%s
 %s
-  <script type="text/javascript">
-    var ui = new qwebirc.ui.Interface("ircui", qwebirc.ui.%s, %s);
+  <script type=\"text/javascript\">
+    var ui = new qwebirc.ui.Interface(\"ircui\", qwebirc.ui.%s, %s);
   </script>
 </head>
 <body>
-  <div id="ircui">
+  <div id=\"ircui\">
     <noscript>
-      <div id="noscript">Javascript is required to use IRC.</div>
+      <div id=\"noscript\">Javascript is required to use IRC.</div>
     </noscript>%s
   </div>
 </body>
 </html>
-""" % (ui["doctype"], config.APP_TITLE, config.STATIC_BASE_URL, config.STATIC_BASE_URL, preload_locales, csshtml, captcha_js, debug and "true" or "false", customjs, jshtml, ui["class"], optionsgen.get_options(), div)
+""" % (
+    ui["doctype"],
+    config.APP_TITLE,
+    config.STATIC_BASE_URL, gid,   # svg
+    config.STATIC_BASE_URL, gid,   # 16
+    config.STATIC_BASE_URL, gid,   # 32
+    config.STATIC_BASE_URL, gid,   # 48
+    config.STATIC_BASE_URL, gid,   # 64
+    config.STATIC_BASE_URL, gid,   # 192
+    config.STATIC_BASE_URL, gid,   # apple
+    config.STATIC_BASE_URL, gid,   # ico
+    config.STATIC_BASE_URL,        # legacy highres
+    config.STATIC_BASE_URL,        # legacy png
+    preload_locales,
+    csshtml,
+    captcha_js,
+    debug and "true" or "false",
+    customjs,
+    jshtml,
+    ui["class"],
+    optionsgen.get_options(),
+    div,
+  )
 
 def main(outputdir=".", produce_debug=True):
   p = os.path.join(outputdir, "static")

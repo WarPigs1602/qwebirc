@@ -58,7 +58,7 @@ def log_run(msg):
   except Exception:
     pass
 
-log_run("Initializing qwebirc ...")
+log_run("Initializing mwebirc ...")
 bin.compile.vcheck()
 log_run("Dependency/build check passed.")
 
@@ -113,7 +113,7 @@ parser.add_option("-P", "--pidfile", help="Path to store PID file", dest="pidfil
 parser.add_option("-s", "--syslog", help="Log to syslog", action="store_true", dest="syslog", default=False)
 parser.add_option("--profile", help="Run in profile mode, dumping results to this file", dest="profile")
 parser.add_option("--profiler", help="Name of profiler to use", dest="profiler")
-parser.add_option("--syslog-prefix", help="Syslog prefix", dest="syslog_prefix", default="qwebirc")
+parser.add_option("--syslog-prefix", help="Syslog prefix", dest="syslog_prefix", default="mwebirc")
 
 sargs = sys.argv[1:]
 if "ARGS" in dir(config):

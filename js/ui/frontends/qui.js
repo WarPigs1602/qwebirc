@@ -149,8 +149,12 @@ qwebirc.ui.QUI = new Class({
     }.bind(this);
     var hideEvent = function() { dropdownMenu.hide(); };
     
-    dropdownMenu.hide();
-    this.parentElement.appendChild(dropdownMenu);
+  dropdownMenu.hide();
+  // Append to body to allow absolute positioning independent of nested layout (fixes custom pages placing it at bottom)
+    try { 
+      document.body.appendChild(dropdownMenu); 
+      if(!dropdownMenu.className.contains('dropdownmenu')) dropdownMenu.addClass('dropdownmenu');
+    } catch(e) { this.parentElement.appendChild(dropdownMenu); }
     
     var buildEntries = function() {
       dropdownMenu.empty();
@@ -204,8 +208,30 @@ qwebirc.ui.QUI = new Class({
         dropdownMenu.hide();
         return;
       }
-
-      dropdownMenu.setStyle("display", "inline-block");
+      // Make it measurable first (hidden visibility)
+  dropdownMenu.setStyles({display: "block", visibility: "hidden"});
+      // Compute desired coordinates (below the dropdown tab)
+      try {
+        var tabPos = dropdown.getPosition();
+        var tabSize = dropdown.getSize();
+        var menuSize = dropdownMenu.getSize();
+        var top = tabPos.y + tabSize.y + 4; // 4px gap below tab
+        var left = tabPos.x; // align left edges
+        // If menu would overflow right edge, shift left
+        var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+        if(left + menuSize.x > viewportWidth - 4) {
+          left = Math.max(4, viewportWidth - menuSize.x - 4);
+        }
+        // Prevent going above top (shouldn't normally)
+        if(top + menuSize.y > window.innerHeight - 4) {
+          // If not enough space below, try placing above
+            var altTop = tabPos.y - menuSize.y - 4;
+            if(altTop > 4) top = altTop; // only if fits
+        }
+        dropdownMenu.setStyles({left: left + "px", top: top + "px"});
+      } catch(e) {}
+      // Finally show
+      dropdownMenu.setStyle("visibility", "visible");
       dropdownMenu.visible = true;
       
       document.addEvent("mousedown", hideEvent);

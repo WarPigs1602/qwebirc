@@ -14,7 +14,7 @@ qwebirc.ui.UI_COMMANDS_P1 = [
 ];
 
 qwebirc.ui.UI_COMMANDS_P2 = [
-  [function(){ return __qwebircGetTabLabel('TAB_ABOUT', 'About qwebirc'); }, "about"]
+  [function(){ return __qwebircGetTabLabel('TAB_ABOUT', 'About mwebirc'); }, "about"]
 ];
 
 if (window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
@@ -25,7 +25,7 @@ if (window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
       [function(){ return __qwebircGetTabLabel('TAB_EMBED', 'Add webchat to your site'); }, "embedded"]
     ];
     qwebirc.ui.UI_COMMANDS_P2 = [
-      [function(){ return __qwebircGetTabLabel('TAB_ABOUT', 'About qwebirc'); }, "about"]
+      [function(){ return __qwebircGetTabLabel('TAB_ABOUT', 'About mwebirc'); }, "about"]
     ];
   });
 }

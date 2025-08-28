@@ -1,9 +1,9 @@
 
-# qwebirc – Modern Web IRC Client
+# mwebirc – Modern Web IRC Client (formerly qwebirc)
 
 ![CI](https://github.com/qwebirc/qwebirc/workflows/CI/badge.svg)
 
-qwebirc is a web-based IRC client built with Python (Twisted) and a lightweight JavaScript UI layer. It focuses on a responsive UX, live language switching and a customizable theme system.
+mwebirc (formerly qwebirc) is a web-based IRC client built with Python (Twisted) and a lightweight JavaScript UI layer. It focuses on a responsive UX, live language switching and a customizable theme system.
 
 ## Key Features
 
@@ -24,7 +24,7 @@ qwebirc is a web-based IRC client built with Python (Twisted) and a lightweight 
 ### 1. Clone
 ```
 git clone https://github.com/WarPigs1602/qwebirc.git
-cd qwebirc
+cd qwebirc  # repository name unchanged yet
 ```
 
 ### 2. Python Environment (recommended)

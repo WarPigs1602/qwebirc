@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">mwebirc Favicon</title>
+  <defs>
+    <linearGradient id="gf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7a6ff0" />
+      <stop offset="100%" stop-color="#5a5fcf" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="64" height="64" rx="14" ry="14" fill="#232634"/>
+  <path d="M10 12h44c2.2 0 4 1.8 4 4v22c0 2.2-1.8 4-4 4H33l-11 10c-2 1.8-5 .4-5-2v-8H10c-2.2 0-4-1.8-4-4V16c0-2.2 1.8-4 4-4z" fill="url(#gf)"/>
+  <path d="M17 24c0-6 4.3-11 10-11 4.3 0 7.7 2.1 9 5.8 1.8-3.7 5.3-5.8 9.2-5.8 8.1 0 13.2 6.1 13.2 15.4V52h-9.5V32.3c0-3.9-2.1-6.4-5.6-6.4-3.7 0-5.8 2.6-5.8 6.6V52h-9.5V32.1c0-4-2.3-6.6-5.7-6.6-3.5 0-5.6 2.7-5.6 6.8V52H17V24z" fill="#fff"/>
+</svg>

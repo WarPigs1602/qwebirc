@@ -39,7 +39,7 @@
   "EMBED_CHOOSE_NICK_DESC": "At startup would you like the client to use a random nickname, a preset nickname or a nickname of the users choice?",
   "EMBED_CHOOSE_NICK_HINT": "It is recommended that you only use a preset nickname if the client is for your own personal use.",
   "EMBED_NICK_USER_CHOOSE": "Make the user choose a nickname.",
-  "EMBED_NICK_RANDOM": "Use a random nickname, e.g. qwebirc12883.",
+  "EMBED_NICK_RANDOM": "Use a random nickname, e.g. mwebirc12883.",
   "EMBED_NICK_PRESET": "Use a preset nickname of your choice.",
   "EMBED_CONNECT_DIALOG_TITLE": "Display connect dialog?",
   "EMBED_CONNECT_DIALOG_QUESTION": "Do you want the user to be shown the connect dialog (with the values you have supplied pre-entered) or just a connect confirmation?",
@@ -64,7 +64,7 @@
   "EMBED_BTN_CLOSE": "Close",
   "TAB_OPTIONS": "Options",
   "TAB_EMBED": "Add webchat to your site",
-  "TAB_ABOUT": "About qwebirc",
+  "TAB_ABOUT": "About mwebirc",
   "TAB_CONNECT": "Connect",
   "TAB_STATUS": "Status"
   ,"NICKMENU_OWNER": "owner"
@@ -192,10 +192,10 @@
   ,"EMOJI_SKIN_MEDIUM": "Medium"
   ,"EMOJI_SKIN_DARK": "Dark"
   ,"EMOJI_SKIN_VERYDARK": "Very Dark"
-  ,"STATUS_VERSION": "qwebirc v{version}"
-  ,"STATUS_COPYRIGHT1": "Copyright (C) 2008-2019 Chris Porter and the qwebirc project."
+  ,"STATUS_VERSION": "mwebirc v{version}"
+  ,"STATUS_COPYRIGHT1": "Originally qwebirc (C) 2008-2019 Chris Porter and project."
   ,"STATUS_COPYRIGHT2": "Copyright (C) 2025 WarPigs1602 and contributors."
-  ,"STATUS_PROJECT_URL": "https://github.com/WarPigs1602/qwebirc"
+  ,"STATUS_PROJECT_URL": "https://github.com/WarPigs1602/qwebirc"  
   ,"STATUS_LICENSE": "Licensed under the GNU General Public License, Version 2."
   }
 }

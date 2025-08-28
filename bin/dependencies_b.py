@@ -26,9 +26,9 @@ def check_dependencies():
   print("0 errors, %d warnings." % i)
 
   if i == 0:
-    print("looks like you've got everything you need to run qwebirc!")
+  print("looks like you've got everything you need to run mwebirc!")
   else:
-    print("you can run qwebirc despite these.")
+  print("you can run mwebirc despite these.")
 
   f = open(".checked", "w")
   f.close()
@@ -40,11 +40,11 @@ def check_win32():
   try:
     import win32con
   except ImportError:
-    fail("qwebirc requires pywin32, see:", "http://sourceforge.net/project/showfiles.php?group_id=78018")
+  fail("mwebirc requires pywin32, see:", "http://sourceforge.net/project/showfiles.php?group_id=78018")
   
 def check_java():
   def java_warn(specific):
-    warn(specific, "java is not required, but allows qwebirc to compress output,", "making it faster to download.", "you can get java at http://www.java.com/")
+  warn(specific, "java is not required, but allows mwebirc to compress output,", "making it faster to download.", "you can get java at http://www.java.com/")
     
   try:
     p = subprocess.Popen(["java", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=os.name == "nt")
@@ -60,7 +60,7 @@ def check_java():
   
 def check_git():
   def git_warn(specific):
-    warn(specific, "git is not required, but allows qwebirc to save bandwidth by versioning.")
+  warn(specific, "git is not required, but allows mwebirc to save bandwidth by versioning.")
     
   try:
     p = subprocess.Popen(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=os.name == "nt")
@@ -79,10 +79,10 @@ def check_zope():
     from zope.interface import Interface
   except ImportError:
     if sys.platform.startswith("win"):
-      fail("qwebirc requires zope interface",
+      fail("mwebirc requires zope interface",
            "see pypi: http://pypi.python.org/pypi/zope.interface")
     else:
-      fail("qwebirc requires zope interface.",
+      fail("mwebirc requires zope interface.",
            "this should normally come with twisted, but can be downloaded",
            "from pypi: http://pypi.python.org/pypi/zope.interface")
 
@@ -90,7 +90,7 @@ def check_twisted():
   try:
     import twisted
   except ImportError:
-    fail("qwebirc requires twisted (at least 8.2.0), see http://twistedmatrix.com/")
+  fail("mwebirc requires twisted (at least 8.2.0), see http://twistedmatrix.com/")
 
   def twisted_fail(x, y=None):
     fail("you don't seem to have twisted's %s module." % x,

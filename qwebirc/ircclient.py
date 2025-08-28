@@ -45,14 +45,14 @@ class QWebIRCClient(basic.LineReceiver):
 
   def handle_LANG(self, params):
     if not params:
-      self.write(":qwebirc NOTICE * :Usage: /LANG <code>")
+      self.write(":mwebirc NOTICE * :Usage: /LANG <code>")
       return
     lang = params[0].lower()
     if lang in self.i18n.translations:
       self.set_language(lang)
-      self.write(f":qwebirc NOTICE * :Language set to {lang}")
+      self.write(f":mwebirc NOTICE * :Language set to {lang}")
     else:
-      self.write(f":qwebirc NOTICE * :Unknown language code: {lang}")
+      self.write(f":mwebirc NOTICE * :Unknown language code: {lang}")
 
   def __init__(self, *args, **kwargs):
     self.__nickname = "(unregistered)"
@@ -235,7 +235,7 @@ class QWebIRCClient(basic.LineReceiver):
       hmac = hmacfn(ident, ip)
       self.write("USER %s bleh bleh %s %s :%s" % (ident, ip, hmac, realname))
     elif config.WEBIRC_MODE == "webirc":
-      self.write("WEBIRC %s qwebirc %s %s" % (config.WEBIRC_PASSWORD, hostname, ip))
+      self.write("WEBIRC %s mwebirc %s %s" % (config.WEBIRC_PASSWORD, hostname, ip))
       self.write("USER %s bleh %s :%s" % (ident, ip, realname))
     elif config.WEBIRC_MODE == "cgiirc":
       self.write("PASS %s_%s_%s" % (config.CGIIRC_STRING, ip, hostname))
@@ -271,7 +271,7 @@ class QWebIRCClient(basic.LineReceiver):
     if message == "Session disconnect":
       self.write("QUIT :Disconnected")
     else:
-      self.write("QUIT :qwebirc exception: %s" % message)
+      self.write("QUIT :mwebirc exception: %s" % message)
     self.transport.loseConnection()
 
   def disconnect(self, reason):

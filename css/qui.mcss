@@ -635,17 +635,22 @@ div#noscript {
   filter: brightness(0) invert(1);
 }
 
-.qwebirc-qui .dropdownmenu {
-  z-index: 100;
+.qwebirc-qui .dropdownmenu,
+.dropdownmenu { /* global fallback when moved outside .qwebirc-qui */
+  z-index: 1000; /* raise above panes */
   border: 1px solid $(menu_border);
-  position: relative;
-  top: 10px;
-  left: 10px;
+  position: absolute; /* allow JS to place it near icon */
+  top: 0; /* overridden dynamically */
+  left: 0; /* overridden dynamically */
   background: $(menu_background);
   box-shadow: 0 2px 8px #0008;
+  min-width: 140px;
+  border-radius: 6px;
+  overflow: hidden;
 }
 
-.qwebirc-qui .dropdownmenu a {
+.qwebirc-qui .dropdownmenu a,
+.dropdownmenu a { /* global fallback */
   display: block;
   font-size: 0.8em;
   color: $(menu_text);
@@ -657,7 +662,8 @@ div#noscript {
   padding-right: 3px;
 }
 
-.qwebirc-qui .dropdownmenu a:hover {
+.qwebirc-qui .dropdownmenu a:hover,
+.dropdownmenu a:hover { /* global fallback */
   background: $(menu_hover_background); /* IE is rubbish and doesn't like #FFFFFF or white */
 }
 
