@@ -505,6 +505,16 @@ qwebirc.ui.StandardUI = new Class({
     if(d._applyTranslatedTitle) {
       try { d._applyTranslatedTitle(); } catch(e) {}
     }
+    // Sicherstellen, dass der SVG-Tab-Close-Button für Custom-Panes aufgebaut wurde
+    try {
+      if(d._ensureTabClose) {
+        d._ensureTabClose(d.type, d._baseName || d.name);
+        // Falls weiterhin leer: erzwinge direkten SVG-Markup-Einbau
+        if(d.tabclose && !d.tabclose.getElement('svg')) {
+          d.tabclose.set('html','<svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+        }
+      }
+    } catch(e) { try { console.debug('[qwebirc][qui] pane close rebuild error', e); } catch(_) {} }
   },
   embeddedWindow: function() {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';

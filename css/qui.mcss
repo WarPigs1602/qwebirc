@@ -454,6 +454,7 @@ html {
   box-shadow: none;
   transition: background 0.15s;
   position: relative;
+  flex: 0 0 auto; /* verhindert Schrumpfen */
 }
 .qwebirc-qui .tabclose:hover {
   background: #2a2d3a;
@@ -475,6 +476,7 @@ html {
   pointer-events: none;
   transition: stroke 0.15s, filter 0.15s, box-shadow 0.15s;
   filter: drop-shadow(0 0 2px #0008);
+  box-sizing: content-box;
 }
 .qwebirc-qui .tabclose:hover svg {
   stroke: #ff2d2d;
@@ -497,6 +499,40 @@ html {
 .qwebirc-qui .tab-selected .tabclose:hover svg {
   stroke: #ffaaaa;
 }
+
+/* Tab Icons für spezielle Pane-Typen */
+.qwebirc-qui a.tab.tab-has-icon { padding-left: 26px; position: relative; }
+.qwebirc-qui a.tab svg.tabicon { position: absolute; left: 6px; width: 14px; height: 14px; top: 50%; transform: translateY(-50%); opacity: 0.85; }
+.qwebirc-qui a.tab:hover svg.tabicon { opacity: 1; }
+.qwebirc-qui a.tab.tab-selected svg.tabicon { opacity: 1; }
+.qwebirc-qui a.tab.tab-icon-options svg.tabicon { /* optional spezifische Farbe */ }
+.qwebirc-qui a.tab.tab-icon-embed svg.tabicon { }
+.qwebirc-qui a.tab.tab-icon-about svg.tabicon { }
+
+/* Pane (Options / Embed / About) Close Button */
+.qwebirc-qui .pane-host { position: relative; }
+.qwebirc-qui .pane-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  background: none;
+  color: #e05c5c;
+  transition: background 0.15s;
+  z-index: 50;
+}
+.qwebirc-qui .pane-close:hover { background: #2a2d3a; }
+.qwebirc-qui .pane-close svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; fill: none; filter: drop-shadow(0 0 2px #0008); transition: stroke 0.15s, filter 0.15s; }
+.qwebirc-qui .pane-close:hover svg { stroke: #ff2d2d; filter: drop-shadow(0 0 4px #ff2d2d88); }
+.qwebirc-qui .pane-close:empty:before { content: "×"; font-size: 16px; font-weight: 600; line-height: 1; }
+.qwebirc-qui .tab-selected .pane-close svg { stroke: #ff8080; }
+.qwebirc-qui .tab-selected .pane-close:hover svg { stroke: #ffaaaa; }
 
 @media screen and (max-device-width:1024px) {
   .qwebirc-qui .tabclose {

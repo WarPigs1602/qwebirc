@@ -62,6 +62,9 @@ qwebirc.ui.EmbedWizard = new Class({
   create: function(parent) {
     this.t = parent;
 
+  try { this.t.addClass('pane-host'); } catch(e) {}
+  this.__injectCloseButton();
+
     var titleRow = this.newRow();
     this.title = new Element("h2");
     this.title.setStyle("margin-top", "0px");
@@ -358,3 +361,26 @@ qwebirc.ui.EmbedWizard = new Class({
   return qwebirc.global.baseURL + (URL.length>0?"?":"") + URL.join("&");
   }
 });
+
+// Close-Button für Embed Wizard
+qwebirc.ui.EmbedWizard.prototype.__injectCloseButton = function() {
+  var host = this.t;
+  if(!host || host.getElement('.pane-close')) return;
+  var btn = new Element('span', { 'class': 'pane-close', 'title': 'Close'});
+  try {
+    var svgns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(svgns, 'svg');
+    svg.setAttribute('viewBox','0 0 14 14');
+    var l1 = document.createElementNS(svgns, 'line'); l1.setAttribute('x1','3'); l1.setAttribute('y1','3'); l1.setAttribute('x2','11'); l1.setAttribute('y2','11');
+    var l2 = document.createElementNS(svgns, 'line'); l2.setAttribute('x1','11'); l2.setAttribute('y1','3'); l2.setAttribute('x2','3'); l2.setAttribute('y2','11');
+    svg.appendChild(l1); svg.appendChild(l2);
+    btn.appendChild(svg);
+  } catch(e) { btn.set('text','×'); }
+  btn.addEvent('click', function(e){ new Event(e).stop(); this.fireEvent('close'); }.bind(this));
+  host.appendChild(btn);
+  var updateTitle = function(){
+    try { var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en'; var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang]; if(i18n && i18n.options && (i18n.options.EMBED_BTN_CLOSE || i18n.options.CANCEL)) btn.set('title', i18n.options.EMBED_BTN_CLOSE || i18n.options.CANCEL); } catch(err) {}
+  };
+  updateTitle();
+  window.addEventListener('qwebirc:languageChanged', updateTitle);
+};

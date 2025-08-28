@@ -6,6 +6,24 @@ qwebirc.ui.QUI = new Class({
     this.parentElement = parentElement;
     this.setModifiableStylesheet("qui");
   this.client = null; // Reference to IRC client for typing
+    // Später Reparatur-Check für Pane-Tab-Close-Buttons (Options / Embed / About)
+    try {
+      var self = this;
+      window.addEvent('qwebirc:languageChanged', function(){ self.__repairPaneTabCloses && self.__repairPaneTabCloses(); });
+      this.__repairPaneTabCloses = function(){
+        try {
+          (self.windowArray||[]).forEach(function(w){
+            if(!w) return;
+            if(w.pane && (w.pane.type=='optionspane' || w.pane.type=='embeddedwizard' || w.pane.type=='aboutpane')) {
+              if(w._ensureTabClose) w._ensureTabClose(w.type, w._baseName || w.name);
+              if(w.tabclose && !w.tabclose.getElement('svg')) {
+                w.tabclose.set('html','<svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+              }
+            }
+          });
+        } catch(e) {}
+      };
+    } catch(e) {}
   },
   postInitialize: function() {
     this.qjsui = new qwebirc.ui.QUI.JSUI("qwebirc-qui", this.parentElement);
@@ -972,63 +990,72 @@ qwebirc.ui.QUI.Window = new Class({
     // SpaceNode nach dem eigenen Tab einfügen
     parentObject.tabs.insertBefore(this.spaceNode, this.tab.nextSibling);
 
-    if(type != qwebirc.ui.WINDOW_STATUS && type != qwebirc.ui.WINDOW_CONNECT) {
-      var tabclose = new Element("span");
-      this.tabclose = tabclose;
-      // SVG sauber im Namespace erstellen (verhindert unsichtbares Icon bei manchen Engines) + Fallback '×'
-      try {
-        var svgns = "http://www.w3.org/2000/svg";
-        var svg = document.createElementNS(svgns, "svg");
-        svg.setAttribute("viewBox", "0 0 14 14");
-        svg.setAttribute("width", "14");
-        svg.setAttribute("height", "14");
-        var l1 = document.createElementNS(svgns, "line");
-        l1.setAttribute("x1", "3"); l1.setAttribute("y1", "3"); l1.setAttribute("x2", "11"); l1.setAttribute("y2", "11");
-        var l2 = document.createElementNS(svgns, "line");
-        l2.setAttribute("x1", "11"); l2.setAttribute("y1", "3"); l2.setAttribute("x2", "3"); l2.setAttribute("y2", "11");
-        // Styles über CSS, aber minimaler Inline-Fallback
-        l1.setAttribute("stroke", "currentColor"); l2.setAttribute("stroke", "currentColor");
-        l1.setAttribute("stroke-width", "2"); l2.setAttribute("stroke-width", "2");
-        l1.setAttribute("stroke-linecap", "round"); l2.setAttribute("stroke-linecap", "round");
-        svg.appendChild(l1); svg.appendChild(l2);
-        tabclose.empty();
-        tabclose.appendChild(svg);
-      } catch(e) {
-        // Fallback Text falls SVG nicht gerendert wird
-        tabclose.set("text", "×");
-      }
-      tabclose.addClass("tabclose");
-      var close = function(e) {
-        new Event(e).stop();
-
-        if(this.closed)
-          return;
-
-        if(type == qwebirc.ui.WINDOW_CHANNEL)
-          this.client.exec("/PART " + name);
-
-        this.close();
-
-        //parentObject.inputbox.focus();
-      }.bind(this);
-
-      tabclose.addEvent("click", close);
-      this.tab.addEvent("mouseup", function(e) {
-        var button = 1;
-
-        if(Browser.Engine.trident)
-          button = 4;
-
-        if(e.event.button == button)
-          close(e);
-      }.bind(this));
-
-      this.tab.appendChild(tabclose);
-    } else {
-      this.tabclose = null;
-    }
+  // Close-Button (wird zunächst erstellt, später nach Text korrekt positioniert)
+  this._ensureTabClose(type, name);
 
     this.tab.appendText(name);
+    // Nach dem Hinzufügen des Textes den Close-Button ggf. ans Ende (oder bei SideTabs an den Anfang) verschieben
+    if(this.tabclose) {
+      try {
+        if(this.parentObject.sideTabs) {
+          // Für seitliche Tabs: Close-Button voran (float rechts via CSS regelt Alignment)
+          this.tab.insertBefore(this.tabclose, this.tab.firstChild);
+        } else {
+          // Horizontale Tabs: Close-Button am Ende
+          this.tab.appendChild(this.tabclose);
+        }
+      } catch(e) {}
+    }
+    // Tab-Icon (SVG) für spezielle Panes hinzufügen
+    (function(){
+      try {
+        var paneType = (this.pane && this.pane.type) ? this.pane.type : (this.identifier||'');
+        var iconClass = null;
+        // Mapping pane type -> icon (simple inline SVG path/lines)
+        var svgns = 'http://www.w3.org/2000/svg';
+        var makeIcon = function(kind){
+          var svg = document.createElementNS(svgns,'svg');
+          svg.setAttribute('viewBox','0 0 16 16');
+          svg.setAttribute('width','16');
+          svg.setAttribute('height','16');
+          svg.setAttribute('class','tabicon');
+          if(kind==='options') {
+            var c = document.createElementNS(svgns,'circle'); c.setAttribute('cx','8'); c.setAttribute('cy','8'); c.setAttribute('r','5'); c.setAttribute('fill','none'); c.setAttribute('stroke','currentColor'); c.setAttribute('stroke-width','2'); svg.appendChild(c);
+            var r = document.createElementNS(svgns,'rect'); r.setAttribute('x','7'); r.setAttribute('y','3'); r.setAttribute('width','2'); r.setAttribute('height','4'); r.setAttribute('fill','currentColor'); svg.appendChild(r);
+          } else if(kind==='embed') {
+            var r2 = document.createElementNS(svgns,'rect'); r2.setAttribute('x','2'); r2.setAttribute('y','4'); r2.setAttribute('width','12'); r2.setAttribute('height','8'); r2.setAttribute('rx','1'); r2.setAttribute('fill','none'); r2.setAttribute('stroke','currentColor'); r2.setAttribute('stroke-width','1.6'); svg.appendChild(r2);
+            var p = document.createElementNS(svgns,'path'); p.setAttribute('d','M6 6l-2 2 2 2M10 6l2 2-2 2'); p.setAttribute('fill','none'); p.setAttribute('stroke','currentColor'); p.setAttribute('stroke-width','1.6'); p.setAttribute('stroke-linecap','round'); p.setAttribute('stroke-linejoin','round'); svg.appendChild(p);
+          } else if(kind==='about') {
+            var circle = document.createElementNS(svgns,'circle'); circle.setAttribute('cx','8'); circle.setAttribute('cy','8'); circle.setAttribute('r','6'); circle.setAttribute('fill','none'); circle.setAttribute('stroke','currentColor'); circle.setAttribute('stroke-width','1.6'); svg.appendChild(circle);
+            var line = document.createElementNS(svgns,'line'); line.setAttribute('x1','8'); line.setAttribute('y1','5'); line.setAttribute('x2','8'); line.setAttribute('y2','9'); line.setAttribute('stroke','currentColor'); line.setAttribute('stroke-width','1.6'); line.setAttribute('stroke-linecap','round'); svg.appendChild(line);
+            var dot = document.createElementNS(svgns,'circle'); dot.setAttribute('cx','8'); dot.setAttribute('cy','11'); dot.setAttribute('r','0.8'); dot.setAttribute('fill','currentColor'); svg.appendChild(dot);
+          } else {
+            return null;
+          }
+          return svg;
+        };
+        if(paneType==='optionspane') iconClass='options';
+        else if(paneType==='embeddedwizard') iconClass='embed';
+        else if(paneType==='aboutpane') iconClass='about';
+        if(iconClass) {
+          // Icon nur hinzufügen, wenn noch keines vorhanden und Tab nicht schon Text-only gesetzt wurde
+          if(!this.tab.getElement('svg.tabicon')) {
+            var icon = makeIcon(iconClass);
+            if(icon) {
+              // Vor dem Text einfügen (nach evtl. Close-Button bei SideTabs?)
+              if(this.parentObject.sideTabs) {
+                this.tab.insertBefore(icon, this.tab.firstChild);
+              } else {
+                // Text ist erstes Child; Icon davor
+                this.tab.insertBefore(icon, this.tab.firstChild);
+              }
+              this.tab.addClass('tab-has-icon');
+              this.tab.addClass('tab-icon-' + iconClass);
+            }
+          }
+        }
+      } catch(err) {}
+    }).bind(this)();
     this.tab.addEvent("click", function(e) {
       new Event(e).stop();
       
@@ -1469,37 +1496,8 @@ qwebirc.ui.QUI.Window.prototype._applyTranslatedTitle = function() {
 qwebirc.ui.QUI.Window.prototype.setTitle = function(newTitle) {
   this.name = newTitle;
   if(this.tab) {
-    // Falls Close-Button verloren ging (z.B. durch vorherige Manipulation), neu erzeugen
-  var prevent = false; // wieder alle (außer Status/Connect) mit Close-Button
-  if(!this.tabclose && this.type != qwebirc.ui.WINDOW_STATUS && this.type != qwebirc.ui.WINDOW_CONNECT) {
-      var tabclose = new Element("span");
-      try {
-        var svgns = "http://www.w3.org/2000/svg";
-        var svg = document.createElementNS(svgns, "svg");
-        svg.setAttribute("viewBox", "0 0 14 14");
-        svg.setAttribute("width", "14");
-        svg.setAttribute("height", "14");
-        var l1 = document.createElementNS(svgns, "line");
-        l1.setAttribute("x1", "3"); l1.setAttribute("y1", "3"); l1.setAttribute("x2", "11"); l1.setAttribute("y2", "11");
-        var l2 = document.createElementNS(svgns, "line");
-        l2.setAttribute("x1", "11"); l2.setAttribute("y1", "3"); l2.setAttribute("x2", "3"); l2.setAttribute("y2", "11");
-        l1.setAttribute("stroke", "currentColor"); l2.setAttribute("stroke", "currentColor");
-        l1.setAttribute("stroke-width", "2"); l2.setAttribute("stroke-width", "2");
-        l1.setAttribute("stroke-linecap", "round"); l2.setAttribute("stroke-linecap", "round");
-        svg.appendChild(l1); svg.appendChild(l2);
-        tabclose.appendChild(svg);
-      } catch(e) {
-        tabclose.set("text", "×");
-      }
-      tabclose.addClass("tabclose");
-      tabclose.addEvent("click", function(e) {
-        new Event(e).stop();
-        if(this.closed) return;
-        if(this.type == qwebirc.ui.WINDOW_CHANNEL) this.client.exec("/PART " + this._baseName);
-        this.close();
-      }.bind(this));
-      this.tabclose = tabclose;
-    }
+    // Close-Button sicherstellen (inkl. Debug-Ausgabe bei Problemen)
+    this._ensureTabClose(this.type, this._baseName || this.name);
     var close = this.tabclose;
     this.tab.empty();
     this.tab.appendText(newTitle);
@@ -1507,5 +1505,75 @@ qwebirc.ui.QUI.Window.prototype.setTitle = function(newTitle) {
   }
   if(this.active) {
     try { document.title = newTitle + ' - ' + this.parentObject.options.appTitle; } catch(e) {}
+  }
+};
+
+// Interne Hilfsroutine: erstellt (oder repariert) den SVG-Close-Button für einen Tab
+qwebirc.ui.QUI.Window.prototype._ensureTabClose = function(type, originalName) {
+  if(type == qwebirc.ui.WINDOW_STATUS || type == qwebirc.ui.WINDOW_CONNECT) {
+    this.tabclose = null; return;
+  }
+  // Rekonstruiere auch, wenn Element existiert aber leer / kein SVG enthält
+  if(this.tabclose && this.tabclose.parentNode === this.tab && this.tabclose.getElement && this.tabclose.getElement('svg')) {
+    // Alles gut
+  } else {
+    // Neu oder reparieren
+    if(!this.tabclose) this.tabclose = new Element('span');
+    // Falls leer oder ohne SVG: Inhalt neu füllen
+    if(!this.tabclose.getElement || !this.tabclose.getElement('svg')) {
+      try { this.tabclose.empty(); } catch(e) {}
+    }
+  }
+  var tabclose = this.tabclose || new Element('span');
+  tabclose.addClass('tabclose');
+  // Säubere evtl. alten Inhalt
+  if(!tabclose.getElement('svg')) { try { tabclose.empty(); } catch(e) {} }
+  // SVG erzeugen
+  var created = false;
+  (function(){
+    // Prüfe möglichst früh auf SVG-Unterstützung
+    var supportsSVG = !!(window.SVGAngle || document.createElementNS && document.createElementNS('http://www.w3.org/2000/svg','svg').createSVGRect);
+    if(!supportsSVG) {
+      tabclose.set('text','×');
+      try { console.warn('[qwebirc][qui] Kein SVG-Support – fallback × für Tab', this.name); } catch(e) {}
+      return;
+    }
+    // Direkter Markup (vermeidet createElementNS Fehler in exotischen Browsern / CSP edge cases)
+    var markup = '<svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">'
+      + '<line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />'
+      + '<line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />'
+      + '</svg>';
+    if(!tabclose.getElement('svg')) {
+      try {
+        tabclose.set('html', markup);
+        created = !!tabclose.getElement('svg');
+        if(!created) tabclose.set('text','×');
+      } catch(e) {
+        tabclose.set('text','×');
+        try { console.warn('[qwebirc][qui] SVG-Markup Fallback × wegen Fehler:', e); } catch(_) {}
+      }
+    } else {
+      created = true; // bereits vorhanden
+    }
+  }).bind(this)();
+  if(!tabclose.retrieve('qwebirc-close-bound')) {
+    tabclose.addEvent('click', function(e){
+      new Event(e).stop();
+      if(this.closed) return;
+      if(this.type == qwebirc.ui.WINDOW_CHANNEL) this.client.exec('/PART ' + (originalName || this.name));
+      this.close();
+    }.bind(this));
+    tabclose.store('qwebirc-close-bound', true);
+  }
+  this.tabclose = tabclose;
+  try {
+    if(this.parentObject && this.parentObject.sideTabs) {
+      this.tab.insertBefore(tabclose, this.tab.firstChild);
+    } else {
+      this.tab.appendChild(tabclose);
+    }
+  } catch(e) {}
+  if(!created) {
+    try { console.debug('[qwebirc][qui] Close-Button ohne SVG (Fallback) für Tab', this.name); } catch(e) {}
   }
 };
