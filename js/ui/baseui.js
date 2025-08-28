@@ -121,11 +121,11 @@ qwebirc.ui.BaseUI = new Class({
     this.selectWindow(w);
     if(!this.firstClient) {
   this.firstClient = true;
-  w.addLine("", "qwebirc v" + qwebirc.VERSION);
-  w.addLine("", "Copyright (C) 2008-2019 Chris Porter and the qwebirc project.");
-  w.addLine("", "Copyright (C) 2025 WarPigs1602 and contributors.");
-  w.addLine("", "https://github.com/WarPigs1602/qwebirc");
-  w.addLine("", "Licensed under the GNU General Public License, Version 2.");
+  w.addLine("GENERICMESSAGE", {__i18nKey: 'STATUS_VERSION', version: qwebirc.VERSION, __i18nFallback: 'qwebirc v'+qwebirc.VERSION});
+  w.addLine("GENERICMESSAGE", {__i18nKey: 'STATUS_COPYRIGHT1', __i18nFallback: 'Copyright (C) 2008-2019 Chris Porter and the qwebirc project.'});
+  w.addLine("GENERICMESSAGE", {__i18nKey: 'STATUS_COPYRIGHT2', __i18nFallback: 'Copyright (C) 2025 WarPigs1602 and contributors.'});
+  w.addLine("GENERICMESSAGE", {__i18nKey: 'STATUS_PROJECT_URL', __i18nFallback: 'https://github.com/WarPigs1602/qwebirc'});
+  w.addLine("GENERICMESSAGE", {__i18nKey: 'STATUS_LICENSE', __i18nFallback: 'Licensed under the GNU General Public License, Version 2.'});
     }
     return w;
   },

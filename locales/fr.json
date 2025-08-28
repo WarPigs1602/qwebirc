@@ -177,7 +177,25 @@
     "ERROR_UNABLE_SEND": "Impossible d'envoyer après plusieurs essais.",
     "ERROR_CONN_CLOSED": "Erreur: connexion fermée après plusieurs échecs.",
     "ERROR_BAD_MSGTYPE": "Erreur: type de message invalide",
-    "ERROR_REMOTE_SERVER": "Connexion au serveur distant impossible.",
-    "ERROR_GENERIC_PREFIX": "Une erreur est survenue :"
+  "ERROR_REMOTE_SERVER": "Connexion au serveur distant impossible.",
+  "ERROR_GENERIC_PREFIX": "Une erreur est survenue :",
+  "EMOJI_CAT_SMILEYS": "Smileys & Personnes",
+  "EMOJI_CAT_ANIMALS": "Animaux & Nature",
+  "EMOJI_CAT_FOOD": "Nourriture & Boissons",
+  "EMOJI_CAT_TRAVEL": "Voyages & Lieux",
+  "EMOJI_CAT_OBJECTS": "Objets",
+  "EMOJI_CAT_FLAGS": "Drapeaux",
+  "EMOJI_CAT_SYMBOLS": "Symboles",
+  "EMOJI_SKIN_DEFAULT": "Défaut",
+  "EMOJI_SKIN_LIGHT": "Clair",
+  "EMOJI_SKIN_MEDLIGHT": "Moyen-clair",
+  "EMOJI_SKIN_MEDIUM": "Moyen",
+  "EMOJI_SKIN_DARK": "Foncé",
+  "EMOJI_SKIN_VERYDARK": "Très foncé",
+  "STATUS_VERSION": "qwebirc v{version}",
+  "STATUS_COPYRIGHT1": "Copyright (C) 2008-2019 Chris Porter et le projet qwebirc.",
+  "STATUS_COPYRIGHT2": "Copyright (C) 2025 WarPigs1602 et contributeurs.",
+  "STATUS_PROJECT_URL": "https://github.com/WarPigs1602/qwebirc",
+  "STATUS_LICENSE": "Sous licence GNU GPL version 2."
   }
 }

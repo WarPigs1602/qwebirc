@@ -251,5 +251,48 @@ qwebirc.irc.Commands = new Class({
     }
     
     this.send("PART " + channel + " :" + message);
+  }],
+  // /LANG <code>  -> Sprache umschalten (UI + Cookie) oder ohne Argument: verfügbare Sprachen anzeigen
+  cmd_LANG: [false, 1, 0, function(args) {
+    var w = this.getActiveWindow();
+    // Ermittle unterstützte Sprachen aus LANGUAGE Option
+    var supported = [];
+    try {
+      if(window.qwebirc && window.qwebirc.config && window.qwebirc.config.DefaultOptions) {
+        var inst = window.qwebirc.config.DefaultOptions.filter(function(o){ return o && o.prefix === 'LANGUAGE'; })[0];
+        if(inst && inst.options) supported = inst.options.map(function(x){ return x[1]; });
+      }
+    } catch(e) {}
+    if(!supported.length) {
+      // Fallback: bereits geladene Locale Keys
+      try {
+        if(window.qwebirc && window.qwebirc.i18n) {
+          supported = Object.keys(window.qwebirc.i18n).filter(function(k){ return k && k !== '__translators'; });
+        }
+      } catch(e) {}
+    }
+    var current = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    if(!args || !args.length || !args[0]) {
+      w.infoMessage("Current language: " + current + (supported.length? (" | Available: " + supported.join(", ")) : ""));
+      return;
+    }
+    var desired = String(args[0]).toLowerCase();
+    if(supported.length && supported.indexOf(desired) === -1) {
+      w.errorMessage("Unsupported language code: " + desired + (supported.length? (" | Available: " + supported.join(", ")): ""));
+      return;
+    }
+    // Interne Set-Funktion nutzen (persistiert auch Cookie via persistLanguageRobust)
+    try { setLanguageInternal(desired, supported); } catch(e) { w.errorMessage("Failed to set language."); return; }
+    // Locale laden (falls noch nicht) und Events feuern
+    try {
+      loadLocale(desired).then(function(){
+        try { localizeOptionsLabels(); } catch(_e) {}
+        try { if(window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n.__translators) window.qwebirc.i18n.__translators.forEach(function(fn){ try{ fn(desired); }catch(e){} }); } catch(_e) {}
+        try { window.dispatchEvent(new CustomEvent('qwebirc:languageChanged', {detail:{lang: desired}})); } catch(_e) {}
+        w.infoMessage("Language switched to: " + desired);
+      });
+    } catch(e) {
+      w.errorMessage("Error loading locale for: " + desired);
+    }
   }]
 });

@@ -25,6 +25,28 @@ qwebirc.ui.Window = new Class({
     this.lastSelected = null;
     this.subWindow = null;
     this.closed = false;
+    // Gespeicherte Metadaten für Event-Linien zur Live-Neuübersetzung
+    this.__storedEventLines = [];
+    // Set von Nachrichtentypen, die über i18n neu gerendert werden können
+    this.__translatableTypes = {
+      JOIN:1, OURJOIN:1, PART:1, QUIT:1, KICK:1, MODE:1, NICK:1, TOPIC:1, UMODE:1, INVITE:1,
+      WHOISUSER:1, WHOISREALNAME:1, WHOISCHANNELS:1, WHOISSERVER:1, WHOISACCOUNT:1, WHOISIDLE:1, WHOISAWAY:1,
+      WHOISOPER:1, WHOISOPERNAME:1, WHOISACTUALLY:1, WHOISGENERICTEXT:1, WHOISEND:1, AWAY:1,
+      GENERICERROR:1, GENERICMESSAGE:1, WALLOPS:1, CHANNELCREATIONTIME:1, CHANNELMODEIS:1,
+      IGNORED:1, UNIGNORED:1, IGNOREHEADER:1, IGNOREENTRY:1, IGNOREEMPTY:1, SILENCE:1, MODEMSG:1,
+      SIGNON:1, CONNECTING:1, CONNECT:1, CONNECTED:1, DISCONNECT:1, ERROR:1, SERVERNOTICE:1,
+  CAP_ACTIVE:1, CAP_AVAILABLE:1,
+  // Benachrichtigungstitel/-körper (werden zwar nicht als Linien gespeichert, aber zur Vollständigkeit für künftige Nutzung)
+  NOTIFYCHANMSGTITLE:1, NOTIFYCHANMSGBODY:1,
+  NOTIFYCHANACTIONTITLE:1, NOTIFYCHANACTIONBODY:1,
+  NOTIFYPRIVMSGTITLE:1, NOTIFYPRIVMSGBODY:1,
+  NOTIFYPRIVACTIONTITLE:1, NOTIFYPRIVACTIONBODY:1,
+  NOTIFYCHANNOTICETITLE:1, NOTIFYCHANNOTICEBODY:1,
+  NOTIFYPRIVNOTICETITLE:1, NOTIFYPRIVNOTICEBODY:1
+    };
+    // Sprachwechsel-Listener (nur einmal binden)
+    this.__onLanguageChangedBound = this.__onLanguageChanged.bind(this);
+    try { window.addEventListener('qwebirc:languageChanged', this.__onLanguageChangedBound); } catch(e) {}
     
     if(this.type & qwebirc.ui.WINDOW_LASTLINE) {
       this.lastPositionLine = new Element("hr");
@@ -32,11 +54,47 @@ qwebirc.ui.Window = new Class({
       this.lastPositionLineInserted = false;
     }
   },
+  __onLanguageChanged: function(ev) {
+    // Alle gespeicherten Linien neu rendern
+    // Performance: Nur aktive Fenster ODER alle? -> alle, damit beim Umschalten alles konsistent ist
+    for(var i=0;i<this.__storedEventLines.length;i++) {
+      var meta = this.__storedEventLines[i];
+      if(!meta || !meta.element || !meta.element.parentNode) continue; // evtl. abgeschnitten
+      this.__rerenderStoredLine(meta);
+    }
+  },
+  __purgeOrphanedStoredLines: function() {
+    // Entferne Einträge, deren DOM-Element nicht mehr existiert
+    if(!this.__storedEventLines.length) return;
+    var filtered = [];
+    for(var i=0;i<this.__storedEventLines.length;i++) {
+      var m = this.__storedEventLines[i];
+      if(m && m.element && m.element.parentNode) filtered.push(m);
+    }
+    this.__storedEventLines = filtered;
+  },
+  __rerenderStoredLine: function(meta) {
+    try {
+      // Timestamp-Span behalten (erstes Kind), rest entfernen
+      var el = meta.element;
+      if(!el) return;
+      var children = Array.prototype.slice.call(el.childNodes);
+      for(var i=1;i<children.length;i++) el.removeChild(children[i]);
+      // Neue Zeichenkette basierend auf aktueller Sprache
+      var dataClone = {}; for(var k in meta.data) if(meta.data.hasOwnProperty(k)) dataClone[k] = meta.data[k];
+      if(dataClone.__i18nKey) {
+        dataClone.m = this.__computeDynamicI18nMessage(dataClone);
+      }
+      var newMsg = this.parentObject.theme.message(meta.type, dataClone, false);
+      qwebirc.ui.Colourise(newMsg, el, this.client.exec, this.parentObject.urlDispatcher.bind(this.parentObject), this);
+    } catch(e) { /* ignore */ }
+  },
   updateTopic: function(topic, element)  {
     qwebirc.ui.Colourise(topic, element, this.client.exec, this.parentObject.urlDispatcher.bind(this.parentObject), this);
   },
   close: function() {
     this.closed = true;
+    try { if(this.__onLanguageChangedBound) window.removeEventListener('qwebirc:languageChanged', this.__onLanguageChangedBound); } catch(e) {}
     
     if($defined(this.scrolltimer)) {
       $clear(this.scrolltimer);
@@ -100,6 +158,7 @@ qwebirc.ui.Window = new Class({
   addLine: function(type, line, colour, element) {
     var hilight = qwebirc.ui.HILIGHT_NONE;
     var lhilight = false;
+  var originalDataObj = null; // Für spätere Re-Übersetzung
 
     if(type) {
       hilight = qwebirc.ui.HILIGHT_ACTIVITY;
@@ -138,8 +197,22 @@ qwebirc.ui.Window = new Class({
     if(!this.active && (hilight != qwebirc.ui.HILIGHT_NONE))
       this.setHilighted(hilight);
 
-    if(type)
+    if(type) {
+      // Falls bislang nur ein String übergeben wurde (Status-Messages etc.), in Objekt umbrechen
+      if(typeof line === 'string') {
+        line = {m: line};
+      }
+      if(line && typeof line === 'object') {
+        // Shallow Copy behalten (Originalvariablen behalten für spätere Übersetzung)
+        try { originalDataObj = {}; for(var k in line) { if(line.hasOwnProperty(k)) originalDataObj[k] = line[k]; } } catch(e) { originalDataObj = null; }
+        // Falls strukturierte i18n Daten vorhanden -> jetzt initiale Übersetzung erzeugen
+        if(line.__i18nKey) {
+          line = Object.assign({}, line); // Mutation vermeiden
+          line.m = this.__computeDynamicI18nMessage(line);
+        }
+      }
       line = this.parentObject.theme.message(type, line, lhilight);
+    }
     
     var tsE = document.createElement("span");
     tsE.className = "timestamp";
@@ -147,7 +220,37 @@ qwebirc.ui.Window = new Class({
     element.appendChild(tsE);
     
     qwebirc.ui.Colourise(line, element, this.client.exec, this.parentObject.urlDispatcher.bind(this.parentObject), this);
+    // Nach dem Colourise ggf. Event-Linie registrieren (auch wenn originalDataObj beim Klonen fehlgeschlagen hat)
+    if(type && this.__translatableTypes[type]) {
+      if(!originalDataObj) originalDataObj = {}; // Sicherstellen, dass wir etwas Speichernsames haben
+      this.__storedEventLines.push({type:type, data:originalDataObj, element:element});
+      // Speicher begrenzen parallel zu MAXIMUM_LINES_PER_WINDOW -> Aufräumen hier grob
+      if(this.__storedEventLines.length > qwebirc.ui.MAXIMUM_LINES_PER_WINDOW + 50) this.__purgeOrphanedStoredLines();
+    }
     this.scrollAdd(element);
+  },
+  __computeDynamicI18nMessage: function(dataObj) {
+    try {
+      var key = dataObj.__i18nKey;
+      if(!key) return dataObj.m || '';
+      var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+      var template = (i18n && i18n[key]) || dataObj.__i18nFallback || dataObj.m || '';
+      // Platzhalter {var} ersetzen
+      var out = template.replace(/\{([a-zA-Z0-9_]+)\}/g, function(_, v){ if(v in dataObj) return dataObj[v]; return '{'+v+'}'; });
+      // Falls bestimmte Felder existieren aber nicht im Template vorkommen, anhängen
+      function ensure(valKey, label) {
+        if(dataObj[valKey] && out.indexOf(dataObj[valKey]) === -1) {
+          if(out.indexOf('{'+valKey+'}') === -1 && out.indexOf(dataObj[valKey]) === -1) {
+            // Falls Template keine strukturelle Stelle hat, einfach anhängen
+            out += (out.trim().length ? ' ' : '') + dataObj[valKey];
+          }
+        }
+      }
+      ensure('capabilities');
+      ensure('mechanisms');
+      return out;
+    } catch(e) { return dataObj && dataObj.m || ''; }
   },
   errorMessage: function(message) {
     this.addLine("", message, "warncolour");
@@ -205,8 +308,16 @@ qwebirc.ui.Window = new Class({
     if($defined(element)) {
       var sd = this.scrolledDown();
       parent.appendChild(element);
-      if(parent.childNodes.length > qwebirc.ui.MAXIMUM_LINES_PER_WINDOW)
-        parent.removeChild(parent.firstChild);
+      if(parent.childNodes.length > qwebirc.ui.MAXIMUM_LINES_PER_WINDOW) {
+        var removed = parent.firstChild;
+        parent.removeChild(removed);
+        // Falls es eine gespeicherte Event-Linie war -> aus Storage löschen
+        if(this.__storedEventLines && this.__storedEventLines.length) {
+          for(var i=0;i<this.__storedEventLines.length;i++) {
+            if(this.__storedEventLines[i].element === removed) { this.__storedEventLines.splice(i,1); break; }
+          }
+        }
+      }
 
       if(sd && !this.scrollTimer)
         this.scrolltimer = this.scrollAdd.delay(50, this, [null]);

@@ -26,6 +26,50 @@ qwebirc.ui.ConnectPane = new Class({
     };
 
     var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
+  var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
+    // Einfaches Alert-Overlay für live-übersetzbare Meldungen
+    if(!document.getElementById('qwebirc-alert-overlay')) {
+      var ov = document.createElement('div');
+      ov.id = 'qwebirc-alert-overlay';
+      ov.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:99999;';
+      var box = document.createElement('div');
+      box.id = 'qwebirc-alert-box';
+      box.style.cssText = 'background:#1e222d;color:#fff;padding:16px 18px;border-radius:8px;max-width:480px;font:14px/1.4 sans-serif;box-shadow:0 4px 18px rgba(0,0,0,0.4);';
+      var msg = document.createElement('div');
+      msg.id = 'qwebirc-alert-message';
+      msg.style.marginBottom = '14px';
+      var btn = document.createElement('button');
+      btn.id = 'qwebirc-alert-close';
+      btn.textContent = 'OK';
+      btn.style.cssText = 'background:#3b82f6;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;';
+      btn.addEventListener('click', function(){ ov.style.display='none'; });
+      box.appendChild(msg); box.appendChild(btn); ov.appendChild(box); document.body.appendChild(ov);
+    }
+    var selfAlert = this;
+    window.qwebirc = window.qwebirc || {}; window.qwebirc.__lastAlert = window.qwebirc.__lastAlert || null;
+    function showI18nAlert(key, fallback) {
+      var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+      var text = (i18n && i18n[key]) || fallback || key;
+      var ov = document.getElementById('qwebirc-alert-overlay');
+      var msg = document.getElementById('qwebirc-alert-message');
+      var btn = document.getElementById('qwebirc-alert-close');
+      if(!ov || !msg) { alert(text); return; }
+      msg.textContent = text;
+      // Button-Label übersetzbar falls SAVE/CANCEL genutzt werden könnte – hier einfache Lokalisierung prüfen
+      var okKey = 'OK';
+      if(i18n && i18n.SAVE) btn.textContent = i18n.SAVE; else btn.textContent = 'OK';
+  if(i18n && i18n.SAVE) btn.textContent = i18n.SAVE; else btn.textContent = 'OK';
+      ov.style.display='flex';
+      window.qwebirc.__lastAlert = {key:key, fallback:fallback};
+    }
+    // Übersetzer registrieren um offenes Alert neu zu übersetzen
+    var regA = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n.registerTranslator;
+    if(typeof regA === 'function') regA(function(){
+      if(window.qwebirc.__lastAlert) {
+        var la = window.qwebirc.__lastAlert; showI18nAlert(la.key, la.fallback);
+      }
+    });
     var cb = delayfn.delay(500);
 
   var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
@@ -424,7 +468,7 @@ qwebirc.ui.ConnectPane = new Class({
         if (!token) {
           var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
           var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
-          alert((i18n2 && i18n2.ALERT_CAPTCHA_REQUIRED) ? i18n2.ALERT_CAPTCHA_REQUIRED : 'Please complete the CAPTCHA.');
+          showI18nAlert('ALERT_CAPTCHA_REQUIRED', 'Please complete the CAPTCHA.');
           if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
           return;
         }
@@ -523,7 +567,7 @@ qwebirc.ui.ConnectPane = new Class({
       {
   var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
-  alert((i18n2 && i18n2.ALERT_NO_SESSION_STORAGE) ? i18n2.ALERT_NO_SESSION_STORAGE : "No session storage support in this browser -- login not supported");
+  showI18nAlert('ALERT_NO_SESSION_STORAGE', 'No session storage support in this browser -- login not supported');
         this.__cancelLoginCallback(false);
         return;
       }
@@ -565,7 +609,7 @@ qwebirc.ui.ConnectPane = new Class({
     if(!nickname) {
   var lang3 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   var i18n3 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang3] && window.qwebirc.i18n[lang3].options;
-  alert((i18n3 && i18n3.ALERT_NICK_REQUIRED) ? i18n3.ALERT_NICK_REQUIRED : 'You must supply a nickname.');
+  showI18nAlert('ALERT_NICK_REQUIRED', 'You must supply a nickname.');
       nick.focus();
       return false;
     }
@@ -574,7 +618,7 @@ qwebirc.ui.ConnectPane = new Class({
       nick.value = stripped;
   var lang3 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   var i18n3 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang3] && window.qwebirc.i18n[lang3].options;
-  alert((i18n3 && i18n3.ALERT_NICK_CORRECTED) ? i18n3.ALERT_NICK_CORRECTED : 'Your nickname was invalid and has been corrected; please check your altered nickname and try again.');
+  showI18nAlert('ALERT_NICK_CORRECTED', 'Your nickname was invalid and has been corrected; please check your altered nickname and try again.');
       nick.focus();
       return false;
     }
@@ -640,7 +684,7 @@ qwebirc.ui.LoginBox2 = function(parentElement, callback, initialNickname, initia
     if(!nickname) {
   var lang4 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   var i18n4 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang4] && window.qwebirc.i18n[lang4].options;
-  alert((i18n4 && i18n4.ALERT_NICK_REQUIRED) ? i18n4.ALERT_NICK_REQUIRED : 'You must supply a nickname.');
+  showI18nAlert('ALERT_NICK_REQUIRED', 'You must supply a nickname.');
       nick.focus();
       return;
     }
@@ -649,7 +693,7 @@ qwebirc.ui.LoginBox2 = function(parentElement, callback, initialNickname, initia
       nick.value = stripped;
   var lang4 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   var i18n4 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang4] && window.qwebirc.i18n[lang4].options;
-  alert((i18n4 && i18n4.ALERT_NICK_CORRECTED_CONNECT) ? i18n4.ALERT_NICK_CORRECTED_CONNECT : 'Your nickname was invalid and has been corrected; please check your altered nickname and press Connect again.');
+  showI18nAlert('ALERT_NICK_CORRECTED_CONNECT', 'Your nickname was invalid and has been corrected; please check your altered nickname and press Connect again.');
       nick.focus();
       return;
     }
@@ -660,7 +704,7 @@ qwebirc.ui.LoginBox2 = function(parentElement, callback, initialNickname, initia
           if(!usernameBox.value || !passwordBox.value) {
             var lang5 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
             var i18n5 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang5] && window.qwebirc.i18n[lang5].options;
-            alert((i18n5 && i18n5.ALERT_AUTH_USERPASS_REQUIRED) ? i18n5.ALERT_AUTH_USERPASS_REQUIRED : 'You must supply your username and password in auth mode.');
+            showI18nAlert('ALERT_AUTH_USERPASS_REQUIRED', 'You must supply your username and password in auth mode.');
             if(!usernameBox.value) {
               usernameBox.focus();
             } else {
@@ -674,7 +718,7 @@ qwebirc.ui.LoginBox2 = function(parentElement, callback, initialNickname, initia
         if(!passwordBox.value) {
           var lang6 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
           var i18n6 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang6] && window.qwebirc.i18n[lang6].options;
-          alert((i18n6 && i18n6.ALERT_PASSWORD_REQUIRED) ? i18n6.ALERT_PASSWORD_REQUIRED : 'You must supply a password.');
+          showI18nAlert('ALERT_PASSWORD_REQUIRED', 'You must supply a password.');
           passwordBox.focus();
           return;
         }

@@ -79,6 +79,34 @@ qwebirc.ui.QUI = new Class({
 
     this.setSideTabs(this.uiOptions.SIDE_TABS);
 
+    // Live-Neuübersetzung für offenes Nick-Menü
+    if(!this.__nickMenuLangListenerAdded) {
+      this.__nickMenuLangListenerAdded = true;
+      var self = this;
+      var refreshOpenNickMenu = function() {
+        try {
+          if(!self.__openNickMenu || !self.__openNickMenu.container || !self.__openNickMenu.container.parentNode) return;
+          var cont = self.__openNickMenu.container;
+          var nick = self.__openNickMenu.nick;
+          // Alle Links neu beschriften
+          var links = cont.getElementsByTagName('a');
+          for(var i=0;i<links.length;i++) {
+            var a = links[i];
+            var item = a.__menuItem;
+            if(!item) continue;
+            try {
+              var lbl = (typeof item.text === 'function') ? item.text() : item.text;
+              a.set('text', '- ' + lbl);
+            } catch(e) {}
+          }
+        } catch(e) {}
+      };
+      if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
+        window.qwebirc.registerTranslator(function(){ refreshOpenNickMenu(); });
+      }
+      window.addEventListener('qwebirc:languageChanged', function(){ refreshOpenNickMenu(); });
+    }
+
   // Hide connect status in typing bar when signedOn fires
     this.addEvent && this.addEvent('signedOn', function() {
       if(window.qwebircConnectStatus) {
@@ -147,7 +175,7 @@ qwebirc.ui.QUI = new Class({
     
     var dropdown = new Element("div");
     dropdown.addClass("dropdown-tab");
-    dropdown.appendChild(new Element("img", {src: qwebirc.global.staticBaseURL + "images/icon.png", title: "menu", alt: "menu"}));
+  dropdown.appendChild(new Element("img", {src: qwebirc.global.staticBaseURL + "images/icon.png", title: "menu", alt: "menu"}));
     dropdown.setStyle("opacity", 1);
 
     this.outerTabs.appendChild(dropdown);
@@ -205,6 +233,14 @@ qwebirc.ui.QUI = new Class({
         if(i18n && i18n.INPUT_PLACEHOLDER) inputbox.placeholder = i18n.INPUT_PLACEHOLDER;
       });
     }
+    // Fallback: direkt auf das Sprachwechsel-Event reagieren (falls Translator-Reihenfolge nicht greift)
+    window.addEventListener('qwebirc:languageChanged', function(ev){
+      try {
+        var lang = ev && ev.detail && ev.detail.lang ? ev.detail.lang : ((window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en');
+        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+        if(i18n && i18n.INPUT_PLACEHOLDER) inputbox.placeholder = i18n.INPUT_PLACEHOLDER;
+      } catch(e) {}
+    });
 
     // Emoji Picker Overlay
   var emojiOverlay = new Element("div");
@@ -215,35 +251,35 @@ qwebirc.ui.QUI = new Class({
 
     // Emoji Kategorien und Emojis
     var emojiCategories = [
-      { name: "Smileys & People", icon: "😃", emojis: [
+      { nameKey: "EMOJI_CAT_SMILEYS", name: "Smileys & People", icon: "😃", emojis: [
   "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
   "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌",
   "😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕",
   // Hand-Emojis mit Hauttönen
   "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦵","🦶","👂","🦻","👃"
-      ] },
-      { name: "Animals & Nature", icon: "🐻", emojis: [
+  ] },
+  { nameKey: "EMOJI_CAT_ANIMALS", name: "Animals & Nature", icon: "🐻", emojis: [
         "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🐔","🐧","🐦","🐤",
         "🐣","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦓","🦍","🐢","🐍","🦎","🦂","🦀","🦞","🦐","🦑","🐙","🦑"
-      ] },
-      { name: "Food & Drink", icon: "🍎", emojis: [
+  ] },
+  { nameKey: "EMOJI_CAT_FOOD", name: "Food & Drink", icon: "🍎", emojis: [
         "🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑",
         "🥦","🥬","🥒","🌶️","🌽","🥕","🧄","🧅","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🥞"
-      ] },
-      { name: "Travel & Places", icon: "✈️", emojis: [
+  ] },
+  { nameKey: "EMOJI_CAT_TRAVEL", name: "Travel & Places", icon: "✈️", emojis: [
         "🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🚚","🚛","🚜","🛵","🏍️","🚲","🛴","🚨","🚔","🚍",
         "🚘","🚖","🚡","🚠","🚟","🚃","🚋","🚞","🚝","🚄","🚅","🚈","🚂","🚆","🚇","🚊","🚉","✈️","🛫","🛬",
         "🛩️","💺","🛰️","🚀","🛸","🚁","⛵","🛶","🚤","🛥️","🛳️","⛴️","🚢","⚓","🪝","⛽","🚧","🚦","🚥","🚏"
-      ] },
-      { name: "Objects", icon: "💡", emojis: [
+  ] },
+  { nameKey: "EMOJI_CAT_OBJECTS", name: "Objects", icon: "💡", emojis: [
         "⌚","📱","📲","💻","⌨️","🖥️","🖨️","🖱️","🖲️","🕹️","🗜️","💽","💾","💿","📀","📼","📷","📸","📹","🎥",
         "📽️","🎞️","📞","☎️","📟","📠","📺","📻","🎙️","🎚️","🎛️","⏱️","⏲️","⏰","🕰️","⌛","⏳","📡","🔋","🔌"
-      ] },
-      { name: "Flags", icon: "🏳️", emojis: [
+  ] },
+  { nameKey: "EMOJI_CAT_FLAGS", name: "Flags", icon: "🏳️", emojis: [
         "🏳️","🏴","🏁","🚩","🏳️‍🌈","🏳️‍⚧️","🇦🇹","🇩🇪","🇨🇭","🇺🇸","🇬🇧","🇫🇷","🇮🇹","🇪🇸","🇵🇱","🇳🇱","🇸🇪","🇳🇴","🇩🇰","🇫🇮",
         "🇨🇦","🇧🇷","🇦🇷","🇲🇽","🇯🇵","🇨🇳","🇰🇷","🇦🇺","🇳🇿","🇮🇳","🇹🇷","🇷🇺","🇺🇦","🇮🇱","🇪🇬","🇿🇦","🇸🇦","🇦🇪","🇶🇦","🇸🇬"
-      ] },
-      { name: "Symbols", icon: "❤️",
+  ] },
+  { nameKey: "EMOJI_CAT_SYMBOLS", name: "Symbols", icon: "❤️",
         emojis: [
           "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟",
           "☮️","✝️","☪️","🕉️","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈","♉","♊","♋","♌","♍","♎","♏",
@@ -260,6 +296,14 @@ qwebirc.ui.QUI = new Class({
     ];
     var activeCategory = 0;
 
+    function __tEmoji(key, fallback) {
+      try {
+        var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+        if(i18n && i18n[key]) return i18n[key];
+      } catch(e) {}
+      return fallback;
+    }
     function renderEmojiPicker() {
       emojiOverlay.empty();
       var cat = emojiCategories[activeCategory];
@@ -276,7 +320,8 @@ qwebirc.ui.QUI = new Class({
         var btn = new Element("button");
         btn.set("type", "button");
         btn.set("text", catItem.icon);
-        btn.set("title", catItem.name);
+        var translatedCatName = __tEmoji(catItem.nameKey, catItem.name);
+        btn.set("title", translatedCatName);
         // Dynamische Größe: 1em
         btn.setStyles({ background: idx===activeCategory?"#ececff":"none", border: "none", fontSize: "1em", cursor: "pointer", borderRadius: "4px", padding: "2px 6px", color: idx===activeCategory?"#232634":"#888" });
         btn.addEvent("click", function(e) {
@@ -289,14 +334,14 @@ qwebirc.ui.QUI = new Class({
       header.appendChild(catBar);
       // Farbauswahl für Smileys & People
       var skinBar = null;
-      if(cat.name === "Smileys & People") {
+    if(cat.nameKey === "EMOJI_CAT_SMILEYS") {
         var skinTones = [
-          { label: "Default", code: "" },
-          { label: "Light", code: "\uD83C\uDFFB" },
-          { label: "Medium-Light", code: "\uD83C\uDFFC" },
-          { label: "Medium", code: "\uD83C\uDFFD" },
-          { label: "Dark", code: "\uD83C\uDFFE" },
-          { label: "Very Dark", code: "\uD83C\uDFFF" }
+      { labelKey: "EMOJI_SKIN_DEFAULT", label: "Default", code: "" },
+      { labelKey: "EMOJI_SKIN_LIGHT", label: "Light", code: "\uD83C\uDFFB" },
+      { labelKey: "EMOJI_SKIN_MEDLIGHT", label: "Medium-Light", code: "\uD83C\uDFFC" },
+      { labelKey: "EMOJI_SKIN_MEDIUM", label: "Medium", code: "\uD83C\uDFFD" },
+      { labelKey: "EMOJI_SKIN_DARK", label: "Dark", code: "\uD83C\uDFFE" },
+      { labelKey: "EMOJI_SKIN_VERYDARK", label: "Very Dark", code: "\uD83C\uDFFF" }
         ];
         var handBase = "";
         // Standard-Hand-Emoji für die Anzeige (Daumen hoch)
@@ -312,7 +357,8 @@ qwebirc.ui.QUI = new Class({
         skinTones.forEach(function(tone, idx) {
           var btn = new Element("button");
           btn.set("type", "button");
-          btn.set("title", tone.label);
+          var toneLabel = __tEmoji(tone.labelKey, tone.label);
+          btn.set("title", toneLabel);
           // Hand-Emoji mit Hautton
           var showHand = handEmoji;
           if(idx > 0) {
@@ -347,7 +393,7 @@ qwebirc.ui.QUI = new Class({
       var handEmojis = [
         "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦾","🦵","🦶","👂","🦻","👃"
       ];
-      var skinToneCode = (typeof window.activeSkinTone !== 'undefined' && cat.name === "Smileys & People") ? window.activeSkinTone : 0;
+  var skinToneCode = (typeof window.activeSkinTone !== 'undefined' && cat.nameKey === "EMOJI_CAT_SMILEYS") ? window.activeSkinTone : 0;
       var emojiGrid = new Element("ul");
       emojiGrid.setStyles({ listStyle: "none", padding: "0", margin: "0" });
       for(var i=0; i<cat.emojis.length; i+=perRow) {
@@ -358,7 +404,7 @@ qwebirc.ui.QUI = new Class({
           emojiBtn.set("type", "button");
           // Hautfarbe nur bei Hand-Emojis
           var showEmoji = emoji;
-          if(cat.name === "Smileys & People" && skinToneCode && handEmojis.indexOf(emoji) !== -1) {
+          if(cat.nameKey === "EMOJI_CAT_SMILEYS" && skinToneCode && handEmojis.indexOf(emoji) !== -1) {
             try {
               showEmoji = emoji + String.fromCodePoint(0x1F3FB + skinToneCode - 1);
             } catch(e) {}
@@ -1160,6 +1206,8 @@ window.qwebircConnectStatus = connectStatus;
     var e = new Element("div");
     parent.appendChild(e);
     e.addClass("menu");
+  // Referenz für Live-Übersetzung merken
+  this.__openNickMenu = {container: e, nick: nick};
     
     var nickArray = [nick];
     qwebirc.ui.MENU_ITEMS.forEach(function(x) {
@@ -1170,6 +1218,7 @@ window.qwebircConnectStatus = connectStatus;
       e.appendChild(e2);
   var label = (typeof x.text === 'function') ? x.text() : x.text;
   e2.set("text", "- " + label);
+  e2.__menuItem = x; // für spätere Neuübersetzung
 
       e2.addEvent("focus", function() { this.blur() }.bind(e2));
       e2.addEvent("click", function(ev) { new Event(ev.stop()); this.menuClick(x.fn); }.bind(this));

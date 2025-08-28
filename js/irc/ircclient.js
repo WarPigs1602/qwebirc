@@ -33,7 +33,7 @@ qwebirc.irc.IRCClient = new Class({
   },
   connect: function() {
     this.parent();
-    this.newServerInfoLine("CONNECTING", "");
+  this.newServerInfoLine("CONNECTING", {m:"", __i18nKey:'THEME_CONNECTING', __i18nFallback:'Connecting to server, please wait...'});
   },
 
   onCapabilities: function(caps) {
@@ -42,15 +42,11 @@ qwebirc.irc.IRCClient = new Class({
     if (!this.activeCaps) this.activeCaps = [];
     if (caps && caps.length > 0 && caps[0] === "ACK") {
       this.activeCaps = caps.slice(1);
-  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-  var label = (i18n && i18n.CAP_ACTIVE) || 'Active capabilities:';
-  this.newServerLine("GENERICMESSAGE", {m: label + " " + this.activeCaps.join(", ")});
+      var list = this.activeCaps.join(", ");
+      this.newServerLine("GENERICMESSAGE", {m: 'Active capabilities: ' + list, __i18nKey:'CAP_ACTIVE', capabilities:list, __i18nFallback:'Active capabilities: {capabilities}'});
     } else {
-  var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-  var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
-  var label2 = (i18n2 && i18n2.CAP_AVAILABLE) || 'Available capabilities:';
-  this.newServerLine("GENERICMESSAGE", {m: label2 + " " + caps.join(", ")});
+      var list2 = (caps||[]).join(", ");
+      this.newServerLine("GENERICMESSAGE", {m: 'Available capabilities: ' + list2, __i18nKey:'CAP_AVAILABLE', capabilities:list2, __i18nFallback:'Available capabilities: {capabilities}'});
     }
   },
   newLine: function(window, type, data) {
@@ -262,7 +258,7 @@ qwebirc.irc.IRCClient = new Class({
   signedOn: function(nickname) {
     this.tracker = new qwebirc.irc.IRCTracker(this);
     this.nickname = nickname;
-    this.newServerLine("SIGNON");
+  this.newServerLine("SIGNON", {m:"", __i18nKey:'THEME_SIGNON', __i18nFallback:'Signed on!'});
 
     // +x vor JOINs
     if(this.ui.uiOptions.USE_HIDDENHOST)
@@ -291,7 +287,7 @@ qwebirc.irc.IRCClient = new Class({
       this.exec("/JOIN " + joinList.join(","));
     }
     else {
-      var d = function() { this.newServerInfoLine("CONNECTED", ""); }.delay(1000, this);
+  var d = function() { this.newServerInfoLine("CONNECTED", {m:"", __i18nKey:'THEME_CONNECTED', __i18nFallback:'Connected and logged in -- ready to go!'}); }.delay(1000, this);
     }
 
     this.fireEvent("signedOn");
@@ -519,7 +515,7 @@ qwebirc.irc.IRCClient = new Class({
   },
   serverNotice: function(user, message) {
     if(user == "") {
-      this.newServerLine("SERVERNOTICE", {"m": message});
+  this.newServerLine("SERVERNOTICE", {"m": message});
     } else {
       this.newServerLine("PRIVNOTICE", {"m": message, "n": user});
     }
@@ -605,7 +601,7 @@ qwebirc.irc.IRCClient = new Class({
     this.tracker = undefined;
     
     qwebirc.connected = false;
-    this.newServerLine("DISCONNECT", {"m": message});
+  this.newServerLine("DISCONNECT", {"m": message});
   },
   nickOnChanHasPrefix: function(nick, channel, prefix) {
     var entry = this.tracker.getNickOnChannel(nick, channel);
@@ -653,7 +649,7 @@ qwebirc.irc.IRCClient = new Class({
     this.newServerInfoLine("CONNECT", "");
   },
   serverError: function(message) {
-    this.newServerLine("ERROR", {"m": message});
+  this.newServerLine("ERROR", {"m": message});
   },
   quit: function(message) {
     this.send("QUIT :" + message, true);

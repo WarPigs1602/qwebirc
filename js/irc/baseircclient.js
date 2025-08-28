@@ -153,15 +153,15 @@ qwebirc.irc.BaseIRCClient = new Class({
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
     var account = params[2];
     var msgTemplate = (i18n && i18n.SASL_LOGGED_IN) || 'You are now logged in as {account}';
-    var msg = msgTemplate.replace('{account}', account);
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = msgTemplate.replace('{account}', account);
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_LOGGED_IN', account: account, __i18nFallback:'You are now logged in as {account}'});
     return true;
   },
   irc_RPL_SASLSUCCESS: function(prefix, params) {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-    var msg = (i18n && i18n.SASL_SUCCESS) || 'SASL authentication successful';
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = (i18n && i18n.SASL_SUCCESS) || 'SASL authentication successful';
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_SUCCESS', __i18nFallback:'SASL authentication successful'});
     return true;
   },
   irc_RPL_LOGGEDOUT: function(prefix, params) {
@@ -169,43 +169,43 @@ qwebirc.irc.BaseIRCClient = new Class({
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
     var account = params[2];
     var msgTemplate = (i18n && i18n.SASL_LOGGED_OUT) || 'You are now logged out (was {account})';
-    var msg = msgTemplate.replace('{account}', account || '');
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = msgTemplate.replace('{account}', account || '');
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_LOGGED_OUT', account: account || '', __i18nFallback:'You are now logged out (was {account})'});
     return true;
   },
   irc_ERR_NICKLOCKED: function(prefix, params) {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-    var msg = (i18n && i18n.SASL_NICK_LOCKED) || 'Nick is locked';
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = (i18n && i18n.SASL_NICK_LOCKED) || 'Nick is locked';
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_NICK_LOCKED', __i18nFallback:'Nick is locked'});
     return true;
   },
   irc_ERR_SASLFAIL: function(prefix, params) {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-    var msg = (i18n && i18n.SASL_FAIL) || 'SASL authentication failed';
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = (i18n && i18n.SASL_FAIL) || 'SASL authentication failed';
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_FAIL', __i18nFallback:'SASL authentication failed'});
     return true;
   },
   irc_ERR_SASLTOOLONG: function(prefix, params) {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-    var msg = (i18n && i18n.SASL_TOO_LONG) || 'SASL message too long';
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = (i18n && i18n.SASL_TOO_LONG) || 'SASL message too long';
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_TOO_LONG', __i18nFallback:'SASL message too long'});
     return true;
   },
   irc_ERR_SASLABORTED: function(prefix, params) {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-    var msg = (i18n && i18n.SASL_ABORTED) || 'SASL authentication aborted';
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = (i18n && i18n.SASL_ABORTED) || 'SASL authentication aborted';
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_ABORTED', __i18nFallback:'SASL authentication aborted'});
     return true;
   },
   irc_ERR_SASLALREADY: function(prefix, params) {
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-    var msg = (i18n && i18n.SASL_ALREADY) || 'SASL authentication already complete';
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = (i18n && i18n.SASL_ALREADY) || 'SASL authentication already complete';
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_ALREADY', __i18nFallback:'SASL authentication already complete'});
     return true;
   },
   irc_RPL_SASLMECHS: function(prefix, params) {
@@ -214,8 +214,8 @@ qwebirc.irc.BaseIRCClient = new Class({
     var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
     var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
     var template = (i18n && i18n.SASL_MECHS) || 'Available SASL mechanisms: {mechanisms}';
-    var msg = template.replace('{mechanisms}', mechs || '');
-  this.newServerLine("GENERICMESSAGE", {m: msg});
+  var msg = template.replace('{mechanisms}', mechs || '');
+  this.newServerLine("GENERICMESSAGE", {m: msg, __i18nKey:'SASL_MECHS', mechanisms: mechs || '', __i18nFallback:'Available SASL mechanisms: {mechanisms}'});
     return true;
   },
   irc_ERR_NICKNAMEINUSE: function(prefix, params) {
@@ -505,31 +505,23 @@ qwebirc.irc.BaseIRCClient = new Class({
         var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
         function tr(key, fallback){ return (i18n && i18n[key]) || fallback; }
         // Ban und Ban-Exception speziell behandeln
+        var payload = null;
         if ((mode === 'b' || mode === 'e') && arg) {
           if(mode === 'b') {
-            msg = (cmode === '+') ? tr('MODEMSG_BAN_SET', colourNick(userNick) + ' set ban for ' + arg + ' in ' + channel) : tr('MODEMSG_BAN_REMOVE', colourNick(userNick) + ' removed ban for ' + arg + ' in ' + channel);
-            msg = msg.replace('{setter}', colourNick(userNick)).replace('{mask}', arg).replace('{channel}', channel);
+            payload = {__i18nKey: (cmode === '+')? 'MODEMSG_BAN_SET':'MODEMSG_BAN_REMOVE', setter: colourNick(userNick), mask: arg, channel: channel, __i18nFallback: colourNick(userNick) + ' ' + ((cmode === '+')? 'set ban for':'removed ban for') + ' ' + arg + ' in ' + channel};
           } else { // e
-            msg = (cmode === '+') ? tr('MODEMSG_BANEX_SET', colourNick(userNick) + ' set ban-exception for ' + arg + ' in ' + channel) : tr('MODEMSG_BANEX_REMOVE', colourNick(userNick) + ' removed ban-exception for ' + arg + ' in ' + channel);
-            msg = msg.replace('{setter}', colourNick(userNick)).replace('{mask}', arg).replace('{channel}', channel);
+            payload = {__i18nKey: (cmode === '+')? 'MODEMSG_BANEX_SET':'MODEMSG_BANEX_REMOVE', setter: colourNick(userNick), mask: arg, channel: channel, __i18nFallback: colourNick(userNick) + ' ' + ((cmode === '+')? 'set ban-exception for':'removed ban-exception for') + ' ' + arg + ' in ' + channel};
           }
         } else if (isPrivilege && arg) {
-          if(cmode === '+') {
-            msg = tr('MODEMSG_PRIV_GRANT', colourNick(userNick) + ' granted ' + privilegeName + ' to ' + colourNick(arg) + ' in ' + channel);
-          } else {
-            msg = tr('MODEMSG_PRIV_REMOVE', colourNick(userNick) + ' removed ' + privilegeName + ' from ' + colourNick(arg) + ' in ' + channel);
-          }
-          msg = msg.replace('{setter}', colourNick(userNick)).replace('{priv}', privilegeName).replace('{target}', colourNick(arg)).replace('{channel}', channel);
+          payload = {__i18nKey: (cmode === '+')? 'MODEMSG_PRIV_GRANT':'MODEMSG_PRIV_REMOVE', setter: colourNick(userNick), priv: privilegeName, target: colourNick(arg), channel: channel, __i18nFallback: colourNick(userNick) + ' ' + ((cmode === '+')? 'granted':'removed') + ' ' + privilegeName + ' ' + ((cmode === '+')? 'to':'from') + ' ' + colourNick(arg) + ' in ' + channel};
         } else {
-          msg = tr('MODEMSG_GENERIC', colourNick(userNick) + ' set mode ' + cmode + mode + (arg ? ' ' + arg : '') + ' on ' + channel)
-            .replace('{setter}', colourNick(userNick))
-            .replace('{modestring}', cmode + mode + (arg ? ' ' + arg : ''))
-            .replace('{channel}', channel);
+          payload = {__i18nKey: 'MODEMSG_GENERIC', setter: colourNick(userNick), modestring: cmode + mode + (arg ? ' ' + arg : ''), channel: channel, __i18nFallback: colourNick(userNick) + ' set mode ' + cmode + mode + (arg ? ' ' + arg : '') + ' on ' + channel};
         }
+        payload.m = payload.__i18nFallback; // initial; wird in addLine überschrieben falls Übersetzung existiert
         if (self.ui && self.ui.getWindow) {
           var win = self.ui.getWindow(self, qwebirc.ui.WINDOW_CHANNEL, channel);
           if (win && win.addLine) {
-            win.addLine("MODEMSG", {m: msg});
+            win.addLine("MODEMSG", payload);
           }
         }
   // ...kein mode-colour Event mehr...

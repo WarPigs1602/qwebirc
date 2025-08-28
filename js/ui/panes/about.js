@@ -3,6 +3,7 @@ qwebirc.ui.AboutPane = new Class({
   initialize: function(parent) {
   this.type = 'aboutpane';
     var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
+  var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
     var cb = delayfn.delay(500);
     
     var r = qwebirc.ui.RequestTransformHTML({url: qwebirc.global.staticBaseURL + "panes/about.html", update: parent, onSuccess: function() {
@@ -21,7 +22,7 @@ qwebirc.ui.AboutPane = new Class({
         } catch(e) {}
       };
       applyTranslations();
-      // Registrieren für zukünftige Sprachwechsel
+      applyTranslations();
       if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
         window.qwebirc.registerTranslator(applyTranslations);
       }
