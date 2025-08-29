@@ -63,7 +63,6 @@ function detectAndSetInitialLanguage() {
       if(m) {
         lang = decodeURIComponent(m[1]).toLowerCase();
         window.__qwebircManualLanguage = lang;
-        if(typeof persistLanguage === 'function') try { persistLanguage(lang); } catch(e) {}
       }
     }
   } catch(e) {}
