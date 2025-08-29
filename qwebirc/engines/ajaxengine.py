@@ -277,13 +277,7 @@ class AJAXEngine(resource.Resource):
 
     self.__connect_hit()
 
-    def proceed(hostname, ip_forced=None):
-      # hostname und ip immer beide übergeben, ggf. hostname/ip kombinieren
-      if hostname and ip_forced and hostname == ip_forced:
-        # PTR-Lookup fehlgeschlagen, kombiniere
-        hostname_combined = f"{hostname}/{ip_forced}"
-      else:
-        hostname_combined = hostname if hostname else ip
+    def proceed(hostname):
       kwargs = dict(nick=nick, ident=ident, ip=ip, realname=realname, perform=perform, hostname=hostname_combined)
       if password is not None:
         kwargs["password"] = password
