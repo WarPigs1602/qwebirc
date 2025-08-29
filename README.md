@@ -3,150 +3,262 @@
 
 ![CI](https://github.com/qwebirc/qwebirc/workflows/CI/badge.svg)
 
-mwebirc (formerly qwebirc) is a web-based IRC client built with Python (Twisted) and a lightweight JavaScript UI layer. It focuses on a responsive UX, live language switching and a customizable theme system.
+mwebirc (formerly qwebirc) is a fast, low-dependency, web-based IRC client written in Python (Twisted) with a compact ES5-style JavaScript frontend. It is designed for:
 
-## Key Features
+* Real‑time interaction (low latency update pipeline)
+* Live language switching without a full page refresh
+* Easy theming & white‑label embedding
+* Operating behind reverse proxies / load balancers
 
-- Multiple window/tab layout (channels, queries, status & custom panes)
-- Live language switching (JSON based i18n) without reload
-- Options / Embed Wizard / About panes (custom window system)
-- Uniform SVG close buttons across tabs and panes (fallback to × when SVG unavailable)
-- Typing indicators using IRCv3 `TAGMSG +typing` capability
-- Emoji picker with categories and skin tone selector
-- Nick colouring, last position markers, highlight detection
-- Configurable hue / theming via modifiable stylesheet (`qui.mcss` variables)
-- Client-side option persistence & URL-serialisable options
-- Minimal dependencies – plain ES5-era JavaScript (MooTools style classes) and Twisted backend
-- Graceful degradation if minification or SVG not supported
+---
+## Table of Contents
+1. Features
+2. Architecture Overview
+3. Quick Start
+4. Configuration & WEBIRC / Gateway Identity
+5. Development Workflow
+6. Theming (Modifiable Stylesheet)
+7. Internationalisation (i18n)
+8. Options System
+9. Embed Wizard
+10. Emoji & Typing Support
+11. Build / Minification
+12. Session & Transport Model
+13. Deployment Notes (Reverse Proxy, TLS, Scaling)
+14. Troubleshooting Matrix
+15. Contributing Guidelines
+16. Security Considerations
+17. License
 
-## Quick Start
+---
+## 1. Key Features
 
-### 1. Clone
+* Multi-window / tab model (channels, queries, status, auxiliary panes)
+* Live language switching (JSON i18n) – no reload, events propagate updates
+* IRCv3 capabilities: message tags (typing), SASL (optional)
+* Dynamic nick context menu (permission aware, retranslated on language change)
+* Theme hue & variable-driven CSS via `qui.mcss`
+* URL serialisable options & local persistence
+* Clean degradation: if JS minification or SVG fails graceful fallbacks are used
+* Emoji picker (categories, skin tone variants)
+* Highlight detection, last-read markers, nick colouring
+* Pluggable WEBIRC / CGIIRC / HMAC modes for forwarding real client IP/hostname
+* Minimal external runtime deps (Twisted + standard library)
+
+---
+## 2. Architecture Overview
+
+| Layer | Purpose | Notes |
+|-------|---------|-------|
+| Browser JS (ES5 style) | UI rendering, event handling, option persistence, i18n updates | No framework lock‑in; uses lightweight class patterns similar to MooTools |
+| AJAX / (optional) WebSocket transport | Delivers IRC events, pushes user commands | WebSocket adds lower latency; AJAX long‑poll is fallback |
+| Twisted HTTP engines (`ajaxengine`, `staticengine`, etc.) | Session management, polling, static asset serving | Each IRC session multiplexes subscriber channels |
+| IRC client (`qwebirc/ircclient.py`) | Twisted-based IRC protocol handling + CAP + SASL | Abstracted via factory, supports outbound IP binding |
+| Config layer (`config.py`) | Deployment & feature toggles | Python file – dynamic logic allowed |
+| i18n loader | Loads locales JSON on demand, not all upfront | Runtime translator callbacks for live updates |
+
+Sessions buffer outgoing events; subscribers (AJAX poll or WebSocket) drain them. Disconnect events are queued so the client can display failure reasons on next poll.
+
+---
+## 3. Quick Start
+
+### 3.1 Clone
 ```
 git clone https://github.com/WarPigs1602/qwebirc.git
-cd qwebirc  # repository name unchanged yet
+cd qwebirc
 ```
 
-### 2. Python Environment (recommended)
+### 3.2 Python Environment (Recommended)
 ```
 python3 -m venv venv
 source venv/bin/activate
 ```
-Requires Python 3.9+ (earlier may work but not tested recently).
+Requires Python 3.9+ (earlier may work but are not continuously tested).
 
-### 3. Install Dependencies
+### 3.3 Install Dependencies
 ```
 pip install -r requirements.txt
 ```
 
-### 4. Configure
+### 3.4 Configure
 ```
 cp config.py.example config.py
 $EDITOR config.py
 ```
-Minimum: set IRC network host/port. Enable `SASL_LOGIN_ENABLED = True` to show SASL user/pass fields in the connect dialog.
+Minimum edits: set `IRCSERVER`, `IRCPORT`. Optional: enable `SASL_LOGIN_ENABLED = True`.
 
-### 5. (Optional) Build / Minify
+### 3.5 (Optional) Build / Minify
 ```
 ./compile.py
 ```
-If available, `uglifyjs` minifies aggregated JS. Install globally if missing:
+If you have `uglify-js` installed globally it minifies the aggregated bundle:
 ```
 npm install -g uglify-js
 ```
-If minification fails, original sources are used (a warning is logged).
+Failures fall back to original sources (warning logged, continues running).
 
-### 6. Run
+### 3.6 Run
 ```
 ./run.py
 ```
-Visit: http://localhost:9090/
- 
-## Development Workflow
+Browse: http://localhost:9090/
 
-For rapid iteration avoid rebuilding every change:
+---
+## 4. Configuration & WEBIRC / Gateway Identity
 
-Create debug symlinks so the app serves raw sources:
+Edit `config.py` (copied from the example). Useful keys:
+
+| Setting | Purpose | Notes |
+|---------|---------|-------|
+| `IRCSERVER`, `IRCPORT`, `SSLPORT` | Target IRC network | `SSLPORT` overrides `IRCPORT` when set |
+| `WEBIRC_MODE` | One of: `webirc`, `cgiirc`, `hmac`, `None`/`WEBIRC_REALNAME` | Controls how client IP/hostname is forwarded |
+| `WEBIRC_PASSWORD` | Shared secret for `webirc` / `cgiirc` modes | Must match IRCd config |
+| `WEBIRC_GATEWAY` | Gateway name sent in WEBIRC command | Defaults to system hostname if unset |
+| `OUTGOING_IP` | Bind local outgoing socket | For multi-homed hosts |
+| `IDENT` | Static ident or `IDENT_HEX` / `IDENT_NICKNAME` | Hex encodes user IP if `IDENT_HEX` |
+| `SASL_LOGIN_ENABLED` | Shows SASL fields on connect dialog | SASL PLAIN only currently |
+| `UPDATE_FREQ` | Minimum seconds between outbound batches | Throttles UI flood |
+| `MAXBUFLEN`, `MAXLINELEN` | Safety limits for buffering / lines | Prevents runaway memory |
+| `DNS_TIMEOUT` | PTR lookup timeout | Affects hostname resolution in WEBIRC modes |
+| `STATIC_BASE_URL` / `DYNAMIC_BASE_URL` | Prefix rewriting for assets / AJAX | Empty for simple single-instance setups |
+
+> Tip: For `WEBIRC_MODE = "webirc"` ensure your IRCd has the matching password and gateway host defined. The client sends: `WEBIRC <password> <gateway> <resolved-hostname> <ip>`.
+
+---
+## 5. Development Workflow
+
+Serve raw, unbundled files for easier debugging:
 ```
-cd static/js
-ln -s ../../js debug || true
-cd ../css
-ln -s ../../css debug || true
+cd static/js && ln -s ../../js debug || true
+cd ../css && ln -s ../../css debug || true
 ```
-Then browse to `http://<host>/quidebug.html` (loads unminified/individual files, easier to debug in dev tools).
+Then visit: `http://<host>/quidebug.html`.
 
-### Hot Tips
-* Use browser dev tools to inspect dynamically created tabs: `a.tab`, close buttons: `span.tabclose > svg`.
-* Language switching: dispatch a custom event `qwebirc:languageChanged` with `{detail:{lang:'de'}}` to preview translations.
-* The typing indicator appears only when the IRC server negotiated the `message-tags` capability.
+Hot tips:
+* Inspect tabs: `a.tab`; close button SVG: `.tabclose svg`.
+* Trigger live language preview: `window.dispatchEvent(new Event('qwebirc:languageChanged'))` (or use translator hooking).
+* Measure latency: open dev tools → Network → observe long‑poll durations or WebSocket frames.
 
-## Theming & Modifiable Stylesheet
+---
+## 6. Theming (Modifiable Stylesheet)
 
-`qui.mcss` acts like a macro stylesheet. At runtime colour variables (hue/lightness/saturation) are substituted. Changing Options → “Adjust user interface hue” updates the active stylesheet without page reload.
+`css/qui.mcss` contains placeholders like `$(base_hue)`. Runtime code substitutes values and injects a generated stylesheet. Changing the hue slider updates this live.
 
-To add a new adjustable variable:
-1. Add placeholder in `css/qui.mcss` (e.g. `$(my_new_colour)`)
-2. Extend the set in code (see `setModifiableStylesheetValues` usage)
-3. Optionally expose a UI option.
+Add a variable:
+1. Insert placeholder in `qui.mcss`
+2. Extend the substitution map in the JS code
+3. Optionally add a user option control
 
-## Internationalisation (i18n)
+---
+## 7. Internationalisation (i18n)
 
-Language data: `locales/index.json` + per-language JSON files, loaded on demand.
+* Index: `locales/index.json`
+* Language files: `locales/<code>.json`
+* Missing keys gracefully fall back to English.
+* UI listens to translator callbacks + `qwebirc:languageChanged` custom DOM event.
+* Open nick menus are re-labelled live; if one is open during a switch it updates in place.
 
 Add a language:
-1. Add its code & label to `locales/index.json`
-2. Create `<code>.json` by copying an existing file
-3. Only missing keys fall back to English.
+```
+cp locales/en.json locales/<new>.json
+```
+Translate keys; add entry to `index.json`.
 
-UI listens for translator callbacks and the custom DOM event `qwebirc:languageChanged` so panes/tabs retitle instantly.
+---
+## 8. Options System
 
-## Options System
+Defined in JavaScript (`options.js`) as an array. At runtime labels are replaced by i18n values. Options can declare hooks for applying changes (e.g. theme hue, layout switches).
 
-Options defined in `options.js` -> `qwebirc.config.DEFAULT_OPTIONS`. Each entry: `[id, KEY, Default Label, defaultValue, (optional extras)]`.
-Labels are replaced at runtime by i18n values (keys like `TAB_OPTIONS`, `SAVE`, etc.).
+Add an option: extend the array, supply translation key, implement any side‑effect logic.
 
-To add an option:
-1. Add to `DEFAULT_OPTIONS`
-2. Provide translations
-3. (If needed) implement `applyChanges` in extras.
+---
+## 9. Embed Wizard
 
-## Embed Wizard
+The embed wizard pane produces copy‑paste `<iframe>` or script integration samples for site owners. It uses the same translation pipeline— new translation keys automatically appear if added to locale JSON.
 
-Guides site owners to generate parameters for embedding qwebirc into their own pages. The wizard’s pane type is `embeddedwizard` and auto-translates its steps.
+---
+## 10. Emoji & Typing Support
 
-## Emoji Picker
-Activated via the small smiley button inside the input area. Features categories, scrollable grid, and skin tone variants for hand emojis.
+* Emoji picker: categories + skin tone cycle; inserted as plain Unicode.
+* Typing indicator: requires negotiated CAP `message-tags`; uses `TAGMSG` with `+typing` tags to show states.
 
-## SVG Close Buttons
-All tabs (except Status / Connect) and custom panes show a uniform SVG “X” icon. If SVG fails, a typographic × appears. Styling in `.tabclose svg` inside `qui.mcss`.
+---
+## 11. Build / Minification
 
-## Typing Indicator
-Shows active typers in channel/query if the server supports message tags + the `+typing` tag. Emits periodic updates while user is typing and transitions to paused/done after inactivity.
+`compile.py` concatenates core JS, optionally minifies, and copies locales & static assets. It is idempotent; you can run it repeatedly. If minification fails the unminified bundle is served.
 
-## Minification / Build
-`./compile.py` aggregates & minifies JS and copies locale data under `static/`. Safe to run repeatedly; unminified sources served if minification fails.
+---
+## 12. Session & Transport Model
 
-## Troubleshooting
+* Each IRC connection is an `IRCSession` object.
+* Subscriptions represent active long‑poll requests or a WebSocket channel.
+* Events are appended to a buffer; flush scheduling respects `UPDATE_FREQ`.
+* On disconnect, a final event is queued; if no subscriber is attached the buffer persists briefly allowing the client to collect it after re‑subscribing.
+* WebSocket engine mirrors the AJAX channel semantics.
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| No SVG close icon (shows ×) | Missing SVG support or CSP blocks inline SVG | Check console for warnings; relax CSP or accept fallback |
-| Language does not change some labels | Missing key in locale file | Add key to language JSON (falls back to English otherwise) |
-| Typing indicator never appears | Server lacks `message-tags` / `+typing` capability | Verify CAP negotiation or disable feature |
-| Emoji picker not closing | Outside click handler blocked by overlay styles | Inspect z-index and event propagation |
+---
+## 13. Deployment Notes
 
-## Contributing
+### Reverse Proxy (nginx example)
+```
+location / { proxy_pass http://127.0.0.1:9090; proxy_set_header X-Forwarded-For $remote_addr; }
+```
+If you set `FORWARDED_FOR_HEADER` and `FORWARDED_FOR_IPS`, the application can trust that header for real client IP.
 
-Pull requests welcome. Please:
-1. Keep patches focused (one feature/fix)
-2. Add/update translations where keys change
-3. Avoid introducing heavy new dependencies
-4. Run `./compile.py` if you adjust bundling logic
+### TLS
+Terminate TLS at the proxy; internally run plain HTTP on 127.0.0.1:9090.
 
-## Security Notes
+### Scaling
+Run multiple worker processes on different ports behind a load balancer. Stickiness (per cookie or IP hash) is recommended to keep an IRC session bound to one backend.
 
-Be mindful of user-supplied strings inserted into the DOM. Existing code tries to sanitise where needed, but review any new dynamic HTML. If deploying behind a CSP, permit inline SVG or ensure the fallback text close button is acceptable.
+---
+## 14. Troubleshooting
 
-## License
+| Symptom | Likely Cause | Action |
+|---------|--------------|--------|
+| SVG × fallback showing | CSP or missing SVG support | Relax CSP / accept fallback |
+| Missing translated labels | Key absent in language file | Add key; English fallback otherwise |
+| Typing indicator absent | Server did not ACK `message-tags` | Inspect CAP negotiation logs |
+| WebSocket not used | No Autobahn / browser fallback | Install Autobahn, check network/proxy |
+| Real IP not forwarded | Misconfigured `WEBIRC_MODE` / password | Verify IRCd WEBIRC block & password |
+| Disconnect message not shown | Client resubscribed after buffer purge | Increase buffer retention or enable WebSocket |
 
-See `LICENCE` file.
+---
+## 15. Contributing Guidelines
+
+1. Small, focused pull requests (one logical change).
+2. Update / add translation keys where UI text changes.
+3. Avoid large new dependencies; keep footprint minimal.
+4. Run `./compile.py` if you touch bundling or locales pipeline.
+5. Add notes to this README when introducing user‑visible features.
+
+Development quality checks (suggested):
+```
+python -m py_compile $(git ls-files '*.py')
+```
+
+---
+## 16. Security Considerations
+
+* Be cautious with any HTML injection; sanitise dynamic fragments.
+* Consider adding a CSP header (allow `data:` for inline SVG if used).
+* In production, run behind a reverse proxy that strips untrusted `X-Forwarded-*` headers before re-injecting trusted ones.
+* Rate limit connection attempts at the proxy or firewall layer.
+
+---
+## 17. License
+
+See the `LICENCE` file.
+
+---
+### Attributions & History
+Originally derived from qwebirc; modernised for live translation, theming and reduced dependency surface.
+
+---
+### Roadmap (Indicative)
+* Optional WebSocket-only mode
+* IRCv3 batch & chghost support
+* Dark mode variable set
+* Client-side accessibility improvements (ARIA roles)
+
+Contributions welcome.
