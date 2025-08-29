@@ -121,6 +121,22 @@ qwebirc.ui.EmbedWizard = new Class({
     return r;
   },
   addSteps: function() {
+    // Sprachauswahl dynamisch aus Manifest (locales/index.json), aber ohne Menüpunkt Manifest
+    var self = this;
+    this.langBox = new Element("select");
+    fetch('/locales/index.json').then(function(r){ return r.json(); }).then(function(list){
+      self.langBox.empty();
+      list.filter(function(entry){
+        return entry.code && entry.code.toLowerCase() !== 'manifest';
+      }).forEach(function(entry){
+        var opt = new Element('option', {value: entry.code});
+        opt.textContent = entry.name;
+        self.langBox.appendChild(opt);
+      });
+      // Aktuelle Sprache vorauswählen
+      var currentLang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+      self.langBox.value = currentLang;
+    });
     var af = function(select) {
       if(Browser.Engine.trident) {
         var f = function() {
@@ -141,9 +157,13 @@ qwebirc.ui.EmbedWizard = new Class({
       var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
       return (i18n && i18n.options && i18n.options[key]) ? i18n.options[key] : (fallback || key);
     }
+    var langDiv = new Element("div");
+    langDiv.appendChild(document.createTextNode(t('LANGUAGE','Language')+': '));
+    langDiv.appendChild(this.langBox);
     this.welcome = this.newStep({
       "title": t('EMBED_WIZ_TITLE', 'Add webchat to your website'),
-      "first": t('EMBED_WIZ_WELCOME', 'This wizard will help you create an embedded client...')
+      "first": t('EMBED_WIZ_WELCOME', 'This wizard will help you create an embedded client...'),
+      middle: langDiv
     });
     
     this.chanBox = new Element("input");
@@ -230,13 +250,17 @@ qwebirc.ui.EmbedWizard = new Class({
       var alink = new Element("a");
       var abox = new Element("input");
       abox.addClass("iframetext");
-      var url = this.generateURL(false);
+  var url = this.generateURL();
+  // Sprache nur für Link/iframe anhängen
+  var lang = self.langBox && self.langBox.value ? self.langBox.value : 'en';
+  if(url.indexOf('?') === -1) url += '?lang=' + encodeURIComponent(lang);
+  else if(!/[&?]lang=/.test(url)) url += '&lang=' + encodeURIComponent(lang);
       
       alink.href = url;
       alink.target = "_blank";
       alink.setAttribute("rel", "noopener noreferrer");
       alink.appendChild(document.createTextNode(url));
-      abox.value = "<iframe src=\"" + url + "\" width=\"647\" height=\"400\"></iframe>";
+  abox.value = "<iframe src=\"" + url + "\" width=\"647\" height=\"400\"></iframe>";
       
       var mBox = [
         alink,

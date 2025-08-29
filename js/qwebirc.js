@@ -39,20 +39,34 @@ if(!window.qwebirc.i18n.__translators) {
 if(!window.qwebirc.registerTranslator && window.qwebirc.i18n && window.qwebirc.i18n.registerTranslator) {
   window.qwebirc.registerTranslator = function(fn){ return window.qwebirc.i18n.registerTranslator(fn); };
 }
+// Sprache sofort beim Laden erkennen und setzen
+if(typeof detectAndSetInitialLanguage === 'function') {
+  detectAndSetInitialLanguage();
+}
 
 // Automatically detect and set language on first load even if options init later
 var _qwebirc_detectedLang = null;
 function detectAndSetInitialLanguage() {
-  // Check if language already set (e.g. from cookie)
+  // 1. Cookie/options
   var lang = null;
-  // If cookie options already loaded, check there first
   try {
     if(window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.uiOptions) {
       var opt = window.qwebirc.ui.uiOptions.optionHash && window.qwebirc.ui.uiOptions.optionHash['LANGUAGE'];
       if(opt && opt.value) lang = opt.value;
     }
   } catch(e) {}
-  // If still not set -> auto-detect
+  // 2. Prüfe ?lang=xx in der URL (höchste Priorität)
+  try {
+    var search = window.location && window.location.search;
+    if(search) {
+      var m = search.match(/[?&]lang=([^&#]+)/);
+      if(m) {
+        lang = decodeURIComponent(m[1]).toLowerCase();
+        window.__qwebircManualLanguage = lang;
+      }
+    }
+  } catch(e) {}
+  // 3. Browser
   if(!lang || lang === 'undefined') {
     lang = (navigator.language || navigator.userLanguage || 'en').split('-')[0];
   }
@@ -337,7 +351,7 @@ function integrateLanguagesIntoOptions(list) {
 // Sprache aus Option oder Default bestimmen
 
 // Beispiel: Nach der Options-Initialisierung aufrufen
-// afterOptionsInit();
+afterOptionsInit();
 
 
 var qwebirc = {ui: {themes: {}, style: {}}, irc: {}, util: {crypto: {}}, config: {}, auth: {}, sound: {}, connected: false, xdomain: {}};
