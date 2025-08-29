@@ -30,4 +30,3 @@ run.sh
 .virtualenv
 venv
 *.bak
-WEBIRC_GATEWAY.txt

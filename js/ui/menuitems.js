@@ -27,10 +27,6 @@ if (window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
     qwebirc.ui.UI_COMMANDS_P2 = [
       [function(){ return __qwebircGetTabLabel('TAB_ABOUT', 'About mwebirc'); }, "about"]
     ];
-    // Live-Übersetzung: Alle offenen Nicklisten-Dropdowns schließen
-    if (window.qwebirc && window.qwebirc.ui && typeof window.qwebirc.ui.closeAllNickMenus === 'function') {
-      window.qwebirc.ui.closeAllNickMenus();
-    }
   });
 }
 

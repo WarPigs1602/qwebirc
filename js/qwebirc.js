@@ -1,15 +1,3 @@
-// Hilfsfunktion: Schließt alle offenen Nicklisten-Dropdowns (für Live-Übersetzung)
-window.qwebirc = window.qwebirc || {};
-window.qwebirc.ui = window.qwebirc.ui || {};
-window.qwebirc.ui.closeAllNickMenus = function() {
-  // Annahme: Nicklisten-Menüs haben eine spezielle CSS-Klasse, z.B. 'nickmenu' oder ähnliches
-  var menus = document.querySelectorAll('.nickmenu, .nick-menu, .userlist-menu');
-  for (var i = 0; i < menus.length; i++) {
-    if (menus[i] && menus[i].parentNode) {
-      menus[i].parentNode.removeChild(menus[i]);
-    }
-  }
-};
 // Helper: fetch translated option label
 function getOptionLabel(key) {
   var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
@@ -33,12 +21,6 @@ function localizeOptionsLabels() {
         opt.label = i18n.options[opt.prefix];
       }
     }
-  }
-  // Löst das Event aus, damit Nicklisten-Menüs live übersetzt werden
-  if(typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-    var ev = document.createEvent('Event');
-    ev.initEvent('qwebirc:languageChanged', true, true);
-    window.dispatchEvent(ev);
   }
 }
 
