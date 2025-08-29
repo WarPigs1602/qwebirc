@@ -22,6 +22,16 @@ if autobahn_status == True:
   has_websocket = True
   TRANSPORTS.append("websocket")
 
+  # Optional server-side enforcement: if administrator sets FORCE_WEBSOCKETS=True
+  # in config, suppress longpoll fallback so Clients ohne WebSocket-Unterstützung
+  # sehen, dass keine kompatible Transport-Methode vorhanden ist (harte Durchsetzung).
+  try:
+    import config as _cfg
+    if getattr(_cfg, "FORCE_WEBSOCKETS", False):
+      TRANSPORTS = ["websocket"]
+  except Exception:
+    pass
+
 elif autobahn_status == False:
   # they've been warned already
   pass

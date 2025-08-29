@@ -287,6 +287,14 @@ STATIC_BASE_URL = ""
 #         instances on the same host.
 DYNAMIC_BASE_URL = ""
 
+# OPTION: FORCE_WEBSOCKETS
+#         If True the server will advertise ONLY the WebSocket transport.
+#         Browsers without WebSocket support will fail to connect (no long-poll fallback).
+#         Advantage: less overhead (no HTTP long-poll connections) and slightly lower latency.
+#         Requirements: Autobahn installed (and at least the minimum version) so that websocket code loads.
+#         Default: False
+FORCE_WEBSOCKETS = False
+
 # OPTION: DYNAMIC_CONFIGURATION
 #         If True then request configuration from the backend when we
 #         initially connect.

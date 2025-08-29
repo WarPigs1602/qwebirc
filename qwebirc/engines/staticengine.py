@@ -48,7 +48,8 @@ class StaticEngine(static.File):
           else:
             config = importlib.import_module('config')
           sasl_enabled = getattr(config, "SASL_LOGIN_ENABLED", False)
-          js = f'<script>window.SASL_LOGIN_ENABLED = {"true" if sasl_enabled else "false"};</script>'
+          force_ws = getattr(config, "FORCE_WEBSOCKETS", False)
+          js = f'<script>window.SASL_LOGIN_ENABLED = {"true" if sasl_enabled else "false"}; window.FORCE_WEBSOCKETS = {"true" if force_ws else "false"};</script>'
           if b"</body>" in data:
             data = data.replace(b"</body>", js.encode("utf-8") + b"</body>")
           else:

@@ -468,12 +468,19 @@ qwebirc.irc.IRCConnection = new Class({
       this.recv();
       return;
     }
+    // server may enforce websocket-only mode
+    var websocketOnly = (transports.length == 1 && transports[0] == "websocket");
     qwebirc.util.WebSocket(function(supported, transport) {
       this.transportStatus = transport;
       if(supported) {
         this.log("websocket present on client and server: using websocket");
         this.__wsSupported = true;
       } else {
+        if(websocketOnly) {
+          this.disconnect();
+          this.__error("WebSocket-Unterstützung erforderlich (Server ist auf WebSockets beschränkt)");
+          return;
+        }
         this.log("websocket present on server but not client: using longpoll");
       }
       this.recv();
