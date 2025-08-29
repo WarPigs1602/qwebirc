@@ -277,36 +277,32 @@ class AJAXEngine(resource.Resource):
 
     self.__connect_hit()
 
-    def proceed(hostname, ip_forced=None):
-      # hostname und ip immer beide übergeben, ggf. hostname/ip kombinieren
-      if hostname and ip_forced and hostname == ip_forced:
-        # PTR-Lookup fehlgeschlagen, kombiniere
-        hostname_combined = f"{hostname}/{ip_forced}"
-      else:
-        hostname_combined = hostname if hostname else ip
-      kwargs = dict(nick=nick, ident=ident, ip=ip, realname=realname, perform=perform, hostname=hostname_combined)
+    def proceed(hostname):
+      kwargs = dict(nick=nick, ident=ident, ip=ip, realname=realname, perform=perform, hostname=hostname)
       if password is not None:
         kwargs["password"] = password
+  # Only include SASL login fields if present and non-empty
       sasl_username = request.args.get("sasl_username") or request.args.get(b"sasl_username")
       sasl_password = request.args.get("sasl_password") or request.args.get(b"sasl_password")
       if sasl_username and ircclient.irc_decode(sasl_username[0]):
         kwargs["sasl_username"] = ircclient.irc_decode(sasl_username[0])
       if sasl_password and ircclient.irc_decode(sasl_password[0]):
         kwargs["sasl_password"] = ircclient.irc_decode(sasl_password[0])
+  # Debug log removed
       client = ircclient.create_irc(session, **kwargs)
       session.client = client
 
     if not hasattr(config, "WEBIRC_MODE") or config.WEBIRC_MODE == "hmac":
-      proceed(ip, ip_forced=ip)
+      proceed(None)
     elif config.WEBIRC_MODE != "hmac":
       notice = lambda x: session.event(connect_notice(x))
       notice("Looking up your hostname...")
       def callback(hostname):
         notice("Found your hostname.")
-        proceed(hostname, ip_forced=ip)
+        proceed(hostname)
       def errback(failure):
         notice("Couldn't look up your hostname!")
-        proceed(ip, ip_forced=ip)
+        proceed(ip)
       qdns.lookupAndVerifyPTR(ip, timeout=[config.DNS_TIMEOUT]).addCallbacks(callback, errback)
 
     Sessions[id] = session

@@ -74,9 +74,6 @@ IDENT = "webchat"
 #          the REALNAME option.
 WEBIRC_MODE = None
 
-# Configure the WEBIRC gateway name
-WEBIRC_GATEWAY = "mwebirc"
-
 # OPTION: WEBIRC_PASSWORD
 #         Used for WEBIRC_MODE webirc and cgiirc, see WEBIRC_MODE
 #         option documentation.
