@@ -11,3 +11,4 @@ incremental>=21.3.0      # Versioning helper
 six>=1.15.0              # Py2/3 compatibility layer still used by Twisted
 txaio>=22.2.1            # Autobahn/Twisted abstraction
 zope.interface>=5.4.0    # Interface declarations for Twisted
+service_identity>=21.1.0 # Proper TLS hostname/IP verification for Twisted (recommended)

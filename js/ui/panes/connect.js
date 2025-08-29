@@ -156,12 +156,38 @@ qwebirc.ui.ConnectPane = new Class({
                 };
                 script.onload = function() { setTimeout(window.renderRecaptcha, 100); };
               } else if (captchaType === 'turnstile') {
-                td.innerHTML = '<div class="cf-turnstile" data-sitekey="' + captchaSiteKey + '"></div>';
-                var script = document.createElement('script');
-                script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-                script.async = true;
-                script.defer = true;
-                document.body.appendChild(script);
+                // Use stable container id so we can preserve widget across language changes
+                td.innerHTML = '<div id="turnstile-container"><div class="cf-turnstile" data-sitekey="' + captchaSiteKey + '"></div></div>';
+                // Only load script once
+                if(!window.__turnstileScriptLoading && !window.__turnstileScriptLoaded) {
+                  var script = document.createElement('script');
+                  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+                  script.async = true;
+                  script.defer = true;
+                  window.__turnstileScriptLoading = true;
+                  script.onload = function(){
+                    window.__turnstileScriptLoaded = true;
+                    window.__turnstileScriptLoading = false;
+                    // turnstile auto-renders; capture widget id if possible after small delay
+                    setTimeout(function(){
+                      try {
+                        if(window.turnstile && !window.turnstileWidgetId) {
+                          var el = document.querySelector('#turnstile-container .cf-turnstile');
+                          if(el) {
+                            // turnstile.render returns id if manual; here we try to get via dataset
+                            window.turnstileWidgetId = el.getAttribute('data-widget-id') || null;
+                          }
+                        }
+                      } catch(e) {}
+                    }, 300);
+                  };
+                  script.onerror = function(){
+                    window.__turnstileFailed = true;
+                    window.__turnstileScriptLoading = false;
+                    console.warn('[captcha] turnstile script failed to load; continuing without CAPTCHA enforcement.');
+                  };
+                  document.body.appendChild(script);
+                }
               }
               captchaRow.appendChild(td);
               var table = loginForm.querySelector('table');
@@ -465,7 +491,7 @@ qwebirc.ui.ConnectPane = new Class({
             token = window.turnstile.getResponse(widgets[0]);
           }
         }
-        if (!token) {
+  if (!token && !window.__turnstileFailed) {
           var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
           var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
           showI18nAlert('ALERT_CAPTCHA_REQUIRED', 'Please complete the CAPTCHA.');
@@ -476,7 +502,13 @@ qwebirc.ui.ConnectPane = new Class({
       }
     this.__cancelLogin();
     this.fireEvent("close");
-  // Save or delete SASL values depending on checkbox
+    this.__saveCookie(data);
+    // Connection established asynchronously; status remains until hide() is called
+    this.options.callback(data);
+  },
+  __saveCookie: function(data) {
+    // Persist nickname + autojoin + SASL (if enabled)
+    if(!data) return;
     var saslCheckbox = this.rootElement.getElement('#show_sasl_fields');
     var saslUserField = this.rootElement.getElement('#sasl_username');
     var saslPassField = this.rootElement.getElement('#sasl_password');
@@ -487,10 +519,10 @@ qwebirc.ui.ConnectPane = new Class({
       this.cookie.erase('sasl_username');
       this.cookie.erase('sasl_password');
     }
+    if(data.nickname) this.cookie.set('nickname', data.nickname);
+    if(data.autojoin !== undefined) this.cookie.set('autojoin', data.autojoin);
     this.cookie.extend(data);
     this.cookie.save();
-  // Connection established asynchronously; status remains until hide() is called
-    this.options.callback(data);
   },
   __cancelLogin: function(noUIModifications) {
     if(this.__cancelLoginCallback)
@@ -512,8 +544,9 @@ qwebirc.ui.ConnectPane = new Class({
         if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
         return;
       }
-      this.fireEvent("close");
-      this.options.callback(data);
+  this.fireEvent("close");
+  this.__saveCookie(data);
+  this.options.callback(data);
     }.bind(this), "loginconnectbutton");
   },
   __login: function(e) {
