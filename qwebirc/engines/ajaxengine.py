@@ -181,9 +181,15 @@ class IRCSession:
         pass
       self.cleanupschedule = None
 
-  # Disconnect the IRC client if present
+    # Disconnect the IRC client if present
     if hasattr(self, "client") and self.client is not None:
       try:
+        # Versuche explizit den Socket zu schließen
+        if hasattr(self.client, "transport") and self.client.transport:
+          try:
+            self.client.transport.loseConnection()
+          except Exception:
+            pass
         if hasattr(self.client, "disconnect"):
           self.client.disconnect("Session disconnect")
         elif hasattr(self.client, "error"):

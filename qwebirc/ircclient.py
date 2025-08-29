@@ -8,7 +8,7 @@ from twisted.internet import reactor, protocol, abstract
 from twisted.web import resource, server
 from twisted.protocols import basic
 from twisted.names.client import Resolver
-import hmac, time, config, random, qwebirc.config_options as config_options
+import hmac, time, config, random, qwebirc.config_options as config_options, socket
 from config import HMACTEMPORAL
 
 if config.get("CONNECTION_RESOLVER"):
@@ -235,7 +235,8 @@ class QWebIRCClient(basic.LineReceiver):
       hmac = hmacfn(ident, ip)
       self.write("USER %s bleh bleh %s %s :%s" % (ident, ip, hmac, realname))
     elif config.WEBIRC_MODE == "webirc":
-      self.write("WEBIRC %s mwebirc %s %s" % (config.WEBIRC_PASSWORD, hostname, ip))
+      gateway = getattr(config, "WEBIRC_GATEWAY", socket.gethostname())
+      self.write("WEBIRC %s %s %s %s" % (config.WEBIRC_PASSWORD, gateway, hostname, ip))
       self.write("USER %s bleh %s :%s" % (ident, ip, realname))
     elif config.WEBIRC_MODE == "cgiirc":
       self.write("PASS %s_%s_%s" % (config.CGIIRC_STRING, ip, hostname))
