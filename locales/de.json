@@ -4,17 +4,17 @@
   "farewell": "Auf Wiedersehen!",
   "options": {
     "LANGUAGE": "Sprache",
-    "BEEP_ON_MENTION": "Bei Aktivität piepen",
+    "BEEP_ON_MENTION": "Bei Aktivität Signalton abspielen",
     "NOTIFICATIONS": "HTML5-Benachrichtigungen bei Aktivität anzeigen",
     "FLASH_ON_MENTION": "Titelleiste blinken, wenn Nick erwähnt wird oder bei Query-Aktivität",
     "DEDICATED_MSG_WINDOW": "Privatnachrichten in eigenem Fenster anzeigen",
     "DEDICATED_NOTICE_WINDOW": "Notices in eigenem Fenster anzeigen",
-    "NICK_OV_STATUS": "Status (@/+) vor Nicknames anzeigen",
+    "NICK_OV_STATUS": "Status (@/+) vor Nicknamen anzeigen",
     "LASTPOS_LINE": "Letzte Position für jedes Fenster anzeigen",
-    "NICK_COLOURS": "Nicknames automatisch einfärben",
+    "NICK_COLOURS": "Nicknamen automatisch einfärben",
     "HIDE_JOINPARTS": "JOINS/PARTS/QUITS ausblenden",
     "STYLE_HUE": "Farbton der Benutzeroberfläche anpassen",
-    "QUERY_ON_NICK_CLICK": "Query bei Klick auf Nickname im Channel",
+    "QUERY_ON_NICK_CLICK": "Query wenn auf Nicknamen im Channel geklickt wird",
     "SHOW_NICKLIST": "Nickliste im Channel anzeigen",
     "SHOW_TIMESTAMPS": "Zeitstempel anzeigen",
   "SIDE_TABS": "Tabs an der Seite anzeigen",
@@ -83,9 +83,9 @@
   ,"NICKMENU_KICK": "kicken"
   ,"NICKMENU_IGNORE": "ignorieren"
   ,"NICKMENU_UNIGNORE": "deignorieren"
-  ,"NO_TOPIC": "(kein Topic gesetzt)"
-  ,"NEED_CHANOP": "Du musst Channel-Operator sein, um das Topic zu ändern!"
-  ,"CHANGE_TOPIC_OF": "Topic von {name} ändern zu:"
+  ,"NO_TOPIC": "(kein Thema gesetzt)"
+  ,"NEED_CHANOP": "Du musst Channel-Operator sein, um das Thema zu ändern!"
+  ,"CHANGE_TOPIC_OF": "Thema von {name} ändern zu:"
   ,"LOG_OUT_CONFIRM": "Abmelden?"
   ,"TRYING_TO_CONNECT": "Verbinde mit Server"
   ,"ALERT_CAPTCHA_REQUIRED": "Bitte CAPTCHA ausfüllen."
@@ -95,22 +95,22 @@
   ,"ALERT_NICK_CORRECTED_CONNECT": "Dein Nick war ungültig und wurde korrigiert; bitte prüfe den geänderten Nick und klicke erneut auf Verbinden."
   ,"ALERT_AUTH_USERPASS_REQUIRED": "Du musst Benutzername und Passwort im Auth-Modus angeben."
   ,"ALERT_PASSWORD_REQUIRED": "Du musst ein Passwort angeben."
-  ,"THEME_SIGNON": "Angemeldet!"
-  ,"THEME_CONNECTING": "Verbinde mit Server, bitte warten..."
-  ,"THEME_CONNECT": "Melde an, bitte warten..."
+  ,"THEME_SIGNON": "Eingeloggt!"
+  ,"THEME_CONNECTING": "Versuche mit dem Server zu verbinden, bitte warten..."
+  ,"THEME_CONNECT": "Versuche zu verbinden, bitte warten..."
   ,"THEME_CONNECTED": "Verbunden und eingeloggt -- es kann losgehen!"
   ,"THEME_DISCONNECT": "Verbindung zum Server getrennt: $m"
   ,"THEME_ERROR": "FEHLER: $m"
   ,"THEME_SERVERNOTICE": "$m"
-  ,"THEME_JOIN": "${$N$} [$h] ist $c beigetreten"
-  ,"THEME_OURJOIN": "${$N$} [$h] ist $c beigetreten"
-  ,"THEME_PART": "${$N$} [$h] hat $c verlassen [$m]"
+  ,"THEME_JOIN": "${$N$} [$h] betritt den Channel $c"
+  ,"THEME_OURJOIN": "Du hast den Channel $c betreten"
+  ,"THEME_PART": "${$N$} [$h] hat den Channel $c verlassen [$m]"
   ,"THEME_KICK": "${$v$} wurde aus $c von ${$N$} gekickt [$m]"
   ,"THEME_MODE": "mode/$c [$m] von ${$N$}"
-  ,"THEME_QUIT": "${$N$} [$h] hat quit gemacht [$m]"
+  ,"THEME_QUIT": "${$N$} [$h] hat sich ausgeloggt [$m]"
   ,"THEME_NICK": "${$n$} heißt jetzt ${$[$w$]$}"
-  ,"THEME_TOPIC": "${$N$} änderte das Topic von $c zu: $m"
-  ,"THEME_UMODE": "Usermode geändert: $m"
+  ,"THEME_TOPIC": "${$N$} hat das Thema von $c zu '$m' geändert..."
+  ,"THEME_UMODE": "Dein Usermode ist nun: $m"
   ,"THEME_INVITE": "$N lädt dich ein $c zu betreten"
   ,"THEME_WHOISUSER": "$B$N$B [$h]"
   ,"THEME_WHOISREALNAME": " realname : $m"
@@ -143,7 +143,7 @@
   ,"THEME_NOTIFYCHANACTIONBODY": " * $n $m"
   ,"THEME_NOTIFYPRIVMSGTITLE": "Private Nachricht von $n:"
   ,"THEME_NOTIFYPRIVMSGBODY": "$m"
-  ,"THEME_NOTIFYPRIVACTIONTITLE": "Private Aktion von $n:"
+  ,"THEME_NOTIFYPRIVACTIONTITLE": "Private Action von $n:"
   ,"THEME_NOTIFYPRIVACTIONBODY": " * $n $m"
   ,"THEME_NOTIFYCHANNOTICETITLE": "Erwähnung in $c:"
   ,"THEME_NOTIFYCHANNOTICEBODY": "-$n- $m"
@@ -153,13 +153,13 @@
   ,"QUIT_PAGE_CLOSED": "Seite geschlossen"
   ,"BAD_IRC_URL": "Ungültiges IRC-URL-Schema."
   ,"INPUT_PLACEHOLDER": "Hier chatten! Du kannst auch Befehle wie /JOIN benutzen"
-  ,"MODEMSG_PRIV_GRANT": "{setter} gab {priv} an {target} in {channel}"
-  ,"MODEMSG_PRIV_REMOVE": "{setter} entzog {priv} von {target} in {channel}"
-  ,"MODEMSG_BAN_SET": "{setter} setzte Ban für {mask} in {channel}"
-  ,"MODEMSG_BAN_REMOVE": "{setter} entfernte Ban für {mask} in {channel}"
-  ,"MODEMSG_BANEX_SET": "{setter} setzte Ban-Ausnahme für {mask} in {channel}"
-  ,"MODEMSG_BANEX_REMOVE": "{setter} entfernte Ban-Ausnahme für {mask} in {channel}"
-  ,"MODEMSG_GENERIC": "{setter} setzte Mode {modestring} auf {channel}"
+  ,"MODEMSG_PRIV_GRANT": "{setter} hat {priv} auf {target} in {channel} gesetzt"
+  ,"MODEMSG_PRIV_REMOVE": "{setter} entzieht {priv} von {target} in {channel}"
+  ,"MODEMSG_BAN_SET": "{setter} hat Ban für {mask} in {channel} gesetzt"
+  ,"MODEMSG_BAN_REMOVE": "{setter} hat Ban für {mask} in {channel} entfernt"
+  ,"MODEMSG_BANEX_SET": "{setter} hat Ban-Ausnahme für {mask} in {channel} gesetzt"
+  ,"MODEMSG_BANEX_REMOVE": "{setter} hat Ban-Ausnahme für {mask} in {channel} entfernt"
+  ,"MODEMSG_GENERIC": "{setter} hat Mode {modestring} auf {channel} gesetzt"
   ,"CAP_ACTIVE": "Aktive Capabilities:"
   ,"CAP_AVAILABLE": "Verfügbare Capabilities:"
   ,"SASL_LOGGED_IN": "Du bist jetzt eingeloggt als {account}"
