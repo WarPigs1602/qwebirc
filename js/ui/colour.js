@@ -165,5 +165,6 @@ String.prototype.toHSBColour = function(client) {
   
   var hue = Math.abs(hash) % 360;
 
-  return new Color([hue, 70, 60], "hsb");
+  // Für Dark Theme: Sättigung und Helligkeit erhöht
+  return new Color([hue, 80, 80], "hsb");
 }
