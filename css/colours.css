@@ -1,9 +1,4 @@
-.qwebirc .colourline .Xc0 {
-  color: #ffffff;
-/* Angepasste Nickfarben für bessere Sichtbarkeit im Dark Theme */
-.qwebirc .colourline .Xc1 { color: #e0e0e0; }
-.qwebirc .colourline .Xc2 { color: #3a7fff; }
-/* Optimierte Nickfarben für Lesbarkeit und Design im Dark Theme */
+/* Optimierte Nickfarben für Lesbarkeit und Design im dunklen Theme */
 .qwebirc .colourline .Xc0 { color: #f8f8ff; } /* fast weiß */
 .qwebirc .colourline .Xc1 { color: #e0e0e0; } /* hellgrau */
 .qwebirc .colourline .Xc2 { color: #6ca0ff; } /* pastellblau */
@@ -92,7 +87,6 @@
 .qwebirc .colourline .Xc96 { color: #fafafa; }
 .qwebirc .colourline .Xc97 { color: #fefefe; }
 .qwebirc .colourline .Xc98 { color: #ffffff; }
-}
 .qwebirc .colourline .Xc91 {
   color: #363636;
 }
