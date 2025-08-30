@@ -1,45 +1,20 @@
 /* Optimierte Nickfarben für Lesbarkeit und Design im dunklen Theme */
-.qwebirc .colourline .Xc0 { color: #ffffff; } /* weiß */
-.qwebirc .colourline .Xc1 { color: #e0e0e0; } /* hellgrau */
-.qwebirc .colourline .Xc2 { color: #3399ff; } /* kräftiges blau, noch kontrastreicher */
-.qwebirc .colourline .Xc3 { color: #2ecc40; } /* sattes grün, weniger hell */
-.qwebirc .colourline .Xc4 { color: #ff3333; } /* kräftiges rot, noch klarer */
-.qwebirc .colourline .Xc5 { color: #ff8800; } /* kräftiges orange */
-.qwebirc .colourline .Xc6 { color: #a259ff; } /* kräftiges lila */
-.qwebirc .colourline .Xc7 { color: #ffb300; } /* dunkleres orange-gelb */
-.qwebirc .colourline .Xc8 { color: #ffd700; } /* goldgelb, besser lesbar */
-.qwebirc .colourline .Xc9 { color: #00b894; } /* dunkleres türkisgrün */
-.qwebirc .colourline .Xc10 { color: #00bcd4; } /* kräftiges türkis */
-.qwebirc .colourline .Xc11 { color: #40c4ff; } /* kräftiges hellblau */
-.qwebirc .colourline .Xc12 { color: #536dfe; } /* kräftiges lavendelblau */
-.qwebirc .colourline .Xc13 { color: #e040fb; } /* kräftiges pink */
-.qwebirc .colourline .Xc14 { color: #bdbdbd; } /* silber */
-.qwebirc .colourline .Xc15 { color: #f5f5f5; } /* fast weiß */
-.qwebirc .colourline .Xc27 { color: #a8326a; }
-.qwebirc .colourline .Xc28 { color: #ff3232; }
-.qwebirc .colourline .Xc29 { color: #ffa632; }
-.qwebirc .colourline .Xc30 { color: #ffff32; }
-.qwebirc .colourline .Xc31 { color: #a6ff32; }
-.qwebirc .colourline .Xc32 { color: #32ff32; }
-.qwebirc .colourline .Xc33 { color: #32ffa6; }
-.qwebirc .colourline .Xc34 { color: #32ffff; }
-.qwebirc .colourline .Xc35 { color: #3296ff; }
-.qwebirc .colourline .Xc36 { color: #3232ff; }
-.qwebirc .colourline .Xc37 { color: #a832ff; }
-.qwebirc .colourline .Xc38 { color: #ff32ff; }
-.qwebirc .colourline .Xc39 { color: #ff3296; }
-.qwebirc .colourline .Xc40 { color: #ff6666; }
-.qwebirc .colourline .Xc41 { color: #ffb366; }
-.qwebirc .colourline .Xc42 { color: #ffff66; }
-.qwebirc .colourline .Xc43 { color: #b3ff66; }
-.qwebirc .colourline .Xc44 { color: #66ff66; }
-.qwebirc .colourline .Xc45 { color: #66ffb3; }
-.qwebirc .colourline .Xc46 { color: #66ffff; }
-.qwebirc .colourline .Xc47 { color: #66b3ff; }
-.qwebirc .colourline .Xc48 { color: #6666ff; }
-.qwebirc .colourline .Xc49 { color: #b366ff; }
-.qwebirc .colourline .Xc50 { color: #ff66ff; }
-.qwebirc .colourline .Xc51 { color: #ff66b3; }
+.qwebirc .colourline .Xc0 { color: #f5f5f5; } /* sehr hell, aber nicht blendend */
+.qwebirc .colourline .Xc1 { color: #b0b0b0; } /* hellgrau */
+.qwebirc .colourline .Xc2 { color: #1976d2; } /* sehr kräftiges blau */
+.qwebirc .colourline .Xc3 { color: #008f11; } /* sehr kräftiges grün */
+.qwebirc .colourline .Xc4 { color: #d50000; } /* sehr kräftiges rot */
+.qwebirc .colourline .Xc5 { color: #ff6f00; } /* sehr kräftiges orange */
+.qwebirc .colourline .Xc6 { color: #8e24aa; } /* sehr kräftiges lila */
+.qwebirc .colourline .Xc7 { color: #ff8f00; } /* kräftiges orange-gelb */
+.qwebirc .colourline .Xc8 { color: #ffd600; } /* kräftiges gelb */
+.qwebirc .colourline .Xc9 { color: #009688; } /* kräftiges türkisgrün */
+.qwebirc .colourline .Xc10 { color: #00b8d4; } /* kräftiges türkis */
+.qwebirc .colourline .Xc11 { color: #0288d1; } /* kräftiges hellblau */
+.qwebirc .colourline .Xc12 { color: #3949ab; } /* kräftiges lavendelblau */
+.qwebirc .colourline .Xc13 { color: #d81b60; } /* kräftiges pink */
+.qwebirc .colourline .Xc14 { color: #757575; } /* dunkleres silber */
+.qwebirc .colourline .Xc15 { color: #e0e0e0; } /* fast weiß */
 .qwebirc .colourline .Xc52 { color: #ff4d4d; }
 .qwebirc .colourline .Xc53 { color: #ffb84d; }
 .qwebirc .colourline .Xc54 { color: #ffff4d; }
@@ -79,14 +54,6 @@
 .qwebirc .colourline .Xc88 { color: #e0e0e0; }
 .qwebirc .colourline .Xc89 { color: #b0b0b0; }
 .qwebirc .colourline .Xc90 { color: #888888; }
-.qwebirc .colourline .Xc91 { color: #a0a0a0; }
-.qwebirc .colourline .Xc92 { color: #bcbcbc; }
-.qwebirc .colourline .Xc93 { color: #d6d6d6; }
-.qwebirc .colourline .Xc94 { color: #eaeaea; }
-.qwebirc .colourline .Xc95 { color: #f5f5f5; }
-.qwebirc .colourline .Xc96 { color: #fafafa; }
-.qwebirc .colourline .Xc97 { color: #fefefe; }
-.qwebirc .colourline .Xc98 { color: #ffffff; }
 .qwebirc .colourline .Xc91 {
   color: #363636;
 }
@@ -405,9 +372,6 @@
 }
 .qwebirc .colourline .Xbc97 {
   background-color: #e2e2e2;
-}
-.qwebirc .colourline .Xbc98 {
-  background-color: #ffffff;
 }
 
 .qwebirc .colourline .Xb {
