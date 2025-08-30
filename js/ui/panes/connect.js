@@ -491,12 +491,21 @@ qwebirc.ui.ConnectPane = new Class({
             token = window.turnstile.getResponse(widgets[0]);
           }
         }
+  // If no token was produced and the widget didn't explicitly fail, warn the user
+  // only if a site key is configured (i.e. CAPTCHA is actually enabled). If
+  // CAPTCHA is effectively disabled (no site key), suppress the alert and
+  // continue without blocking the connect flow.
   if (!token && !window.__turnstileFailed) {
-          var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-          var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
-          showI18nAlert('ALERT_CAPTCHA_REQUIRED', 'Please complete the CAPTCHA.');
-          if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
-          return;
+          var captchaSiteKeyLocal = window.CAPTCHA_SITE_KEY || '';
+          if (captchaSiteKeyLocal) {
+            var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+            var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
+            showI18nAlert('ALERT_CAPTCHA_REQUIRED', 'Please complete the CAPTCHA.');
+            if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
+            return;
+          } else {
+            // No site key configured -> treat captcha as disabled; continue without token
+          }
         }
         data['captcha_token'] = token;
       }
