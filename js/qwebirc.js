@@ -356,6 +356,26 @@ afterOptionsInit();
 
 var qwebirc = {ui: {themes: {}, style: {}}, irc: {}, util: {crypto: {}}, config: {}, auth: {}, sound: {}, connected: false, xdomain: {}};
 
+// Global alert helper used by various UI code. If a pane-specific overlay
+// exists (created by ConnectPane), prefer it; otherwise fall back to window.alert.
+window.showI18nAlert = function(key, fallback) {
+  try {
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var text = (i18n && i18n[key]) || fallback || key;
+    var ov = document.getElementById('qwebirc-alert-overlay');
+    var msg = document.getElementById('qwebirc-alert-message');
+    var btn = document.getElementById('qwebirc-alert-close');
+    if(!ov || !msg) { alert(text); return; }
+    msg.textContent = text;
+    if(i18n && i18n.SAVE) btn.textContent = i18n.SAVE; else btn.textContent = 'OK';
+    ov.style.display = 'flex';
+    window.qwebirc = window.qwebirc || {}; window.qwebirc.__lastAlert = {key:key, fallback:fallback};
+  } catch(e) {
+    try { alert(fallback || key); } catch(_) {}
+  }
+};
+
 if(typeof QWEBIRC_BUILD != "undefined") {
   qwebirc.BUILD = QWEBIRC_BUILD;
   qwebirc.FILE_SUFFIX = "-" + QWEBIRC_BUILD;
