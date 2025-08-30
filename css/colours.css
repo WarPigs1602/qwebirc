@@ -1,18 +1,18 @@
 /* Optimierte Nickfarben für Lesbarkeit und Design im dunklen Theme */
-.qwebirc .colourline .Xc0 { color: #f8f8ff; } /* fast weiß */
+.qwebirc .colourline .Xc0 { color: #ffffff; } /* weiß */
 .qwebirc .colourline .Xc1 { color: #e0e0e0; } /* hellgrau */
-.qwebirc .colourline .Xc2 { color: #6ca0ff; } /* pastellblau */
-.qwebirc .colourline .Xc3 { color: #7be87b; } /* pastellgrün */
-.qwebirc .colourline .Xc4 { color: #ff7b7b; } /* pastellrot */
-.qwebirc .colourline .Xc5 { color: #e57373; } /* warmes rot */
-.qwebirc .colourline .Xc6 { color: #c792ea; } /* lila */
-.qwebirc .colourline .Xc7 { color: #ffd580; } /* pastellorange */
-.qwebirc .colourline .Xc8 { color: #fff59d; } /* pastellgelb */
-.qwebirc .colourline .Xc9 { color: #a8ffb0; } /* mintgrün */
-.qwebirc .colourline .Xc10 { color: #4dd2d2; } /* türkis */
-.qwebirc .colourline .Xc11 { color: #4de0ff; } /* hellblau */
+.qwebirc .colourline .Xc2 { color: #4d8cff; } /* kräftiges blau */
+.qwebirc .colourline .Xc3 { color: #4dcc4d; } /* kräftiges grün */
+.qwebirc .colourline .Xc4 { color: #ff4d4d; } /* kräftiges rot */
+.qwebirc .colourline .Xc5 { color: #ff884d; } /* orange */
+.qwebirc .colourline .Xc6 { color: #b266ff; } /* lila */
+.qwebirc .colourline .Xc7 { color: #ffb84d; } /* orange-gelb */
+.qwebirc .colourline .Xc8 { color: #ffe066; } /* gelb */
+.qwebirc .colourline .Xc9 { color: #4de0a0; } /* türkisgrün */
+.qwebirc .colourline .Xc10 { color: #4de0e0; } /* türkis */
+.qwebirc .colourline .Xc11 { color: #66ccff; } /* hellblau */
 .qwebirc .colourline .Xc12 { color: #7b9cff; } /* lavendelblau */
-.qwebirc .colourline .Xc13 { color: #ffb3ff; } /* pastellpink */
+.qwebirc .colourline .Xc13 { color: #ff66cc; } /* pink */
 .qwebirc .colourline .Xc14 { color: #bdbdbd; } /* silber */
 .qwebirc .colourline .Xc15 { color: #f5f5f5; } /* fast weiß */
 .qwebirc .colourline .Xc27 { color: #a8326a; }
@@ -421,11 +421,11 @@
 }
 
 .qwebirc .warncolour {
-  background-color: #ff9090;
-  color: black;
+  background-color: #b22222;
+  color: #fff;
 }
 
 .qwebirc .infocolour {
-  background-color: #d6d6ff;
-  color: black;
+  background-color: #232634;
+  color: #e0e0e0;
 }
