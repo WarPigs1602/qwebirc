@@ -32,15 +32,23 @@ body {
   height: 100%;
   overflow: hidden;
   /* match QUI and prefer system/emoji fonts for proper emoji rendering */
-  font-family: Verdana, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  font-family: var(--qwebirc-ui-font);
+}
+
+/* expose a theme hue for panes so JS can read it via getComputedStyle(document.documentElement).getPropertyValue('--qwebirc-pane-bg') */
+:root {
+  --qwebirc-pane-bg: $(tabbar_background);
+  --qwebirc-pane-fg: $(tab_text);
+  --qwebirc-ui-font: Verdana, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 }
 
 /* Zwei-spaltiges Options-Layout (leichte, responsive Verbesserungen) */
 .qwebirc-optionspane { text-align:left; }
 .qwebirc-classicui .qwebirc-optionspane {
   /* Keep options compact and allow dialogs.css to provide the dialog chrome.
-     Avoid heavy shadows/borders here so the options column stays lightweight. */
-  background: transparent;
+     Expose a readable background color via CSS custom property so JS can pick up the hue. */
+  background: var(--qwebirc-pane-bg, $(tabbar_background));
+  color: var(--qwebirc-pane-fg, $(tab_text));
   border: none;
   padding: 6px 8px;
   border-radius: 4px;
@@ -182,6 +190,15 @@ html {
   font-size: 0.8em;
 }
 
+/* If a pane element also has the .lines class (e.g. embedded wizard/options/about),
+   prefer the pane background variable so JS can hue the pane reliably. */
+.qwebirc-classicui .lines.qwebirc-embeddedwizard,
+.qwebirc-classicui .lines.qwebirc-optionspane,
+.qwebirc-classicui .lines.qwebirc-aboutpane {
+  background: var(--qwebirc-pane-bg, $(lines_background)) !important;
+  color: var(--qwebirc-pane-fg, $(lines_text)) !important;
+}
+
 .qwebirc-classicui .lines .timestamp {
   display: $(timestamp_display);
 }
@@ -216,7 +233,7 @@ html {
   padding-bottom: 3px;
   width: 99%;
   /* use same font stack so emojis inside input render like in QUI */
-  font-family: Verdana, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  font-family: var(--qwebirc-ui-font);
 }
 
 /* Emoji Picker Styles (portiert von qui.mcss) */
@@ -692,11 +709,62 @@ iframe {
 
 }
 
-/* Ensure embed and about panes match options typography in Classic UI */
+/* Ensure embed and about panes match options typography in Classic UI and inherit pane background variable */
 .qwebirc-classicui .qwebirc-aboutpane,
 .qwebirc-classicui .qwebirc-embeddedwizard {
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
-  font-size: 1.08em;
-  line-height: 1.25;
-  color: #e0e0e0;
+  /* Use QUI typography for embedded/about panes so their text sizes match QUI */
+  font-family: Verdana, sans-serif;
+  color: var(--qwebirc-pane-fg, $(tab_text));
+  background: var(--qwebirc-pane-bg, $(tabbar_background));
+}
+
+/* Apply QUI font-size rules to embedded wizard so it visually matches the QUI theme */
+.qwebirc-classicui .qwebirc-embeddedwizard .lines {
+  font-size: 0.8em; /* same as .qwebirc-qui .lines */
+}
+.qwebirc-classicui .qwebirc-embeddedwizard .tabbar {
+  font-size: 0.85em; /* same as QUI */
+  line-height: 22px;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard a.tab {
+  font-size: 0.95em; /* QUI tab size */
+  font-weight: 500;
+  background: transparent;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard .topic {
+  font-size: 0.8em;
+  color: #b0b0b0;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard .input input.keyboard-input {
+  font-size: 1em;
+  height: 1.6em;
+  padding-left: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  width: 99%;
+  border: 1.5px solid $(input_border);
+  border-radius: 6px;
+  background: var(--qwebirc-pane-bg, $(tabbar_background));
+  color: var(--qwebirc-pane-fg, $(tab_text));
+  box-shadow: 0 2px 8px #0002;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard .input input.keyboard-input::placeholder {
+  color: #888;
+  opacity: 1;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard .input input.keyboard-input:focus {
+  border: 1.5px solid #7a6ff0;
+  box-shadow: 0 0 0 2px #7a6ff033;
+}
+
+/* mobile responsive sizes copied from QUI for parity */
+@media screen and (max-device-width:1024px) {
+  .qwebirc-classicui .qwebirc-embeddedwizard .lines { font-size: 1.2em; }
+  .qwebirc-classicui .qwebirc-embeddedwizard .ircwindow div { font-size: 0.8em; }
+  .qwebirc-classicui .qwebirc-embeddedwizard .tabbar, .qwebirc-classicui .qwebirc-embeddedwizard .nicklist { font-size: 1.3em; }
+  .qwebirc-classicui .qwebirc-embeddedwizard .topic, .qwebirc-classicui .qwebirc-embeddedwizard .dropdownmenu a, .qwebirc-classicui .qwebirc-embeddedwizard .dropdownhint { font-size: 1.4em; }
+  .qwebirc-classicui .qwebirc-embeddedwizard .input input.keyboard-input { font-size: 1.6em; }
+  .qwebirc-classicui .qwebirc-embeddedwizard input { font-size: 1.6em; }
 }

@@ -161,20 +161,20 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   color: #098ED1;
   text-shadow: 0 2px 8px #0003, 0 1px 0 #fff2;
 }
-/* Modernisierte SASL-Inputs und Passwortfelder */
+/* Modernisierte SASL-Inputs und Passwortfelder (helles Formular, dunkle Schrift) */
 .qwebirc-loginbox input#sasl_username,
 .qwebirc-loginbox input#sasl_password,
 .qwebirc-loginbox input#confirm_sasl_username,
 .qwebirc-loginbox input#confirm_sasl_password {
   width: 200px;
-  border: 1.5px solid #3a3f4b;
+  border: 1.5px solid #c8d2dc;
   border-radius: 6px;
-  background: #232634;
-  color: #e0e0e0;
+  background: #ffffff;
+  color: #111214;
   padding: 6px 2.6em 6px 10px; /* extra right space for icon */
   font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px #0002;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
   line-height: 1.2;
 }
 .qwebirc-loginbox input#sasl_username:focus,
@@ -188,7 +188,7 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 
 /* Modernisierte Labels */
 .qwebirc-loginbox label {
-  color: #b0b0b0;
+  color: #333333; /* dunkle Schrift für Connect-Formular */
   font-size: 1em;
   font-weight: 500;
   margin-bottom: 4px;
@@ -274,14 +274,14 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 /* Modernisiertes Login-Input */
 .qwebirc-loginbox input#loginnickname, .qwebirc-loginbox input#loginchannels {
   width: 200px;
-  border: 1.5px solid #3a3f4b;
+  border: 1.5px solid #c8d2dc;
   border-radius: 6px;
-  background: #232634;
-  color: #e0e0e0;
+  background: #ffffff;
+  color: #111214;
   padding: 6px 10px;
   font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px #0002;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
 }
 .qwebirc-loginbox input#loginnickname:focus, .qwebirc-loginbox input#loginchannels:focus {
   border: 1.5px solid #7a6ff0;
@@ -312,10 +312,10 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 }
 /* Modernisiertes Login-Formular */
 .qwebirc-loginbox form {
-  background: #232634;
+  background: #ffffff; /* helles Formular für Connect */
   border-radius: 12px;
-  box-shadow: 0 2px 12px #0003;
-  border: 1.5px solid #3a3f4b;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  border: 1px solid #e8eef6;
   padding: 24px 18px;
 }
 
@@ -339,9 +339,8 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 
 /**************** ABOUT PANE *******************/
 .qwebirc-aboutpane {
-  font-size: 1.08em !important;
   line-height: 1.6;
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  font-family: var(--qwebirc-ui-font);
   background: #fbfbfe;
   color: #222428;
   border-radius: 10px;
@@ -421,9 +420,8 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   box-shadow: 0 2px 12px #0003;
   border: 1.5px solid #3a3f4b;
   padding: 14px 10px;
-  font-size: 1.08em;
   line-height: 1.25;
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  font-family: var(--qwebirc-ui-font);
 }
 
 .qwebirc-optionspane table {
@@ -903,9 +901,8 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   color: #222428;
   /* Use QUI wizard font schema for Classic embedded wizard (size, spacing, family)
     while preserving the Classic color scheme above. */
-  font-size: 1.08em;
   line-height: 1.25;
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  font-family: var(--qwebirc-ui-font);
   border-radius: 8px;
   border: 1px solid #e8eef6;
 }
