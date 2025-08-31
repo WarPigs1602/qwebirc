@@ -20,6 +20,13 @@ UIs = {
   }
 }
 
+# Register classicui frontend so it will be built and available as a selectable UI
+UIs["classicui"] = {
+  "class": "CLASSICUI",
+  "uifiles": ["classicui"],
+  "doctype": "<!DOCTYPE html>"
+}
+
 def flatten(y):
   for x in y:
     if isinstance(x, list):

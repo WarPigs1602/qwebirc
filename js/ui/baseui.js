@@ -371,6 +371,12 @@ qwebirc.ui.StandardUI = new Class({
     }
     this.__styleValues.textHue = $defined(this.options.thue) ? this.options.thue : this.__styleValues.hue;
 
+    // Ensure the modifiable stylesheet for this UI is loaded so STYLE_* options
+    // are applied on standard pages as well (classic UI frontends already call this).
+    try {
+      this.setModifiableStylesheet(uiName);
+    } catch(e) {}
+
     document.addEvent("keydown", this.__handleHotkey.bind(this));
   },
   __build_menu_items: function(options) {
@@ -511,7 +517,17 @@ qwebirc.ui.StandardUI = new Class({
         d._ensureTabClose(d.type, d._baseName || d.name);
   // If still empty: force direct SVG markup insertion
         if(d.tabclose && !d.tabclose.getElement('svg')) {
-          d.tabclose.set('html','<svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+          try {
+            // Classic UI hides SVG close glyphs and prefers a simple × text glyph.
+            // To avoid producing an empty tabclose in Classic, only inject SVG for non-Classic UIs.
+            var isClassic = false;
+            try {
+              if(this.parentElement && this.parentElement.classList && this.parentElement.classList.contains('qwebirc-classicui')) isClassic = true;
+            } catch(_) {}
+            if(!isClassic) {
+              d.tabclose.set('html','<svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+            }
+          } catch(e) {}
         }
       }
   } catch(e) { try { console.debug('[debug][qwebirc][qui] pane close rebuild error', e); } catch(_) {} }

@@ -1,23 +1,34 @@
-qwebirc.ui.QUI = new Class({
+// helper to stop events - works with MooTools Event wrappers and native events
+function _qwebirc_stopEvent(e) {
+  if (!e) return;
+  try {
+    if (e.stop) { e.stop(); return; }
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+  } catch (ignore) {}
+}
+
+qwebirc.ui.CLASSICUI = new Class({
   Extends: qwebirc.ui.RootUI,
   initialize: function(parentElement, theme, options) {
-    this.parent(parentElement, qwebirc.ui.QUI.Window, "qui", options);
+    this.parent(parentElement, qwebirc.ui.QUI.Window, "classicui", options);
     this.theme = theme;
     this.parentElement = parentElement;
-    this.setModifiableStylesheet("qui");
-  this.client = null; // Reference to IRC client for typing
-  // Later repair check for pane tab close buttons (Options / Embed / About)
+    this.setModifiableStylesheet("classicui");
+    this.client = null; // Reference to IRC client for typing
+    // Later repair check for pane tab close buttons (Options / Embed / About)
     try {
       var self = this;
-      window.addEvent('qwebirc:languageChanged', function(){ self.__repairPaneTabCloses && self.__repairPaneTabCloses(); });
+      window.addEvent && window.addEvent('qwebirc:languageChanged', function(){ self.__repairPaneTabCloses && self.__repairPaneTabCloses(); });
       this.__repairPaneTabCloses = function(){
         try {
           (self.windowArray||[]).forEach(function(w){
             if(!w) return;
             if(w.pane && (w.pane.type=='optionspane' || w.pane.type=='embeddedwizard' || w.pane.type=='aboutpane')) {
               if(w._ensureTabClose) w._ensureTabClose(w.type, w._baseName || w.name);
-              if(w.tabclose && !w.tabclose.getElement('svg')) {
-                w.tabclose.set('html','<svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+              if(w.tabclose) {
+                // Classic theme: prefer simple × fallback instead of SVG icons
+                try { w.tabclose.set('text','×'); } catch(e) { try { w.tabclose.set('html','×'); } catch(_) {} }
               }
             }
           });
@@ -26,13 +37,13 @@ qwebirc.ui.QUI = new Class({
     } catch(e) {}
   },
   postInitialize: function() {
-    this.qjsui = new qwebirc.ui.QUI.JSUI("qwebirc-qui", this.parentElement);
+  this.qjsui = new qwebirc.ui.CLASSICUI.JSUI("qwebirc-classicui", this.parentElement);
     this.qjsui.addEvent("reflow", function() {
       var w = this.getActiveWindow();
       if($defined(w))
         w.onResize();
     }.bind(this));
-    this.qjsui.top.addClass("outertabbar");
+  this.qjsui.top.addClass("outertabbar");
     this.qjsui.left.addClass("outertabbar");
 
     this.qjsui.top.addClass("outertabbar_top");
@@ -60,7 +71,7 @@ qwebirc.ui.QUI = new Class({
     this.reflow = this.qjsui.reflow.bind(this.qjsui);
 
     var scrollHandler = function(x) {
-      var event = new Event(x);
+      var event = x;
       var up, down;
       if(this.sideTabs) {
         var p = this.qjsui.left;
@@ -76,12 +87,12 @@ qwebirc.ui.QUI = new Class({
         down = event.wheel < 0;
       }
 
-      if(up) {
+  if(up) {
         this.nextWindow();
       } else if(down) {
         this.prevWindow();
       }
-      event.stop();
+  _qwebirc_stopEvent(event);
     }.bind(this);
     this.qjsui.left.addEvent("mousewheel", scrollHandler);
     this.qjsui.top.addEvent("mousewheel", scrollHandler);
@@ -97,7 +108,7 @@ qwebirc.ui.QUI = new Class({
 
     this.setSideTabs(this.uiOptions.SIDE_TABS);
 
-  // Live re-translation for open nick menu
+    // Live re-translation for open nick menu (parity with QUI)
     if(!this.__nickMenuLangListenerAdded) {
       this.__nickMenuLangListenerAdded = true;
       var self = this;
@@ -106,7 +117,7 @@ qwebirc.ui.QUI = new Class({
           if(!self.__openNickMenu || !self.__openNickMenu.container || !self.__openNickMenu.container.parentNode) return;
           var cont = self.__openNickMenu.container;
           var nick = self.__openNickMenu.nick;
-          // Alle Links neu beschriften
+          // Re-label all links
           var links = cont.getElementsByTagName('a');
           for(var i=0;i<links.length;i++) {
             var a = links[i];
@@ -125,7 +136,7 @@ qwebirc.ui.QUI = new Class({
       window.addEventListener('qwebirc:languageChanged', function(){ refreshOpenNickMenu(); });
     }
 
-  // Hide connect status in typing bar when signedOn fires
+    // Hide connect status in typing bar when signedOn fires (parity with QUI)
     this.addEvent && this.addEvent('signedOn', function() {
       if(window.qwebircConnectStatus) {
         window.qwebircConnectStatus.hide();
@@ -141,28 +152,40 @@ qwebirc.ui.QUI = new Class({
   __createDropdownMenu: function() {
     var dropdownMenu = new Element("span");
     dropdownMenu.addClass("dropdownmenu");
-    
+
     dropdownMenu.hide = function() {
       dropdownMenu.setStyle("display", "none");
       dropdownMenu.visible = false;
-      document.removeEvent("mousedown", hideEvent);
-    }.bind(this);
+      document.removeEventListener && document.removeEventListener("mousedown", hideEvent);
+    };
     var hideEvent = function() { dropdownMenu.hide(); };
-    
-  dropdownMenu.hide();
-  // Append to body to allow absolute positioning independent of nested layout (fixes custom pages placing it at bottom)
-    try { 
-      document.body.appendChild(dropdownMenu); 
-      if(!dropdownMenu.className.contains('dropdownmenu')) dropdownMenu.addClass('dropdownmenu');
+
+    dropdownMenu.hide();
+    // Append to body to allow absolute positioning independent of nested layout
+    try {
+      document.body.appendChild(dropdownMenu);
+      if(!dropdownMenu.className.contains) dropdownMenu.addClass && dropdownMenu.addClass('dropdownmenu');
+      // If Classic UI root exists in document, mark overlay so scoped CSS applies
+      try {
+        var node = this.parentElement;
+        var foundRoot = false;
+        while(node && node !== document.documentElement) {
+          try { if(node.classList && node.classList.contains('qwebirc-classicui')) { foundRoot = true; break; } } catch(_) {}
+          node = node.parentNode;
+        }
+        if(foundRoot) {
+          try { dropdownMenu.addClass && dropdownMenu.addClass('qwebirc-classicui'); } catch(_) {}
+        }
+      } catch(_) {}
     } catch(e) { this.parentElement.appendChild(dropdownMenu); }
-    
-    var buildEntries = function() {
-      dropdownMenu.empty();
+
+  var buildEntries = function() {
+      dropdownMenu.empty && dropdownMenu.empty();
       this.UICommands.forEach(function(x) {
         var label = (typeof x[0] === 'function') ? x[0]() : x[0];
         var fn = x[1];
-        var e = new Element("a");
-        e.addEvent("mousedown", function(ev) { new Event(ev).stop(); });
+  var e = new Element("a");
+  e.addEvent("mousedown", function(ev) { _qwebirc_stopEvent(ev); });
         e.addEvent("click", function() {
           dropdownMenu.hide();
           fn();
@@ -175,9 +198,7 @@ qwebirc.ui.QUI = new Class({
     // Rebuild on language change
     if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
       window.qwebirc.registerTranslator(function(){
-        // Recreate UICommands from cache in BaseUI if available
         if(this.__menuCache) {
-          // Convert cached entries into materialized labels
           this.UICommands = this.__menuCache.map(function(entry){
             return [(typeof entry[0] === 'function') ? entry[0] : entry[0], entry[1]];
           });
@@ -185,7 +206,6 @@ qwebirc.ui.QUI = new Class({
         buildEntries();
       }.bind(this));
     }
-  // Fallback: explicitly listen for language event (if translator does not fire)
     window.addEventListener('qwebirc:languageChanged', function(){
       if(this.__menuCache) {
         this.UICommands = this.__menuCache.map(function(entry){
@@ -194,57 +214,66 @@ qwebirc.ui.QUI = new Class({
       }
       buildEntries();
     }.bind(this));
-    
+
     var dropdown = new Element("div");
     dropdown.addClass("dropdown-tab");
-  dropdown.appendChild(new Element("img", {src: qwebirc.global.staticBaseURL + "images/icon.png", title: "menu", alt: "menu"}));
+    // i18n helper for small keys
+    var __t = function(key, fallback) {
+      try {
+        var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+        if(i18n && i18n[key]) return i18n[key];
+      } catch(e) {}
+      return fallback;
+    };
+    var menuTitle = __t('MENU', 'menu');
+    var menuImg = new Element("img", {src: qwebirc.global.staticBaseURL + "images/icon.png", title: menuTitle, alt: menuTitle});
+    dropdown.appendChild(menuImg);
     dropdown.setStyle("opacity", 1);
+    // update title/alt on language change
+    if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
+      window.qwebirc.registerTranslator(function(){
+        try { var t = __t('MENU','menu'); if(menuImg && menuImg.set) { menuImg.set('title', t); menuImg.set('alt', t); } } catch(e) {}
+      });
+    }
+    window.addEventListener && window.addEventListener('qwebirc:languageChanged', function(){ try { var t = __t('MENU','menu'); if(menuImg && menuImg.set) { menuImg.set('title', t); menuImg.set('alt', t); } } catch(e) {} });
 
     this.outerTabs.appendChild(dropdown);
     dropdownMenu.show = function(x) {
-      new Event(x).stop();
+      _qwebirc_stopEvent(x);
 
-      if(dropdownMenu.visible) {
-        dropdownMenu.hide();
-        return;
-      }
-      // Make it measurable first (hidden visibility)
-  dropdownMenu.setStyles({display: "block", visibility: "hidden"});
-      // Compute desired coordinates (below the dropdown tab)
+      if(dropdownMenu.visible) { dropdownMenu.hide(); return; }
+      dropdownMenu.setStyles && dropdownMenu.setStyles({display: "block", visibility: "hidden"});
       try {
         var tabPos = dropdown.getPosition();
         var tabSize = dropdown.getSize();
         var menuSize = dropdownMenu.getSize();
-        var top = tabPos.y + tabSize.y + 4; // 4px gap below tab
-        var left = tabPos.x; // align left edges
-        // If menu would overflow right edge, shift left
+        var top = tabPos.y + tabSize.y + 4;
+        var left = tabPos.x;
         var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
         if(left + menuSize.x > viewportWidth - 4) {
           left = Math.max(4, viewportWidth - menuSize.x - 4);
         }
-        // Prevent going above top (shouldn't normally)
         if(top + menuSize.y > window.innerHeight - 4) {
-          // If not enough space below, try placing above
-            var altTop = tabPos.y - menuSize.y - 4;
-            if(altTop > 4) top = altTop; // only if fits
+          var altTop = tabPos.y - menuSize.y - 4;
+          if(altTop > 4) top = altTop;
         }
-        dropdownMenu.setStyles({left: left + "px", top: top + "px"});
+        dropdownMenu.setStyles && dropdownMenu.setStyles({left: left + "px", top: top + "px"});
       } catch(e) {}
-      // Finally show
-      dropdownMenu.setStyle("visibility", "visible");
+      dropdownMenu.setStyle && dropdownMenu.setStyle("visibility", "visible");
       dropdownMenu.visible = true;
-      
-      document.addEvent("mousedown", hideEvent);
+      document.addEventListener && document.addEventListener("mousedown", hideEvent);
     }.bind(this);
-    dropdown.addEvent("mousedown", function(e) { new Event(e).stop(); });
+  dropdown.addEvent("mousedown", function(e) { _qwebirc_stopEvent(e); });
     dropdown.addEvent("click", dropdownMenu.show);
   },
   createInput: function() {
     var form = new Element("form");
     this.input.appendChild(form);
+    
     form.addClass("input");
 
-    // Emoji Picker Button
+  // Emoji Picker Button (full implementation portiert aus qui.js)
   var emojiBtn = new Element("button", { type: "button", html: "😊" });
   emojiBtn.addClass("emoji-picker-btn");
   // Dynamic size: 1em
@@ -252,78 +281,48 @@ qwebirc.ui.QUI = new Class({
   form.appendChild(emojiBtn);
 
   // Input box with left padding for emoji button
-    var inputbox = new Element("input");
-    inputbox.setStyle("paddingLeft", "32px");
-    this.addEvent("signedOn", function(client) {
-      this.getStatusWindow(client).lines.removeClass("spinner");
-      var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-      inputbox.placeholder = (i18n && i18n.INPUT_PLACEHOLDER) || "chat here! you can also use commands, like /JOIN";
-      var d = function() { inputbox.addClass("input-flash"); }.delay(250);
-      var d = function() { inputbox.removeClass("input-flash"); }.delay(500);
-      var d = function() { inputbox.addClass("input-flash"); }.delay(750);
-      var d = function() { inputbox.removeClass("input-flash"); }.delay(1000);
-      var d = function() { inputbox.addClass("input-flash"); }.delay(1250);
-      var d = function() { inputbox.removeClass("input-flash"); }.delay(1750);
-    });
-    form.appendChild(inputbox);
-    this.inputbox = inputbox;
-    this.inputbox.maxLength = 470;
-  // Language change -> update placeholder
-    if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
-      window.qwebirc.registerTranslator(function(){
-        var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-        if(i18n && i18n.INPUT_PLACEHOLDER) inputbox.placeholder = i18n.INPUT_PLACEHOLDER;
-      });
-    }
-  // Fallback: react directly to language change event (if translator ordering doesn't apply)
-    window.addEventListener('qwebirc:languageChanged', function(ev){
-      try {
-        var lang = ev && ev.detail && ev.detail.lang ? ev.detail.lang : ((window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en');
-        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-        if(i18n && i18n.INPUT_PLACEHOLDER) inputbox.placeholder = i18n.INPUT_PLACEHOLDER;
-      } catch(e) {}
-    });
+  var inputbox = new Element("input");
+  inputbox.setStyle("paddingLeft", "32px");
 
-    // Emoji Picker Overlay
+  // Emoji Picker Overlay
   var emojiOverlay = new Element("div");
   emojiOverlay.addClass("emoji-picker-overlay");
   // Dynamic size: 1em
   emojiOverlay.setStyles({ display: "none", position: "absolute", left: "0", bottom: "40px", zIndex: 1000, background: "#fff", border: "1px solid #ccc", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", padding: "8px", minWidth: "220px", maxHeight: "220px", overflowY: "auto", fontSize: "1em" });
   form.appendChild(emojiOverlay);
 
-    // Emoji Kategorien und Emojis
+    // Emoji Kategorien und Emojis (bereinigt: entfernt U+FFFD / '�' Einträge)
     var emojiCategories = [
       { nameKey: "EMOJI_CAT_SMILEYS", name: "Smileys & People", icon: "😃", emojis: [
-  "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
-  "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌",
-  "😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕",
-  // Hand emojis with skin tone modifiers
-  "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦵","🦶","👂","🦻","👃"
-  ] },
-  { nameKey: "EMOJI_CAT_ANIMALS", name: "Animals & Nature", icon: "🐻", emojis: [
+        "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
+        "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😪",
+        "🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🤯","🤠","🥳","😎","🤓","🧐","😕"
+      ,
+      // Hand emojis with skin tone modifiers
+      "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦵","🦶","👂","🦻","👃"
+      ] },
+      { nameKey: "EMOJI_CAT_ANIMALS", name: "Animals & Nature", icon: "🐻", emojis: [
         "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🐔","🐧","🐦","🐤",
-        "🐣","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦓","🦍","🐢","🐍","🦎","🦂","🦀","🦞","🦐","🦑","🐙","🦑"
-  ] },
-  { nameKey: "EMOJI_CAT_FOOD", name: "Food & Drink", icon: "🍎", emojis: [
-        "🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑",
+        "🐣","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦓","🦍","🐢","🐍","🦎","🦂","🦀","🦞","🦐","🦑","🐙"
+      ] },
+      { nameKey: "EMOJI_CAT_FOOD", name: "Food & Drink", icon: "🍎", emojis: [
+        "🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥝","🍅","🍆","🥑",
         "🥦","🥬","🥒","🌶️","🌽","🥕","🧄","🧅","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🥞"
-  ] },
-  { nameKey: "EMOJI_CAT_TRAVEL", name: "Travel & Places", icon: "✈️", emojis: [
+      ] },
+      { nameKey: "EMOJI_CAT_TRAVEL", name: "Travel & Places", icon: "✈️", emojis: [
         "🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🚚","🚛","🚜","🛵","🏍️","🚲","🛴","🚨","🚔","🚍",
         "🚘","🚖","🚡","🚠","🚟","🚃","🚋","🚞","🚝","🚄","🚅","🚈","🚂","🚆","🚇","🚊","🚉","✈️","🛫","🛬",
         "🛩️","💺","🛰️","🚀","🛸","🚁","⛵","🛶","🚤","🛥️","🛳️","⛴️","🚢","⚓","🪝","⛽","🚧","🚦","🚥","🚏"
-  ] },
-  { nameKey: "EMOJI_CAT_OBJECTS", name: "Objects", icon: "💡", emojis: [
+      ] },
+      { nameKey: "EMOJI_CAT_OBJECTS", name: "Objects", icon: "💡", emojis: [
         "⌚","📱","📲","💻","⌨️","🖥️","🖨️","🖱️","🖲️","🕹️","🗜️","💽","💾","💿","📀","📼","📷","📸","📹","🎥",
         "📽️","🎞️","📞","☎️","📟","📠","📺","📻","🎙️","🎚️","🎛️","⏱️","⏲️","⏰","🕰️","⌛","⏳","📡","🔋","🔌"
-  ] },
-  { nameKey: "EMOJI_CAT_FLAGS", name: "Flags", icon: "🏳️", emojis: [
+      ] },
+      { nameKey: "EMOJI_CAT_FLAGS", name: "Flags", icon: "🏳️", emojis: [
         "🏳️","🏴","🏁","🚩","🏳️‍🌈","🏳️‍⚧️","🇦🇹","🇩🇪","🇨🇭","🇺🇸","🇬🇧","🇫🇷","🇮🇹","🇪🇸","🇵🇱","🇳🇱","🇸🇪","🇳🇴","🇩🇰","🇫🇮",
         "🇨🇦","🇧🇷","🇦🇷","🇲🇽","🇯🇵","🇨🇳","🇰🇷","🇦🇺","🇳🇿","🇮🇳","🇹🇷","🇷🇺","🇺🇦","🇮🇱","🇪🇬","🇿🇦","🇸🇦","🇦🇪","🇶🇦","🇸🇬"
-  ] },
-  { nameKey: "EMOJI_CAT_SYMBOLS", name: "Symbols", icon: "❤️",
+      ] },
+      { nameKey: "EMOJI_CAT_SYMBOLS", name: "Symbols", icon: "❤️",
         emojis: [
           "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟",
           "☮️","✝️","☪️","🕉️","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈","♉","♊","♋","♌","♍","♎","♏",
@@ -332,9 +331,9 @@ qwebirc.ui.QUI = new Class({
           "1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔢","🔣","🔤","🔡","🔠","🔽","🔼","🔺","🔻","🔸","🔹",
           // Weitere Symbole
           "⬆️","⬇️","⬅️","➡️","↗️","↘️","↙️","↖️","↩️","↪️","⤴️","⤵️","🔀","🔁","🔂","🔄","🔃","🔚","🔙","🔛",
-          "🔜","🔝","🛑","⏏️","⏩","⏪","⏫","⏬","⏭️","⏮️","⏸️","⏹️","⏺️","⏯️","⏭️","⏮️","⏸️","⏹️","⏺️","⏯️",
-          "▪️","▫️","◾","◽","◼️","◻️","⬛","⬜","🔳","🔲","◉","◯","◐","◑","◒","◓","◔","◕","⚫","⚪",
-          "🔘","🔴","🔵","🔺","🔻","🔸","🔹","🔶","🔷","🔳","🔲","🔈","🔉","🔊","🔇","🔕","🔔","🔕","🔔","🔕"
+          "🔜","🔝","🛑","⏏️","⏩","⏪","⏫","⏬","⏭️","⏮️","⏸️","⏹️","⏺️","⏯️","▪️","▫️","◾","◽","◼️","◻️",
+          "⬛","⬜","🔳","🔲","◉","◯","◐","◑","◒","◓","◔","◕","⚫","⚪","🔘","🔴","🔵","🔺","🔻","🔸","🔹",
+          "🔶","🔷","🔈","🔉","🔊","🔇","🔕","🔔"
         ]
       }
     ];
@@ -387,14 +386,10 @@ qwebirc.ui.QUI = new Class({
       { labelKey: "EMOJI_SKIN_DARK", label: "Dark", code: "\uD83C\uDFFE" },
       { labelKey: "EMOJI_SKIN_VERYDARK", label: "Very Dark", code: "\uD83C\uDFFF" }
         ];
-        var handBase = "";
+        var handBase = "\u001d\u001d\u001d\u001d\u001d";
   // Default hand emoji for display (thumbs up)
-        var handEmoji = "";
-        handEmoji = "";
-        handEmoji = "";
-        handEmoji = "";
-        handEmoji = "";
-        handEmoji = "";
+        var handEmoji = "\u001d\u001d\u001d\u001d\u001d";
+  // Default assignment
         handEmoji = "👍";
         skinBar = new Element("div");
         skinBar.setStyles({ display: "flex", gap: "6px", margin: "8px 0 0 0", alignItems: "center" });
@@ -502,126 +497,54 @@ qwebirc.ui.QUI = new Class({
         }
       }
     });
-    // Setze IRC-Client-Referenz beim ersten connect
     this.addEvent("signedOn", function(client) {
-      this.client = client;
+      // store IRC client reference so typing TAGMSGs can be sent (parity with QUI)
+      try { this.client = client; } catch(e) {}
+      // i18n-aware placeholder
+      try {
+        var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+        inputbox.placeholder = (i18n && i18n.INPUT_PLACEHOLDER) ? i18n.INPUT_PLACEHOLDER : 'chat here! you can also use commands, like /JOIN';
+      } catch(e) { inputbox.placeholder = 'chat here! you can also use commands, like /JOIN'; }
+      var d = function() { inputbox.addClass("input-flash"); }.delay(250);
+      var d = function() { inputbox.removeClass("input-flash"); }.delay(500);
+      var d = function() { inputbox.addClass("input-flash"); }.delay(750);
+      var d = function() { inputbox.removeClass("input-flash"); }.delay(1000);
+      var d = function() { inputbox.addClass("input-flash"); }.delay(1250);
+      var d = function() { inputbox.removeClass("input-flash"); }.delay(1750);
+    });
+  form.appendChild(inputbox);
+  this.inputbox = inputbox;
+  this.inputbox.maxLength = 470;
+    // Language-aware placeholder handling (registerTranslator compatibility)
+    if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
+      window.qwebirc.registerTranslator(function(){
+        try {
+          var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+          var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+          if(i18n && i18n.INPUT_PLACEHOLDER) inputbox.placeholder = i18n.INPUT_PLACEHOLDER;
+        } catch(e) {}
+      });
+    }
+    window.addEventListener && window.addEventListener('qwebirc:languageChanged', function(ev){
+      try {
+        var lang = ev && ev.detail && ev.detail.lang ? ev.detail.lang : ((window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en');
+        var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+        if(i18n && i18n.INPUT_PLACEHOLDER) inputbox.placeholder = i18n.INPUT_PLACEHOLDER;
+      } catch(e) {}
     });
 
+  // Emoji picker removed from Classic (functionality exists in QUI frontend)
+
     var sendInput = function() {
-      if(inputbox.value == "")
-        return;
+      if(inputbox.value == "") return;
       this.resetTabComplete();
       this.getActiveWindow().historyExec(inputbox.value);
       inputbox.value = "";
       inputbox.placeholder = "";
-      // Sende "done"-Status nach dem Senden
-      if (typingTimeout) clearTimeout(typingTimeout);
-      lastTypingState = "done";
-      this.sendTypingTagmsg("done");
+      // If typing indicator code present, send done
+      if(this._sendTypingTagmsg) this._sendTypingTagmsg('done');
     }.bind(this);
-
-    // Hilfsfunktion: Sende TAGMSG mit typing-Status
-    this.sendTypingTagmsg = function(state) {
-      // Typing-Indicator bei Befehlen (Eingaben mit /) deaktivieren
-      if (typeof inputbox !== 'undefined' && inputbox.value && inputbox.value.trim().charAt(0) === '/') {
-        return;
-      }
-      var win = this.getActiveWindow();
-      if(!win) return;
-      var target = win.name;
-      // Only support channel or query
-      if(win.type == qwebirc.ui.WINDOW_CHANNEL || win.type == qwebirc.ui.WINDOW_QUERY) {
-        if(this.client && this.client.send) {
-          // Check whether message-tags capability is active
-          if(this.client.activeCaps && this.client.activeCaps.indexOf("message-tags") !== -1) {
-            this.client.send("@+typing=" + state + " TAGMSG " + target);
-          }
-        }
-      }
-    };
-
-    // Typing-Status-Logik
-    var typingTimeout = null;
-    var typingInterval = null;
-    var lastTypingState = "done";
-    var typingInterval = null;
-    var TYPING_INTERVAL = 1000; // ms
-    var PAUSE_DELAY = 2000; // ms
-    var typingTimeout = null;
-
-    var startTypingInterval = function() {
-      if (typingInterval) return;
-  // Send immediately to avoid delay
-      if(inputbox.value.length > 0 && lastTypingState !== "active") {
-        this.sendTypingTagmsg("active");
-        lastTypingState = "active";
-      }
-      typingInterval = setInterval(function() {
-        if(inputbox.value.length > 0) {
-          if(lastTypingState !== "active") {
-            this.sendTypingTagmsg("active");
-            lastTypingState = "active";
-          }
-        } else {
-          stopTypingInterval();
-        }
-      }.bind(this), TYPING_INTERVAL);
-    }.bind(this);
-
-    var stopTypingInterval = function() {
-      if (typingInterval) {
-        clearInterval(typingInterval);
-        typingInterval = null;
-      }
-    };
-
-    var typingHandler = function(e) {
-      var win = this.getActiveWindow();
-      if(!win || (win.type != qwebirc.ui.WINDOW_CHANNEL && win.type != qwebirc.ui.WINDOW_QUERY)) {
-        return;
-      }
-      if(typingTimeout) clearTimeout(typingTimeout);
-      if(inputbox.value.length > 0) {
-        startTypingInterval();
-        if(typingTimeout) clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(function() {
-          if(lastTypingState !== "done" && lastTypingState !== "paused") {
-            this.sendTypingTagmsg("paused");
-            lastTypingState = "paused";
-          }
-        }.bind(this), PAUSE_DELAY);
-      } else {
-        stopTypingInterval();
-        if(lastTypingState !== "done") {
-          this.sendTypingTagmsg("done");
-          lastTypingState = "done";
-        }
-        if(typingTimeout) clearTimeout(typingTimeout);
-      }
-    }.bind(this);
-    inputbox.addEvent("input", typingHandler);
-
-  // Also start interval on keydown in case input event is not triggered
-    inputbox.addEvent("keydown", function() {
-      if(inputbox.value.length > 0) {
-        startTypingInterval();
-        if(typingTimeout) clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(function() {
-          stopTypingInterval();
-          if(lastTypingState !== "done" && lastTypingState !== "paused") {
-            this.sendTypingTagmsg("paused");
-            lastTypingState = "paused";
-          }
-        }.bind(this), PAUSE_DELAY);
-      } else {
-        stopTypingInterval();
-        if(lastTypingState !== "done") {
-          this.sendTypingTagmsg("done");
-          lastTypingState = "done";
-        }
-        if(typingTimeout) clearTimeout(typingTimeout);
-      }
-    }.bind(this));
 
     if(!qwebirc.util.deviceHasKeyboard()) {
       inputbox.addClass("mobile-input");
@@ -648,11 +571,7 @@ qwebirc.ui.QUI = new Class({
       inputbox.addClass("keyboard-input");
     }
     
-    form.addEvent("submit", function(e) {
-      new Event(e).stop();
-  sendInput();
-  emojiOverlay.setStyle("display", "none");
-    });
+  form.addEvent("submit", function(e) { _qwebirc_stopEvent(e); sendInput(); });
 
     var reset = this.resetTabComplete.bind(this);
     inputbox.addEvent("focus", reset);
@@ -673,7 +592,7 @@ qwebirc.ui.QUI = new Class({
       } else if(e.key == "tab") {
         this.tabComplete(inputbox, e.shift);
 
-        new Event(e).stop();
+  _qwebirc_stopEvent(e);
         e.preventDefault();
         return;
       } else {
@@ -686,7 +605,7 @@ qwebirc.ui.QUI = new Class({
       
       var result = resultfn.bind(this.commandhistory)();
       
-      new Event(e).stop();
+  _qwebirc_stopEvent(e);
       e.preventDefault();
 
       if(!result)
@@ -695,6 +614,99 @@ qwebirc.ui.QUI = new Class({
         
       inputbox.value = result;
       qwebirc.util.setAtEnd(inputbox);
+    }.bind(this));
+
+    /* Typing-Indicator (TAGMSG @+typing) - portiert aus qui.js */
+  this._sendTypingTagmsg = function(state) {
+      try {
+        if (typeof inputbox !== 'undefined' && inputbox.value && inputbox.value.trim().charAt(0) === '/') return;
+        var win = this.getActiveWindow();
+        if(!win) return;
+        var target = win.name;
+        if(win.type == qwebirc.ui.WINDOW_CHANNEL || win.type == qwebirc.ui.WINDOW_QUERY) {
+          if(this.client && this.client.send) {
+            if(this.client.activeCaps && this.client.activeCaps.indexOf("message-tags") !== -1) {
+              this.client.send("@+typing=" + state + " TAGMSG " + target);
+            }
+          }
+        }
+      } catch(e) {}
+    }.bind(this);
+
+  // Compatibility: expose same public method name as QUI so other code can call it
+  try { this.sendTypingTagmsg = this._sendTypingTagmsg; } catch(e) {}
+
+    var typingTimeout = null;
+    var typingInterval = null;
+    var lastTypingState = "done";
+    var TYPING_INTERVAL = 1000;
+    var PAUSE_DELAY = 2000;
+
+    var startTypingInterval = function() {
+      if (typingInterval) return;
+      if(inputbox.value.length > 0 && lastTypingState !== "active") {
+        this._sendTypingTagmsg("active");
+        lastTypingState = "active";
+      }
+      typingInterval = setInterval(function() {
+        if(inputbox.value.length > 0) {
+          if(lastTypingState !== "active") {
+            this._sendTypingTagmsg("active");
+            lastTypingState = "active";
+          }
+        } else {
+          stopTypingInterval();
+        }
+      }.bind(this), TYPING_INTERVAL);
+    }.bind(this);
+
+    var stopTypingInterval = function() {
+      if (typingInterval) { clearInterval(typingInterval); typingInterval = null; }
+    };
+
+    var typingHandler = function(e) {
+      var win = this.getActiveWindow();
+      if(!win || (win.type != qwebirc.ui.WINDOW_CHANNEL && win.type != qwebirc.ui.WINDOW_QUERY)) return;
+      if(typingTimeout) clearTimeout(typingTimeout);
+      if(inputbox.value.length > 0) {
+        startTypingInterval();
+        if(typingTimeout) clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(function() {
+          if(lastTypingState !== "done" && lastTypingState !== "paused") {
+            this._sendTypingTagmsg("paused");
+            lastTypingState = "paused";
+          }
+        }.bind(this), PAUSE_DELAY);
+      } else {
+        stopTypingInterval();
+        if(lastTypingState !== "done") {
+          this._sendTypingTagmsg("done");
+          lastTypingState = "done";
+        }
+        if(typingTimeout) clearTimeout(typingTimeout);
+      }
+    }.bind(this);
+    inputbox.addEvent("input", typingHandler);
+
+    inputbox.addEvent("keydown", function() {
+      if(inputbox.value.length > 0) {
+        startTypingInterval();
+        if(typingTimeout) clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(function() {
+          stopTypingInterval();
+          if(lastTypingState !== "done" && lastTypingState !== "paused") {
+            this._sendTypingTagmsg("paused");
+            lastTypingState = "paused";
+          }
+        }.bind(this), PAUSE_DELAY);
+      } else {
+        stopTypingInterval();
+        if(lastTypingState !== "done") {
+          this._sendTypingTagmsg("done");
+          lastTypingState = "done";
+        }
+        if(typingTimeout) clearTimeout(typingTimeout);
+      }
     }.bind(this));
   },
   setLines: function(lines) {
@@ -739,13 +751,13 @@ qwebirc.ui.QUI = new Class({
   }
 });
 
-qwebirc.ui.QUI.JSUI = new Class({
+qwebirc.ui.CLASSICUI.JSUI = new Class({
   Implements: [Events],
   initialize: function(class_, parent, sizer) {
     this.parent = parent;
     this.sizer = $defined(sizer)?sizer:parent;
 
-    this.class_ = class_;
+  this.class_ = class_;
     this.create();
     
     this.reflowevent = null;
@@ -848,249 +860,66 @@ qwebirc.ui.QUI.JSUI = new Class({
   }
 });
 
-qwebirc.ui.QUI.Window = new Class({
+qwebirc.ui.CLASSICUI.Window = new Class({
   Extends: qwebirc.ui.Window,
   
   initialize: function(parentObject, client, type, name, identifier) {
     this.parent(parentObject, client, type, name, identifier);
-  // Store original names for later re-translation (only for fixed system panes)
-  this._baseName = name;
-
-  // Typing bar for channel and query windows
-    if(type == qwebirc.ui.WINDOW_CHANNEL || type == qwebirc.ui.WINDOW_QUERY) {
-      this._typingBar = null;
-      this._typingUsers = {};
-      this._typingTimeouts = {};
-      this._typingBarHideTimeout = null;
-
-      // Hilfsfunktion: Nickname mit Farbe als HTML
-      this._renderNick = function(nick) {
-        if (this.nicksColoured && typeof nick.toHSBColour === 'function') {
-          var color = nick.toHSBColour(this.client);
-          if (color) {
-            return '<span style="color:' + color.rgbToHex() + '">' + nick + '</span>';
-          }
-        }
-        return '<span>' + nick + '</span>';
-      };
-
-  // Shows the typing bar for all currently active typers
-      this._updateTypingBar = function() {
-        if (!this._typingBar) {
-          var inputForm = $$('.input form')[0];
-          if (inputForm) {
-            var typingBar = new Element("div", {
-              'class': 'qwebirc-typing-bar',
-            });
-            typingBar.inject(inputForm, 'before');
-            this._typingBar = typingBar;
-          }
-        }
-        if (!this._typingBar) return;
-
-        var nicks = Object.keys(this._typingUsers).filter(function(nick) {
-          return this._typingUsers[nick] === 'active';
-        }.bind(this));
-
-        if (nicks.length === 0) {
-          this._typingBar.set('text', '');
-          this._typingBar.removeClass('active');
-          this._typingBar.removeClass('paused');
-          this._typingBar.addClass('qwebirc-typing-bar');
-          return;
-        }
-
-  var nickHtml = nicks.map(this._renderNick.bind(this)).join(', ');
-  var text = nickHtml + ' <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>';
-  this._typingBar.set('html', text);
-        this._typingBar.removeClass('paused');
-        this._typingBar.addClass('qwebirc-typing-bar');
-        this._typingBar.addClass('active');
-      };
-
-      // Hauptfunktion: Event-Verarbeitung
-      this.showTypingBar = function(event) {
-        if (!event.tags || !event.tags.typing) return;
-        var typingState = event.tags.typing;
-        var nick = event.user.split('!')[0];
-
-  // Timing: hide after 5s of inactivity
-        var hideDelay = 5000;
-        if (this._typingTimeouts[nick]) {
-          clearTimeout(this._typingTimeouts[nick]);
-        }
-        if (typingState === 'active') {
-          this._typingUsers[nick] = 'active';
-          this._typingTimeouts[nick] = setTimeout(function() {
-            delete this._typingUsers[nick];
-            this._updateTypingBar();
-          }.bind(this), hideDelay);
-        } else if (typingState === 'paused') {
-          this._typingUsers[nick] = 'paused';
-          this._typingTimeouts[nick] = setTimeout(function() {
-            delete this._typingUsers[nick];
-            this._updateTypingBar();
-          }.bind(this), hideDelay);
-        } else if (typingState === 'done') {
-          delete this._typingUsers[nick];
-          if (this._typingTimeouts[nick]) {
-            clearTimeout(this._typingTimeouts[nick]);
-            delete this._typingTimeouts[nick];
-          }
-        }
-        this._updateTypingBar();
-      };
-    }
-
 
     this.tab = new Element("a");
     this.tab.addClass("tab");
-    this.tab.addEvent("focus", function() { this.blur() }.bind(this.tab));
+    this.tab.addEvent("focus", function() { this.blur() }.bind(this.tab));;
 
     this.spaceNode = document.createTextNode(" ");
+    parentObject.tabs.appendChild(this.tab);
+    parentObject.tabs.appendChild(this.spaceNode);
 
-  // Sort tabs: 1. Others (except channel/query) alphabetically, 2. Channels alphabetically, 3. Queries alphabetically at the end
-    this.tab.windowType = type;
-  // Set query nick as attribute for sorting
-    if(type === qwebirc.ui.WINDOW_QUERY && typeof name === 'string') {
-      this.tab.setAttribute('data-querynick', name);
-    }
-  // Set channel name as attribute for sorting
-    if(type === qwebirc.ui.WINDOW_CHANNEL && typeof name === 'string') {
-      this.tab.setAttribute('data-channel', name);
-    }
-    var allTabs = Array.from(parentObject.tabs.childNodes).filter(function(node) {
-      return node.nodeType === 1 && node.classList.contains("tab");
-    });
-    allTabs.push(this.tab);
-    // Gruppieren
-    var statusTabs = allTabs.filter(function(tab) {
-      return tab.windowType === qwebirc.ui.WINDOW_STATUS;
-    });
-    var channelTabs = allTabs.filter(function(tab) {
-      return tab.windowType === qwebirc.ui.WINDOW_CHANNEL;
-    });
-    var queryTabs = allTabs.filter(function(tab) {
-      return tab.windowType === qwebirc.ui.WINDOW_QUERY;
-    });
-    var otherTabs = allTabs.filter(function(tab) {
-      return tab.windowType !== qwebirc.ui.WINDOW_CHANNEL && tab.windowType !== qwebirc.ui.WINDOW_QUERY && tab.windowType !== qwebirc.ui.WINDOW_STATUS;
-    });
-    // Sortieren
-    otherTabs.sort(function(a, b) {
-      return a.textContent.localeCompare(b.textContent, undefined, {sensitivity: 'base'});
-    });
-    channelTabs.sort(function(a, b) {
-      // Sortiere alphabetisch, case-insensitive, Channel-Prefixe ignorieren (wie im IRC)
-      function stripPrefix(name) {
-        return name.replace(/^[#&!+]+/, '');
-      }
-      // Versuche, den echten Channelnamen aus data-channel zu nehmen, sonst fallback auf Text
-      var aName = a.getAttribute && a.getAttribute('data-channel') ? a.getAttribute('data-channel') : a.textContent.trim();
-      var bName = b.getAttribute && b.getAttribute('data-channel') ? b.getAttribute('data-channel') : b.textContent.trim();
-      var an = stripPrefix(aName).toLowerCase();
-      var bn = stripPrefix(bName).toLowerCase();
-      if (an < bn) return -1;
-      if (an > bn) return 1;
-      return 0;
-    });
-    queryTabs.sort(function(a, b) {
-      // Querys auch alphabetisch, case-insensitive sortieren, Nick aus Attribut wenn vorhanden
-      var aNick = a.getAttribute && a.getAttribute('data-querynick') ? a.getAttribute('data-querynick') : a.textContent.trim();
-      var bNick = b.getAttribute && b.getAttribute('data-querynick') ? b.getAttribute('data-querynick') : b.textContent.trim();
-      var an = aNick.toLowerCase();
-      var bn = bNick.toLowerCase();
-      if (an < bn) return -1;
-      if (an > bn) return 1;
-      return 0;
-    });
-    // Alle Tabs entfernen
-    allTabs.forEach(function(tab) {
-      if (tab.parentNode === parentObject.tabs) parentObject.tabs.removeChild(tab);
-    });
-  // Order: Status, Channels, Queries, Others
-  var sortedTabs = statusTabs.concat(channelTabs, queryTabs, otherTabs);
-    sortedTabs.forEach(function(tab) {
-      parentObject.tabs.appendChild(tab);
-    });
-  // Insert space node after this tab
-    parentObject.tabs.insertBefore(this.spaceNode, this.tab.nextSibling);
+    if(type != qwebirc.ui.WINDOW_STATUS && type != qwebirc.ui.WINDOW_CONNECT) {
+      var tabclose = new Element("span");
+      this.tabclose = tabclose;
+      // use multiplication sign as a nicer close glyph (QUI falls back to × as well)
+      tabclose.set("text", "×");
+      tabclose.addClass("tabclose");
+      var close = function(e) {
+        _qwebirc_stopEvent(e);
 
-  // Close button (initially created, properly positioned after text later)
-  this._ensureTabClose(type, name);
+        if(this.closed)
+          return;
+
+        if(type == qwebirc.ui.WINDOW_CHANNEL)
+          this.client.exec("/PART " + name);
+
+        this.close();
+
+        //parentObject.inputbox.focus();
+      }.bind(this);
+
+      tabclose.addEvent("click", close);
+      this.tab.addEvent("mouseup", function(e) {
+        var button = 1;
+
+        if(Browser.Engine.trident)
+          button = 4;
+
+        if(e.event.button == button)
+          close(e);
+      }.bind(this));
+
+      this.tab.appendChild(tabclose);
+    } else {
+      this.tabclose = null;
+    }
 
     this.tab.appendText(name);
-  // After adding the text move the close button to the end (or beginning for side tabs) if needed
-    if(this.tabclose) {
-      try {
-        if(this.parentObject.sideTabs) {
-          // For side tabs: close button first (CSS float right handles alignment)
-          this.tab.insertBefore(this.tabclose, this.tab.firstChild);
-        } else {
-          // Horizontale Tabs: Close-Button am Ende
-          this.tab.appendChild(this.tabclose);
-        }
-      } catch(e) {}
-    }
-  // Add tab icon (SVG) for special panes
-    (function(){
-      try {
-        var paneType = (this.pane && this.pane.type) ? this.pane.type : (this.identifier||'');
-        var iconClass = null;
-        // Mapping pane type -> icon (simple inline SVG path/lines)
-        var svgns = 'http://www.w3.org/2000/svg';
-        var makeIcon = function(kind){
-          var svg = document.createElementNS(svgns,'svg');
-          svg.setAttribute('viewBox','0 0 16 16');
-          svg.setAttribute('width','16');
-          svg.setAttribute('height','16');
-          svg.setAttribute('class','tabicon');
-          if(kind==='options') {
-            var c = document.createElementNS(svgns,'circle'); c.setAttribute('cx','8'); c.setAttribute('cy','8'); c.setAttribute('r','5'); c.setAttribute('fill','none'); c.setAttribute('stroke','currentColor'); c.setAttribute('stroke-width','2'); svg.appendChild(c);
-            var r = document.createElementNS(svgns,'rect'); r.setAttribute('x','7'); r.setAttribute('y','3'); r.setAttribute('width','2'); r.setAttribute('height','4'); r.setAttribute('fill','currentColor'); svg.appendChild(r);
-          } else if(kind==='embed') {
-            var r2 = document.createElementNS(svgns,'rect'); r2.setAttribute('x','2'); r2.setAttribute('y','4'); r2.setAttribute('width','12'); r2.setAttribute('height','8'); r2.setAttribute('rx','1'); r2.setAttribute('fill','none'); r2.setAttribute('stroke','currentColor'); r2.setAttribute('stroke-width','1.6'); svg.appendChild(r2);
-            var p = document.createElementNS(svgns,'path'); p.setAttribute('d','M6 6l-2 2 2 2M10 6l2 2-2 2'); p.setAttribute('fill','none'); p.setAttribute('stroke','currentColor'); p.setAttribute('stroke-width','1.6'); p.setAttribute('stroke-linecap','round'); p.setAttribute('stroke-linejoin','round'); svg.appendChild(p);
-          } else if(kind==='about') {
-            var circle = document.createElementNS(svgns,'circle'); circle.setAttribute('cx','8'); circle.setAttribute('cy','8'); circle.setAttribute('r','6'); circle.setAttribute('fill','none'); circle.setAttribute('stroke','currentColor'); circle.setAttribute('stroke-width','1.6'); svg.appendChild(circle);
-            var line = document.createElementNS(svgns,'line'); line.setAttribute('x1','8'); line.setAttribute('y1','5'); line.setAttribute('x2','8'); line.setAttribute('y2','9'); line.setAttribute('stroke','currentColor'); line.setAttribute('stroke-width','1.6'); line.setAttribute('stroke-linecap','round'); svg.appendChild(line);
-            var dot = document.createElementNS(svgns,'circle'); dot.setAttribute('cx','8'); dot.setAttribute('cy','11'); dot.setAttribute('r','0.8'); dot.setAttribute('fill','currentColor'); svg.appendChild(dot);
-          } else {
-            return null;
-          }
-          return svg;
-        };
-        if(paneType==='optionspane') iconClass='options';
-        else if(paneType==='embeddedwizard') iconClass='embed';
-        else if(paneType==='aboutpane') iconClass='about';
-        if(iconClass) {
-          // Add icon only if none exists yet and tab not already text-only
-          if(!this.tab.getElement('svg.tabicon')) {
-            var icon = makeIcon(iconClass);
-            if(icon) {
-              // Insert before text (after possible close button for side tabs?)
-              if(this.parentObject.sideTabs) {
-                this.tab.insertBefore(icon, this.tab.firstChild);
-              } else {
-                // Text ist erstes Child; Icon davor
-                this.tab.insertBefore(icon, this.tab.firstChild);
-              }
-              this.tab.addClass('tab-has-icon');
-              this.tab.addClass('tab-icon-' + iconClass);
-            }
-          }
-        }
-      } catch(err) {}
-    }).bind(this)();
     this.tab.addEvent("click", function(e) {
-      new Event(e).stop();
+      _qwebirc_stopEvent(e);
       
       if(this.closed)
         return;
         
       parentObject.selectWindow(this);
     }.bind(this));
-  // Register translator for system tabs
+    // Register translator for system tabs (live-update titles/topics on language change)
     if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
       window.qwebirc.registerTranslator(function(){
         try { this._applyTranslatedTitle(); } catch(e) {}
@@ -1101,7 +930,7 @@ qwebirc.ui.QUI.Window = new Class({
         } catch(e) {}
       }.bind(this));
     }
-    window.addEventListener('qwebirc:languageChanged', function(){
+    window.addEventListener && window.addEventListener('qwebirc:languageChanged', function(){
       try { this._applyTranslatedTitle(); } catch(e) {}
       try {
         if(this.type == qwebirc.ui.WINDOW_CHANNEL && this.topic) {
@@ -1115,71 +944,7 @@ qwebirc.ui.QUI.Window = new Class({
     this.parentObject.qjsui.applyClasses("middle", this.lines);
     this.lines.addClass("lines");
 
-  // Entferne spinner-Grafik beim Verbinden
-  // if(type == qwebirc.ui.WINDOW_STATUS)
-  //   this.lines.addClass("spinner");
-// --- Connect-Status in Typing-Bar anzeigen ---
-// Helper for animated dots
-// Typing bar style: three empty <span class="typing-dot"></span> for animated dots
-function getTypingBarDots() {
-  return '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
-}
-
-// Connect-Status-Objekt
-var connectStatus = {
-  interval: null,
-  step: 0,
-  typingBar: null,
-  show: function() {
-    if (this.interval) return;
-    var typingBar = document.querySelector('.qwebirc-typing-bar');
-    if (!typingBar) {
-      // Versuche, die Typing-Bar zu erzeugen, falls sie noch nicht existiert
-      var inputForm = $$('.input form')[0];
-      if (inputForm) {
-        typingBar = new Element('div', {'class': 'qwebirc-typing-bar active'});
-        typingBar.inject(inputForm, 'before');
-      }
-    }
-    if (!typingBar) return;
-    this.typingBar = typingBar;
-    typingBar.addClass('active');
-    var self = this;
-  // Keine Animation, sondern wie Typing-Bar
-  var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-  var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-  var lbl = (i18n && i18n.TRYING_TO_CONNECT) ? i18n.TRYING_TO_CONNECT : 'Trying to connect server';
-  typingBar.set('html', lbl + ' <span class="typing-dots">' + getTypingBarDots() + '</span>');
-// Automatisch Statusmeldung ausblenden, wenn signedOn-Event kommt
-if (window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.QUI) {
-  var QUIproto = qwebirc.ui.QUI.prototype;
-  var oldPostInit = QUIproto.postInitialize;
-  QUIproto.postInitialize = function() {
-    if (oldPostInit) oldPostInit.apply(this, arguments);
-    this.addEvent && this.addEvent('signedOn', function() {
-      if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
-    });
-  };
-}
-  },
-  hide: function() {
-  // hide typing status
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-    // Entferne ALLE Typing-Bars mit dieser Klasse aus dem DOM
-    var bars = document.querySelectorAll('.qwebirc-typing-bar');
-    bars.forEach(function(bar) {
-      bar.style.display = 'none';
-      if (bar.parentNode) bar.parentNode.removeChild(bar);
-    });
-    this.typingBar = null;
-  }
-};
-
-// Export for other modules
-window.qwebircConnectStatus = connectStatus;
+  // status window: no spinner decoration in Classic theme (spinner handled by MochaUI elsewhere)
 
     if(type != qwebirc.ui.WINDOW_CUSTOM && type != qwebirc.ui.WINDOW_CONNECT)
       this.lines.addClass("ircwindow");
@@ -1210,6 +975,88 @@ window.qwebircConnectStatus = connectStatus;
     
     this.nicksColoured = this.parentObject.uiOptions.NICK_COLOURS;
     this.reflow();
+    // Typing indicator state (portiert aus qui.js)
+    this._typingUsers = {};
+    this._typingTimeouts = {};
+
+    // Helper: render nick (keeps parity with QUI)
+    this._renderNick = function(nick) {
+      try {
+        // if nick is the local user, emphasize
+        if (this.client && this.client.nickname && this.client.nickname.toLowerCase() === nick.toLowerCase()) {
+          return '<strong>' + nick + '</strong>';
+        }
+      } catch(e) {}
+      return nick;
+    };
+
+    this._updateTypingBar = function() {
+      try {
+        if(!this._typingBar) {
+          var inputForm = document.querySelectorAll('.input form')[0];
+          if (inputForm) {
+            var typingBar = new Element('div', {'class': 'qwebirc-typing-bar'});
+            typingBar.inject(inputForm, 'before');
+            this._typingBar = typingBar;
+          }
+        }
+        if (!this._typingBar) return;
+
+        var nicks = Object.keys(this._typingUsers).filter(function(nick) {
+          return this._typingUsers[nick] === 'active';
+        }.bind(this));
+
+        if (nicks.length === 0) {
+          this._typingBar.set('text', '');
+          this._typingBar.removeClass('active');
+          this._typingBar.removeClass('paused');
+          this._typingBar.addClass('qwebirc-typing-bar');
+          return;
+        }
+
+        var nickHtml = nicks.map(this._renderNick.bind(this)).join(', ');
+        var text = nickHtml + ' <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>';
+        this._typingBar.set('html', text);
+        this._typingBar.removeClass('paused');
+        this._typingBar.addClass('qwebirc-typing-bar');
+        this._typingBar.addClass('active');
+      } catch(e) {}
+    };
+
+    // Hauptfunktion: Event-Verarbeitung für eingehende TAGMSGs
+    this.showTypingBar = function(event) {
+      try {
+        if (!event.tags || !event.tags.typing) return;
+        var typingState = event.tags.typing;
+        var nick = event.user ? event.user.split('!')[0] : null;
+        if(!nick) return;
+
+        var hideDelay = 5000;
+        if (this._typingTimeouts[nick]) {
+          clearTimeout(this._typingTimeouts[nick]);
+        }
+        if (typingState === 'active') {
+          this._typingUsers[nick] = 'active';
+          this._typingTimeouts[nick] = setTimeout(function() {
+            delete this._typingUsers[nick];
+            this._updateTypingBar();
+          }.bind(this), hideDelay);
+        } else if (typingState === 'paused') {
+          this._typingUsers[nick] = 'paused';
+          this._typingTimeouts[nick] = setTimeout(function() {
+            delete this._typingUsers[nick];
+            this._updateTypingBar();
+          }.bind(this), hideDelay);
+        } else if (typingState === 'done') {
+          delete this._typingUsers[nick];
+          if (this._typingTimeouts[nick]) {
+            clearTimeout(this._typingTimeouts[nick]);
+            delete this._typingTimeouts[nick];
+          }
+        }
+        this._updateTypingBar();
+      } catch(e) {}
+    };
   },
   rename: function(name) {
     var newNode = document.createTextNode(name);
@@ -1222,16 +1069,27 @@ window.qwebircConnectStatus = connectStatus;
   editTopic: function() {
     if(this.type != qwebirc.ui.WINDOW_CHANNEL)
       return;
-    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-    var t = function(key, fallback){ return (i18n && i18n[key]) ? i18n[key] : (fallback || key); };
 
     if(!this.client.nickOnChanHasPrefix(this.client.nickname, this.name, "@")) {
-      alert(t('NEED_CHANOP','Sorry, you need to be a channel operator to change the topic!'));
-      return;
+/*      var cmodes = this.client.getChannelModes(channel);
+      if(cmodes.indexOf("t")) {*/
+        try {
+          var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+          var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+          var t = function(key, fallback){ return (i18n && i18n.options && i18n.options[key]) ? i18n.options[key] : (fallback || key); };
+          alert(t('NEED_CHANOP','Sorry, you need to be a channel operator to change the topic!'));
+        } catch(e) { alert('Sorry, you need to be a channel operator to change the topic!'); }
+        return;
+      /*}*/
     }
-    var promptMsg = t('CHANGE_TOPIC_OF','Change topic of {name} to:').replace('{name}', this.name);
-    var newTopic = prompt(promptMsg, this.topic.topicText);
+    try {
+      var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+      var tt = function(key, fallback){ return (i18n && i18n.options && i18n.options[key]) ? i18n.options[key] : (fallback || key); };
+      var newTopic = prompt(tt('CHANGE_TOPIC_OF','Change topic of {name} to:').replace('{name}', this.name), this.topic.topicText);
+    } catch(e) {
+      var newTopic = prompt('Change topic of ' + this.name + ' to:', this.topic.topicText);
+    }
     if(newTopic === null)
       return;
 
@@ -1259,22 +1117,24 @@ window.qwebircConnectStatus = connectStatus;
     var e = new Element("div");
     parent.appendChild(e);
     e.addClass("menu");
+    
+  var nickArray = [nick];
   // Store reference for live re-translation
   this.__openNickMenu = {container: e, nick: nick};
-    
-    var nickArray = [nick];
-    qwebirc.ui.MENU_ITEMS.forEach(function(x) {
+  qwebirc.ui.MENU_ITEMS.forEach(function(x) {
       if(!x.predicate || x.predicate !== true && !x.predicate.apply(this, nickArray))
         return;
       
       var e2 = new Element("a");
       e.appendChild(e2);
+
   var label = (typeof x.text === 'function') ? x.text() : x.text;
   e2.set("text", "- " + label);
-  e2.__menuItem = x; // for later re-translation
+  // store reference for live re-translation
+  try { e2.__menuItem = x; } catch(e) {}
 
       e2.addEvent("focus", function() { this.blur() }.bind(e2));
-      e2.addEvent("click", function(ev) { new Event(ev.stop()); this.menuClick(x.fn); }.bind(this));
+  e2.addEvent("click", function(ev) { _qwebirc_stopEvent(ev); this.menuClick(x.fn); }.bind(this));
     }.bind(this));
     return e;
   },
@@ -1298,7 +1158,7 @@ window.qwebircConnectStatus = connectStatus;
   removePrevMenu: function() {
     if(!this.prevNick)
       return;
-
+      
     this.prevNick.removeClass("selected");
     this.prevNick.removeClass("selected-middle");
     if(this.prevNick.menu)
@@ -1306,46 +1166,19 @@ window.qwebircConnectStatus = connectStatus;
     this.prevNick = null;
   },
   nickListAdd: function(nick, position) {
-  // Show only the highest prefix
     var realNick = this.client.stripPrefix(nick);
-    var prefix = nick.charAt(0);
-    var prefixClass = "";
-    var prefixSymbol = "";
-    switch(prefix) {
-      case "~": prefixClass = "prefix-owner"; prefixSymbol = "👑"; break;
-      case "&": prefixClass = "prefix-admin"; prefixSymbol = "★"; break;
-      case "@": prefixClass = "prefix-op"; prefixSymbol = "●"; break;
-      case "%": prefixClass = "prefix-halfop"; prefixSymbol = "◑"; break;
-      case "+": prefixClass = "prefix-voice"; prefixSymbol = "➤"; break;
-      case ' ': case '': prefixClass = "prefix-none"; prefixSymbol = ""; break;
-      default: prefixClass = "prefix-unknown"; prefixSymbol = prefix ? prefix : ""; break; // Buchstabe wieder anzeigen
-    }
+    
     var e = new Element("a");
     qwebirc.ui.insertAt(position, this.nicklist, e);
-    // Nur ein Prefix-Symbol mit Abstand
-    if(prefixSymbol) {
-      var prefixSpan = new Element("span");
-      prefixSpan.addClass(prefixClass);
-      prefixSpan.setStyle("display", "inline-block");
-      prefixSpan.setStyle("width", "16px");
-      prefixSpan.setStyle("text-align", "center");
-      prefixSpan.set("text", prefixSymbol);
-      e.appendChild(prefixSpan);
-    } else {
-  // Keep space so everything stays aligned
-      var emptySpan = new Element("span");
-      emptySpan.setStyle("display", "inline-block");
-      emptySpan.setStyle("width", "16px");
-      e.appendChild(emptySpan);
-    }
     var span = new Element("span");
     if(this.parentObject.uiOptions.NICK_COLOURS) {
       var colour = realNick.toHSBColour(this.client);
       if($defined(colour))
         span.setStyle("color", colour.rgbToHex());
     }
-    span.set("text", realNick);
+    span.set("text", nick);
     e.appendChild(span);
+    
     e.realNick = realNick;
     
     e.addEvent("click", function(x) {
@@ -1359,7 +1192,7 @@ window.qwebircConnectStatus = connectStatus;
       e.addClass("selected");
       this.moveMenuClass();
       e.menu = this.createMenu(e.realNick, e);
-      new Event(x).stop();
+  _qwebirc_stopEvent(x);
     }.bind(this));
     
     e.addEvent("focus", function() { this.blur() }.bind(e));
@@ -1385,14 +1218,16 @@ window.qwebircConnectStatus = connectStatus;
     qwebirc.ui.Colourise(this.name + suffix, t, null, null, this);
 
     if(this.type == qwebirc.ui.WINDOW_CHANNEL) {
-      var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-      var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-      var tt = function(key, fallback){ return (i18n && i18n[key]) ? i18n[key] : (fallback || key); };
       t.topicText = topic;
       if (topic) {
         this.parent(topic, t);
       } else {
-        t.appendChild(document.createTextNode(tt('NO_TOPIC','(no topic set)')));
+        try {
+          var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+          var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+          var noTopic = (i18n && i18n.NO_TOPIC) ? i18n.NO_TOPIC : '(no topic set)';
+          t.appendChild(document.createTextNode(noTopic));
+        } catch(e) { t.appendChild(document.createTextNode('(no topic set)')); }
       }
     }
 
@@ -1498,8 +1333,8 @@ window.qwebircConnectStatus = connectStatus;
   }
 });
 
-// Hilfsmethode: Mapping von Fenstertyp / Pane zu i18n-Key
-qwebirc.ui.QUI.Window.prototype._i18nKeyFor = function() {
+// Helpers copied from qui.js to provide parity
+qwebirc.ui.CLASSICUI.Window.prototype._i18nKeyFor = function() {
   if(this.type == qwebirc.ui.WINDOW_STATUS) return 'TAB_STATUS';
   if(this.type == qwebirc.ui.WINDOW_CONNECT || this.identifier == '_Connect' || (this.pane && this.pane.type == 'connectpane')) return 'TAB_CONNECT';
   if(this.pane && this.pane.type == 'optionspane') return 'TAB_OPTIONS';
@@ -1508,9 +1343,9 @@ qwebirc.ui.QUI.Window.prototype._i18nKeyFor = function() {
   return null;
 };
 
-qwebirc.ui.QUI.Window.prototype._applyTranslatedTitle = function() {
+qwebirc.ui.CLASSICUI.Window.prototype._applyTranslatedTitle = function() {
   var key = this._i18nKeyFor();
-  if(!key) return; // Nicht systemdefiniert
+  if(!key) return;
   var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
   if(i18n && i18n.options && i18n.options[key]) {
@@ -1518,78 +1353,42 @@ qwebirc.ui.QUI.Window.prototype._applyTranslatedTitle = function() {
   }
 };
 
-// Override setTitle to update tab text live
-qwebirc.ui.QUI.Window.prototype.setTitle = function(newTitle) {
+qwebirc.ui.CLASSICUI.Window.prototype.setTitle = function(newTitle) {
   this.name = newTitle;
   if(this.tab) {
-    // Close-Button sicherstellen (inkl. Debug-Ausgabe bei Problemen)
-    this._ensureTabClose(this.type, this._baseName || this.name);
+    this._ensureTabClose && this._ensureTabClose(this.type, this._baseName || this.name);
     var close = this.tabclose;
-    this.tab.empty();
+    try { this.tab.empty(); } catch(e) {}
     this.tab.appendText(newTitle);
-  if(close) this.tab.appendChild(close);
+    if(close) this.tab.appendChild(close);
   }
   if(this.active) {
     try { document.title = newTitle + ' - ' + this.parentObject.options.appTitle; } catch(e) {}
   }
 };
 
-// Internal helper: creates (or repairs) the SVG close button for a tab
-qwebirc.ui.QUI.Window.prototype._ensureTabClose = function(type, originalName) {
-  if(type == qwebirc.ui.WINDOW_STATUS || type == qwebirc.ui.WINDOW_CONNECT) {
-    this.tabclose = null; return;
-  }
-  // Also reconstruct if element exists but is empty / has no SVG
+qwebirc.ui.CLASSICUI.Window.prototype._ensureTabClose = function(type, originalName) {
+  if(type == qwebirc.ui.WINDOW_STATUS || type == qwebirc.ui.WINDOW_CONNECT) { this.tabclose = null; return; }
   if(this.tabclose && this.tabclose.parentNode === this.tab && this.tabclose.getElement && this.tabclose.getElement('svg')) {
-    // Alles gut
+    // ok
   } else {
-    // Neu oder reparieren
     if(!this.tabclose) this.tabclose = new Element('span');
-  // If empty or missing SVG: refill content
     if(!this.tabclose.getElement || !this.tabclose.getElement('svg')) {
       try { this.tabclose.empty(); } catch(e) {}
     }
   }
   var tabclose = this.tabclose || new Element('span');
   tabclose.addClass('tabclose');
-  // Clean possible old content
-  if(!tabclose.getElement('svg')) { try { tabclose.empty(); } catch(e) {} }
-  // SVG erzeugen
-  var created = false;
-  (function(){
-  // Check for SVG support as early as possible
-    var supportsSVG = !!(window.SVGAngle || document.createElementNS && document.createElementNS('http://www.w3.org/2000/svg','svg').createSVGRect);
-    if(!supportsSVG) {
-      tabclose.set('text','×');
-  try { console.warn('[qwebirc][qui] No SVG support – using × fallback for tab', this.name); } catch(e) {}
-      return;
-    }
-    // Direkter Markup (vermeidet createElementNS Fehler in exotischen Browsern / CSP edge cases)
-    var markup = '<svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">'
-      + '<line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />'
-      + '<line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />'
-      + '</svg>';
-    if(!tabclose.getElement('svg')) {
-      try {
-        tabclose.set('html', markup);
-        created = !!tabclose.getElement('svg');
-        if(!created) tabclose.set('text','×');
-      } catch(e) {
-        tabclose.set('text','×');
-  try { console.warn('[qwebirc][qui] Using × fallback for SVG markup error:', e); } catch(_) {}
-      }
-    } else {
-      created = true; // bereits vorhanden
-    }
-  }).bind(this)();
-  // Defensive: ensure a single close handler is bound (supports MooTools Element or native DOM node)
+  // Classic theme: always use × fallback for simplicity and consistent look
+  try { tabclose.empty && tabclose.empty(); } catch(e) {}
+  try { tabclose.set('text', '×'); } catch(e) { try { tabclose.set('html', '×'); } catch(_) {} }
+  // Ensure a single close handler is bound (MooTools or native fallback).
   try {
     var alreadyBound = (tabclose.retrieve && tabclose.retrieve('qwebirc-close-bound')) || tabclose.__qwebircCloseBound;
   } catch(e) { var alreadyBound = tabclose.__qwebircCloseBound; }
   if(!alreadyBound) {
-    var closeHandler = function(e){
-      try { if(typeof Event !== 'undefined' && Event.prototype && e instanceof Event) { /* native event */ } else { /* MooTools Event wrapper */ } } catch(_) {}
-      try { if(e && e.stop) e.stop(); else if(e && e.preventDefault) { e.preventDefault(); e.stopPropagation && e.stopPropagation(); } } catch(_) {}
+    var closeHandler = function(e) {
+      _qwebirc_stopEvent(e);
       try { if(this.closed) return; } catch(_) {}
       try { if(this.type == qwebirc.ui.WINDOW_CHANNEL && this.client) this.client.exec('/PART ' + (originalName || this.name)); } catch(_) {}
       try { this.close(); } catch(_) {}
@@ -1606,7 +1405,47 @@ qwebirc.ui.QUI.Window.prototype._ensureTabClose = function(type, originalName) {
       if(tabclose.parentNode !== this.tab) this.tab.appendChild(tabclose);
     }
   } catch(e) {}
-  if(!created) {
-  try { console.debug('[debug][qwebirc][qui] Close button fallback without SVG for tab', this.name); } catch(e) {}
+};
+
+// Connect status object (export) – minimal implementation similar to qui.js
+var connectStatus = {
+  interval: null,
+  step: 0,
+  typingBar: null,
+  show: function() {
+    if (this.interval) return;
+    var typingBar = document.querySelector('.qwebirc-typing-bar');
+    if (!typingBar) {
+      var inputForm = $$('.input form')[0];
+      if (inputForm) {
+  typingBar = new Element('div', {'class': 'qwebirc-typing-bar active'});
+  // mark this bar as the connect-status bar so it can be removed safely
+  try { typingBar.setAttribute('data-connect-status', '1'); } catch(e) {}
+  typingBar.inject(inputForm, 'before');
+      }
+    }
+    if (!typingBar) return;
+    this.typingBar = typingBar;
+    typingBar.addClass && typingBar.addClass('active');
+    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+    var lbl = (i18n && i18n.TRYING_TO_CONNECT) ? i18n.TRYING_TO_CONNECT : 'Trying to connect server';
+    typingBar.set && typingBar.set('html', lbl + ' <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>');
+  },
+  hide: function() {
+    if (this.interval) { clearInterval(this.interval); this.interval = null; }
+    // Only remove typing bars that were created for connect status. Regular
+    // typing-indicator bars (from other clients) should not be removed here.
+    var bars = document.querySelectorAll('.qwebirc-typing-bar[data-connect-status]');
+    bars.forEach(function(bar) {
+      try { bar.classList && bar.classList.remove('active'); } catch(e) {}
+      try { bar.style && (bar.style.display = 'none'); } catch(e) {}
+      if (bar.parentNode) try { bar.parentNode.removeChild(bar); } catch(e) {}
+    });
+    this.typingBar = null;
   }
 };
+window.qwebircConnectStatus = connectStatus;
+
+/* Backwards compatibility: older code expects qwebirc.ui.QUI */
+qwebirc.ui.QUI = qwebirc.ui.CLASSICUI;

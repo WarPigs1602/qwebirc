@@ -126,6 +126,18 @@ html {
 .qwebirc-optionspane table.qwebirc-options-table .option-row td { padding:4px 10px; }
 .qwebirc-optionspane table.qwebirc-options-table .label-cell { text-align:left; white-space:nowrap; font-weight:600; }
 .qwebirc-optionspane table.qwebirc-options-table .value-cell { text-align:left; }
+
+/* QUI: About pane should use a darker chrome with lighter text for contrast */
+.qwebirc-qui .qwebirc-aboutpane {
+  background: #232634;
+  color: #eaeef8; /* light text for readability on dark QUI background */
+  border: 1.5px solid #3a3f4b;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0004;
+}
+.qwebirc-qui .qwebirc-aboutpane .mainbody {
+  color: #e0e0e0;
+}
 .qwebirc-optionspane table.qwebirc-options-table label { font-weight:600; }
 .qwebirc-optionspane table.qwebirc-options-table .wide-option .label-cell { vertical-align:top; }
 .qwebirc-optionspane table.qwebirc-options-table input[type="text"],

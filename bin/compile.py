@@ -174,23 +174,40 @@ def main(outputdir=".", produce_debug=True):
       os.mkdir(css_out_dir)
     except OSError:
       log(f"warning: could not create css dir {css_out_dir}")
-  
+  # collect all css files for a global bundle
+  all_css_files = []
+
   #jmerge_files(outputdir, "js", "qwebirc", pages.DEBUG_BASE, lambda x: os.path.join("js", x + ".js"))
 
   for uiname, value in pages.UIs.items():
     log(f"Building UI '{uiname}' ...")
     csssrc = pagegen.csslist(uiname, True)
+    # If a referenced .css file doesn't exist, try the .mcss fallback (MCSS_SUFFIX)
+    fixed_csssrc = []
+    for entry in csssrc:
+      path = entry
+      # Only try fixups for local css paths
+      if path.startswith("css/") and not os.path.exists(path):
+        # try replacing .css -> .mcss
+        if path.endswith('.css'):
+          alt = path[:-4] + MCSS_SUFFIX
+          if os.path.exists(alt):
+            path = alt
+      fixed_csssrc.append(path)
+    csssrc = fixed_csssrc
+    # accumulate unique css entries for global bundle (preserve order)
+    for f in csssrc:
+      if f not in all_css_files:
+        all_css_files.append(f)
     jmerge_files(outputdir, "css", uiname + "-" + ID, csssrc)
-    shutil.copy2(os.path.join(outputdir, "static", "css", uiname + "-" + ID + ".css"), os.path.join(outputdir, "static", "css", uiname + ".css"))
-    
+
     mcssname = os.path.join("css", uiname + MCSS_SUFFIX)
     if os.path.exists(mcssname):
       mcssdest = os.path.join(outputdir, "static", "css", uiname + MCSS_SUFFIX)
       shutil.copy2(mcssname, mcssdest)
+      # keep the versioned .mcss file but do not duplicate an unversioned .css file
       shutil.copy2(mcssdest, os.path.join(outputdir, "static", "css", uiname + "-" + ID + MCSS_SUFFIX))
-    
-    #jmerge_files(outputdir, "js", uiname, value["uifiles"], lambda x: os.path.join("js", "ui", "frontends", x + ".js"))
-    
+    # Build JS bundle for this UI (include base and UI-specific frontends)
     alljs = ["js/debugdisabled.js"]
     for y in pages.JS_BASE:
       alljs.append(os.path.join("static", "js", y + ".js"))
@@ -200,9 +217,18 @@ def main(outputdir=".", produce_debug=True):
       alljs.append(os.path.join("js", y + ".js"))
     for y in value["uifiles"]:
       alljs.append(os.path.join("js", "ui", "frontends", y + ".js"))
-  jmerge_files(outputdir, "js", uiname + "-" + ID, alljs, file_prefix="QWEBIRC_BUILD=\"" + ID + "\";\n")
-  STATS['js_bundles'] += 1
-  log(f"Bundled JS for UI '{uiname}'")
+
+    # create the compiled JS for this UI
+    jmerge_files(outputdir, "js", uiname + "-" + ID, alljs, file_prefix="QWEBIRC_BUILD=\"" + ID + "\";\n")
+    STATS['js_bundles'] += 1
+    log(f"Bundled JS for UI '{uiname}'")
+
+  # Create a global CSS bundle that contains all necessary stylesheets
+  if all_css_files:
+  # Global CSS bundle creation disabled: do not produce a bundle-<gitid>.css
+  # file. Keeping per-UI bundles only avoids creating a large combined file
+  # and prevents cache overwrites.
+    log("Skipping global CSS bundle creation (disabled)")
 
   try:
     os.rmdir(coutputdir)

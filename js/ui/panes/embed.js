@@ -63,6 +63,15 @@ qwebirc.ui.EmbedWizard = new Class({
     this.t = parent;
 
   try { this.t.addClass('pane-host'); } catch(e) {}
+  try {
+    var node = this.t;
+    var foundRoot = false;
+    while(node && node !== document.documentElement) {
+      try { if(node.classList && node.classList.contains('qwebirc-classicui')) { foundRoot = true; break; } } catch(e) {}
+      node = node.parentNode;
+    }
+    if(foundRoot) this.t.addClass('qwebirc-classicui');
+  } catch(e) {}
   this.__injectCloseButton();
 
     var titleRow = this.newRow();
@@ -260,6 +269,8 @@ qwebirc.ui.EmbedWizard = new Class({
       alink.target = "_blank";
       alink.setAttribute("rel", "noopener noreferrer");
       alink.appendChild(document.createTextNode(url));
+  // Make iframe code and visually style the output like the options pane
+  abox.addClass('iframetext');
   abox.value = "<iframe src=\"" + url + "\" width=\"647\" height=\"400\"></iframe>";
       
       var mBox = [
@@ -382,7 +393,13 @@ qwebirc.ui.EmbedWizard = new Class({
         URL.push("uio=" + uioptions);
     }
     
-  return qwebirc.global.baseURL + (URL.length>0?"?":"") + URL.join("&");
+  // Build final URL: ensure we don't leave a trailing slash after a .html filename
+  try {
+    var base = qwebirc.global.baseURL || '';
+    if(base.match(/\.html\/$/))
+      base = base.slice(0, -1);
+  } catch(e) { var base = qwebirc.global.baseURL || ''; }
+  return base + (URL.length>0?"?":"") + URL.join("&");
   }
 });
 

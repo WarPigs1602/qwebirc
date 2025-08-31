@@ -22,6 +22,15 @@ qwebirc.ui.AboutPane = new Class({
         oldClose.parentNode.insertBefore(closeBtn, oldClose);
         oldClose.parentNode.removeChild(oldClose);
         parent.addClass('pane-host');
+        try {
+          var node = parent;
+          var foundRoot = false;
+          while(node && node !== document.documentElement) {
+            try { if(node.classList && node.classList.contains('qwebirc-classicui')) { foundRoot = true; break; } } catch(e) {}
+            node = node.parentNode;
+          }
+          if(foundRoot) parent.addClass('qwebirc-classicui');
+        } catch(e) {}
       }
       var versionDiv = parent.getElement("div[class=version]");
       if(versionDiv) versionDiv.set("text", "v" + qwebirc.VERSION);

@@ -33,16 +33,19 @@ class StaticEngine(static.File):
     static.File.__init__(self, *args, **kwargs)
 
   def render_GET(self, request):
+    # Track hits for this request
     self.hit(request)
-  # Inject only for HTML files, otherwise default behaviour
-    if self.path.endswith('.html'):
-      try:
+
+    # Helper constant
+    BODY_CLOSE = b"</body>"
+
+    try:
+      # HTML files: inject small JS snippet and force UTF-8 header
+      if self.path.endswith('.html'):
         with open(self.path, 'rb') as f:
           data = f.read()
-  # Inject only when HTML content
         try:
-          import sys
-          import importlib
+          import sys, importlib
           if 'config' in sys.modules:
             config = sys.modules['config']
           else:
@@ -50,22 +53,53 @@ class StaticEngine(static.File):
           sasl_enabled = getattr(config, "SASL_LOGIN_ENABLED", False)
           force_ws = getattr(config, "FORCE_WEBSOCKETS", False)
           js = f'<script>window.SASL_LOGIN_ENABLED = {"true" if sasl_enabled else "false"}; window.FORCE_WEBSOCKETS = {"true" if force_ws else "false"};</script>'
-          if b"</body>" in data:
-            data = data.replace(b"</body>", js.encode("utf-8") + b"</body>")
+          if BODY_CLOSE in data:
+            data = data.replace(BODY_CLOSE, js.encode('utf-8') + BODY_CLOSE)
           else:
-            data += js.encode("utf-8")
+            data += js.encode('utf-8')
         except Exception:
           pass
-        request.setHeader(b"content-type", b"text/html; charset=utf-8")
-        request.setHeader(b"content-length", str(len(data)).encode("utf-8"))
+        try:
+          request.setHeader(b"content-type", b"text/html; charset=utf-8")
+        except Exception:
+          pass
+        try:
+          request.setHeader(b"content-length", str(len(data)).encode("utf-8"))
+        except Exception:
+          pass
         request.write(data)
         from twisted.internet import reactor
         reactor.callLater(0, request.finish)
         return server.NOT_DONE_YET
-      except Exception as e:
-        request.setResponseCode(500)
-        return b"Internal Server Error"
-  # Default behaviour for other file types
+
+      # Serve CSS/MCSS/JS/JSON with explicit UTF-8 content-type
+      if self.path.endswith(('.css', '.mcss', '.js', '.json')):
+        with open(self.path, 'rb') as f:
+          data = f.read()
+        if self.path.endswith(('.css', '.mcss')):
+          ctype = b'text/css; charset=utf-8'
+        elif self.path.endswith('.js'):
+          ctype = b'application/javascript; charset=utf-8'
+        else:
+          ctype = b'application/json; charset=utf-8'
+        try:
+          request.setHeader(b'content-type', ctype)
+        except Exception:
+          pass
+        try:
+          request.setHeader(b'content-length', str(len(data)).encode('utf-8'))
+        except Exception:
+          pass
+        request.write(data)
+        from twisted.internet import reactor
+        reactor.callLater(0, request.finish)
+        return server.NOT_DONE_YET
+
+    except Exception:
+      request.setResponseCode(500)
+      return b"Internal Server Error"
+
+    # Default behaviour for other file types
     return static.File.render_GET(self, request)
     
   @property

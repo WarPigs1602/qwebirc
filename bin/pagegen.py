@@ -95,6 +95,7 @@ def producehtml(name, debug):
         preload_locales += '  <link rel="preload" href="%slocales/%s" as="fetch" type="application/json" crossorigin>\n' % (config.STATIC_BASE_URL, fname)
 
   csshtml = "\n".join("  <link rel=\"stylesheet\" href=\"%s%s\" type=\"text/css\"/>" % (config.STATIC_BASE_URL, x) for x in css)
+  # Global bundle usage removed: keep per-UI CSS links only
 
   def toscript(xxx_todo_changeme):
     (url, digest) = xxx_todo_changeme

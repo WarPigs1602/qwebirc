@@ -2,9 +2,7 @@
 body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) ::-webkit-scrollbar {
   width: 12px;
   background: #232634;
-}
-body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) ::-webkit-scrollbar-thumb {
-  background: #5a5fcf;
+/* (empty legacy .wizardcontrols block intentionally omitted) */
   border-radius: 6px;
 }
 body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
@@ -344,288 +342,67 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   font-size: 1.08em !important;
   line-height: 1.6;
   font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
-  background: #232634;
-  color: #e0e0e0;
+  background: #fbfbfe;
+  color: #222428;
   border-radius: 10px;
-  box-shadow: 0 2px 12px #0003;
-  border: 1.5px solid #3a3f4b;
-  padding: 18px 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  border: 1px solid #dfe7ee;
+  padding: 14px 12px;
 }
 
 .qwebirc-aboutpane .mainbody {
   font-size: 1em;
-  line-height: 1.7;
+  line-height: 1.5;
   text-align: center;
-  padding: 7px 4px;
+  padding: 8px 6px;
+  color: #333333;
 }
 
-.qwebirc-aboutpane table {
-  display: inline-block;
-}
-
-.qwebirc-aboutpane div.header {
-  padding-top: 5px;
-}
-
-.qwebirc-aboutpane .header {
-  background: #232634;
-  text-align: center;
-  border-bottom: 1px solid #3a3f4b;
-  padding-bottom: 7px;
-}
-
-.qwebirc-aboutpane .header .title {
-  font-size: 1.5em;
-  color: #ececff;
-  margin-bottom: 4px;
-  font-family: 'Segoe UI Semibold', 'Verdana', 'Arial', sans-serif;
-}
-
-.qwebirc-aboutpane .header .subtitle {
-  text-align: center;
-  margin-top: 6px;
-  color: #b0b0b0;
-  font-size: 1.08em;
-}
-
-.qwebirc-aboutpane .skipmargin {
-  margin-top: 0px;
-}
-
-/**************** EMBEDDED WIZARD *******************/
-div.qwebirc-embeddedwizard {
-  background: #232634;
-  color: #e0e0e0;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px #0003;
-  border: 1.5px solid #3a3f4b;
-  padding: 14px 10px;
-  font-size: 1.08em;
-  line-height: 1.25;
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
-}
-.qwebirc-embeddedwizard label {
-  color: #b0b0b0;
-  font-size: 1em;
-  font-weight: 500;
-  margin-bottom: 2px;
-  display: inline-block;
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
-}
-.qwebirc-embeddedwizard input[type="radio"] {
-  accent-color: #7a6ff0;
-  width: 18px;
-  height: 18px;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-.qwebirc-embeddedwizard .wizardcontrols label,
-.qwebirc-embeddedwizard label[for^="options_radio"],
-.qwebirc-embeddedwizard label[for^="nick"],
-.qwebirc-embeddedwizard label[for^="lookandfeel"],
-.qwebirc-embeddedwizard label[for^="prompt"] {
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
-  font-size: 1em;
-  color: #b0b0b0;
-  font-weight: 500;
-  margin-left: 2px;
-  margin-right: 12px;
-  cursor: pointer;
-}
-
-.qwebirc-embeddedwizard input.text,
-.qwebirc-embeddedwizard input[type="text"],
-.qwebirc-embeddedwizard input[type="number"],
-.qwebirc-embeddedwizard input[type="password"] {
-  width: 220px;
-  font-size: 1.08em;
-  padding: 7px 12px;
-  border-radius: 6px;
-  background: #232634;
-  color: #ececff;
-  border: 1.5px solid #7a6ff0;
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
-  transition: border 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px #0002;
-}
-.qwebirc-embeddedwizard input.text:focus,
-.qwebirc-embeddedwizard input[type="text"]:focus,
-.qwebirc-embeddedwizard input[type="number"]:focus,
-.qwebirc-embeddedwizard input[type="password"]:focus {
-  border: 1.5px solid #5a5fcf;
-  outline: none;
-  box-shadow: 0 0 0 2px #7a6ff033;
-}
-
-.qwebirc-embeddedwizard input.iframetext {
-  width: 95%;
-  font-size: 1.08em;
-  padding: 7px 12px;
-  border-radius: 6px;
-  background: #232634;
-  color: #ececff;
-  border: 1.5px solid #7a6ff0;
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
-  transition: border 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px #0002;
-}
-.qwebirc-embeddedwizard input.iframetext:focus {
-  border: 1.5px solid #5a5fcf;
-  outline: none;
-  box-shadow: 0 0 0 2px #7a6ff033;
-}
-
-
-
-.qwebirc-embeddedwizard .wizardcontrols input,
-.qwebirc-embeddedwizard input[type="submit"],
-.qwebirc-embeddedwizard input[type="button"],
-.qwebirc-embeddedwizard button {
-  min-width: 70px;
-  font-size: 1em;
-  padding: 7px 14px;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
-  color: #ececff;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 8px #0002;
-  transition: background 0.2s, box-shadow 0.2s;
-  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
-  margin-top: 6px;
-}
-.qwebirc-embeddedwizard .wizardcontrols input:hover,
-.qwebirc-embeddedwizard input[type="submit"]:hover,
-.qwebirc-embeddedwizard input[type="button"]:hover,
-.qwebirc-embeddedwizard button:hover {
-  background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
-  box-shadow: 0 4px 16px #0003;
-}
-/* More compact line spacing for the wizard */
-.qwebirc-embeddedwizard > div {
-  margin-bottom: 4px;
-}
+.qwebirc-aboutpane table { display: inline-block; }
+.qwebirc-aboutpane div.header { padding-top: 5px; }
+.qwebirc-aboutpane .header { background: #ffffff; text-align: center; border-bottom: 1px solid #e8eef6; padding-bottom: 6px; }
+.qwebirc-aboutpane .header .title { font-size: 1.6em; color: #111214; font-family: 'Segoe UI Semibold', 'Verdana', 'Arial', sans-serif; }
+.qwebirc-aboutpane .header .subtitle { text-align: center; margin-top: 6px; color: #6b6f73; font-size: 1.02em; }
+.qwebirc-aboutpane .skipmargin { margin-top: 0px; }
 
 /**************** PRIVACY POLICY PANE *******************/
 .qwebirc-privacypolicypane {
   font-size: 1em !important;
+  background: #fbfbfe !important;
+  color: #222428 !important;
+  border-radius: 8px;
+  border: 1px solid #e8eef6 !important;
+  padding: 10px;
 }
 
-.qwebirc-privacypolicypane .mainbody {
-  font-size: 0.8em;
-  text-align: center;
-  padding: 5px;
-}
-
-.qwebirc-privacypolicypane table {
-  display: inline-block;
-}
-
-.qwebirc-privacypolicypane div.header {
-  padding-top: 5px;
-}
-
-.qwebirc-privacypolicypane .header {
-  background: white;
-  text-align: center;
-  border-bottom: 1px solid gray;
-  padding-bottom: 5px;
-}
-
-.qwebirc-privacypolicypane .header .title {
-  font-size: 3em;
-}
-
-.qwebirc-privacypolicypane .header .subtitle {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.qwebirc-privacypolicypane .monospace {
-  font-family: Consolas, "Lucida Console", monospace;
-}
+.qwebirc-privacypolicypane .mainbody { font-size: 0.95em; text-align: center; padding: 8px; color: #333333; }
+.qwebirc-privacypolicypane table { display: inline-block; }
+.qwebirc-privacypolicypane div.header { padding-top: 5px; }
+.qwebirc-privacypolicypane .header { background: #ffffff; text-align: center; border-bottom: 1px solid #e8eef6; padding-bottom: 6px; }
+.qwebirc-privacypolicypane .header .title { font-size: 1.6em; }
+.qwebirc-privacypolicypane .header .subtitle { text-align: center; margin-top: 8px; }
+.qwebirc-privacypolicypane .monospace { font-family: Consolas, "Lucida Console", monospace; }
 
 /****** FEEDBACK ***********/
-.qwebirc-feedbackpane {
-  font-size: 1em !important;
-}
-
-.qwebirc-feedbackpane .mainbody {
-  font-size: 0.8em;
-  text-align: center;
-  padding: 5px;
-}
-
-.qwebirc-feedbackpane table {
-  display: inline-block;
-}
-
-.qwebirc-feedbackpane div.header {
-  padding-top: 5px;
-}
-
-.qwebirc-feedbackpane .header {
-  background: white;
-  text-align: center;
-  border-bottom: 1px solid gray;
-  padding-bottom: 5px;
-}
-
-.qwebirc-feedbackpane .header .title {
-  font-size: 3em;
-}
-
-.qwebirc-feedbackpane .header .subtitle {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.qwebirc-feedbackpane .monospace {
-  font-family: Consolas, "Lucida Console", monospace;
-}
+.qwebirc-feedbackpane { font-size: 1em !important; background: #fbfbfe; color: #222428; border-radius: 8px; border: 1px solid #e8eef6; padding: 10px; }
+.qwebirc-feedbackpane .mainbody { font-size: 0.95em; text-align: center; padding: 8px; color: #333333; }
+.qwebirc-feedbackpane table { display: inline-block; }
+.qwebirc-feedbackpane div.header { padding-top: 5px; }
+.qwebirc-feedbackpane .header { background: #ffffff; text-align: center; border-bottom: 1px solid #e8eef6; padding-bottom: 6px; }
+.qwebirc-feedbackpane .header .title { font-size: 1.6em; }
+.qwebirc-feedbackpane .header .subtitle { text-align: center; margin-top: 10px; }
+.qwebirc-feedbackpane .monospace { font-family: Consolas, "Lucida Console", monospace; }
 
 /************* FAQ *****************/
 
-.qwebirc-faqpane {
-  font-size: 1em !important;
-}
-
-.qwebirc-faqpane .mainbody {
-  font-size: 0.8em;
-  text-align: center;
-  padding: 5px;
-  margin-left: 20px;
-  margin-right: 20px;
-}
-
-.qwebirc-faqpane table {
-  display: inline-block;
-}
-
-.qwebirc-faqpane div.header {
-  padding-top: 5px;
-}
-
-.qwebirc-faqpane .header {
-  background: white;
-  text-align: center;
-  border-bottom: 1px solid gray;
-  padding-bottom: 5px;
-}
-
-.qwebirc-faqpane .header .title {
-  font-size: 3em;
-}
-
-.qwebirc-faqpane .header .subtitle {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.qwebirc-faqpane .monospace {
-  font-family: Consolas, "Lucida Console", monospace;
-}
+.qwebirc-faqpane { font-size: 1em !important; background: #fbfbfe; color: #222428; border-radius: 8px; border: 1px solid #e8eef6; padding: 10px; }
+.qwebirc-faqpane .mainbody { font-size: 0.95em; text-align: center; padding: 8px; margin-left: 10px; margin-right: 10px; color: #333333; }
+.qwebirc-faqpane table { display: inline-block; }
+.qwebirc-faqpane div.header { padding-top: 5px; }
+.qwebirc-faqpane .header { background: #ffffff; text-align: center; border-bottom: 1px solid #e8eef6; padding-bottom: 6px; }
+.qwebirc-faqpane .header .title { font-size: 1.6em; }
+.qwebirc-faqpane .header .subtitle { text-align: center; margin-top: 10px; }
+.qwebirc-faqpane .monospace { font-family: Consolas, "Lucida Console", monospace; }
 
 .qwebirc .loading {
   padding-left: 4px;
@@ -713,6 +490,7 @@ div.qwebirc-embeddedwizard {
   background: linear-gradient(90deg, #5a5fcf 0%, #7a6ff0 100%);
   box-shadow: 0 4px 16px #0003;
 }
+
 .qwebirc-optionspane div.hue-slider {
   border: 0px solid black;
   width: 360px;
@@ -733,4 +511,466 @@ div.qwebirc-embeddedwizard {
   border-radius: 4px;
   box-shadow: 0 2px 8px #0003;
 }
+
+/* ----------------------------------------------------------------- */
+/* Compatibility: apply legacy/dialog rules when using .qwebirc-classicui */
+/* This block mirrors the simpler legacy selectors but scoped under the */
+/* .qwebirc-classicui ancestor so older embed setups keep working.      */
+/* ----------------------------------------------------------------- */
+
+.qwebirc-classicui .qwebirc-centrebox {
+  height: 100%;
+  width: 100%;
+}
+
+.qwebirc-classicui .qwebirc-centrebox table {
+  width: 100%;
+}
+
+.qwebirc-classicui .qwebirc-centrebox table table {
+  width: auto;
+}
+
+.qwebirc-classicui .qwebirc-loginbox .tr1 td {
+  width: 100%;
+  text-align: center;
+}
+
+.qwebirc-classicui .bar-spacer {
+  height: 5px;
+}
+
+.qwebirc-classicui .collapse {
+  border-spacing: 0;
+  padding: 0;
+}
+
+.qwebirc-classicui .qwebirc-loginbox .tr2 td {
+  vertical-align: middle;
+}
+
+.qwebirc-classicui .qwebirc-loginbox .tr2 table {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.qwebirc-classicui .qwebirc-loginbox .bar {
+  height: 8px;
+  background: white;
+  border-bottom: 1px rgb(95,110,124) solid;
+  border-top: 1px rgb(95,110,124) solid;
+}
+
+.qwebirc-classicui .qwebirc-loginbox .bar-background {
+  height: 68px;
+  background: rgb(95,110,124);
+  padding: 10px;
+}
+
+.qwebirc-classicui .qwebirc-loginbox .bar-logo {
+  width: 225px;
+  height: 68px;
+  left: 50%;
+  margin: 0 auto;
+  margin-top: 3px;
+  _background: none;
+}
+
+.qwebirc-classicui .qwebirc-loginbox input#loginnickname,
+.qwebirc-classicui .qwebirc-loginbox input#loginchannels {
+  width: 200px;
+}
+
+/* CONFIRM LOGIN BOX */
+.qwebirc-classicui .qwebirc-confirmbox {
+  width: 100%;
+  vertical-align: middle;
+}
+
+.qwebirc-classicui .qwebirc-confirmbox .tr1 td {
+  width: 100%;
+  vertical-align: bottom;
+  text-align: center;
+}
+
+.qwebirc-classicui .qwebirc-confirmbox .tr2 td {
+  width: 100%;
+  vertical-align: top;
+  text-align: center;
+}
+
+/* ABOUT PANE */
+.qwebirc-classicui .qwebirc-aboutpane {
+  font-size: 1em !important;
+}
+
+.qwebirc-classicui .qwebirc-aboutpane .mainbody {
+  font-size: 0.8em;
+  text-align: center;
+  padding: 5px;
+}
+
+.qwebirc-classicui .qwebirc-aboutpane table {
+  display: inline-block;
+}
+
+.qwebirc-classicui .qwebirc-aboutpane div.header {
+  padding-top: 5px;
+}
+
+.qwebirc-classicui .qwebirc-aboutpane .header {
+  background: white;
+  text-align: center;
+  border-bottom: 1px solid gray;
+  padding-bottom: 5px;
+}
+
+.qwebirc-classicui .qwebirc-aboutpane .header .title {
+  font-size: 3em;
+}
+
+.qwebirc-classicui .qwebirc-aboutpane .header .subtitle {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.qwebirc-classicui .qwebirc-aboutpane .skipmargin {
+  margin-top: 0px;
+}
+
+/* EMBEDDED WIZARD */
+ .qwebirc-classicui div.qwebirc-embeddedwizard {
+  padding-left: 5px;
+  padding-top: 2px;
+}
+
+.qwebirc-classicui .qwebirc-embeddedwizard input.text {
+  width: 300px;
+}
+
+.qwebirc-classicui .qwebirc-embeddedwizard input.iframetext {
+  width: 95%;
+}
+
+.qwebirc-classicui .qwebirc-embeddedwizard /* .wizardcontrols empty block removed for lint compliance */
+
+.qwebirc-classicui .qwebirc-embeddedwizard .wizardcontrols input {
+  min-width: 70px;
+}
+
+/* Embedded wizard: form element styling for QUI (modern) */
+.qwebirc-embeddedwizard label {
+  color: #b0b0b0;
+  font-size: 1em;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+.qwebirc-embeddedwizard input.text,
+.qwebirc-embeddedwizard input[type="text"],
+.qwebirc-embeddedwizard input[type="number"],
+.qwebirc-embeddedwizard input[type="password"],
+.qwebirc-embeddedwizard textarea,
+.qwebirc-embeddedwizard select {
+  width: 220px;
+  font-size: 1.04em;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: #232634;
+  color: #ececff;
+  border: 1.5px solid #7a6ff0;
+  transition: border 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px #0002;
+}
+.qwebirc-embeddedwizard input.text:focus,
+.qwebirc-embeddedwizard input[type="text"]:focus,
+.qwebirc-embeddedwizard input[type="number"]:focus,
+.qwebirc-embeddedwizard input[type="password"]:focus,
+.qwebirc-embeddedwizard textarea:focus,
+.qwebirc-embeddedwizard select:focus {
+  border: 1.5px solid #5a5fcf;
+  outline: none;
+  box-shadow: 0 0 0 2px #7a6ff033;
+}
+.qwebirc-embeddedwizard input.iframetext { width: 95%; }
+.qwebirc-embeddedwizard .wizardcontrols input,
+.qwebirc-embeddedwizard input[type="submit"],
+.qwebirc-embeddedwizard input[type="button"],
+.qwebirc-embeddedwizard button {
+  min-width: 70px;
+  font-size: 1em;
+  padding: 7px 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
+  color: #ececff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0002;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+/* Embedded wizard: Classic UI adjustments (light background, dark text, form controls)
+   These rules ensure embedded forms match the Classic look & feel. */
+.qwebirc-classicui .qwebirc-embeddedwizard,
+.qwebirc-classicui div.qwebirc-embeddedwizard {
+  background: #fbfbfe !important;
+  color: #222428 !important;
+  border-radius: 8px;
+  border: 1px solid #e8eef6 !important;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard label,
+.qwebirc-classicui div.qwebirc-embeddedwizard label {
+  color: #333333;
+  font-weight: 600;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard input.text,
+.qwebirc-classicui .qwebirc-embeddedwizard input[type="text"],
+.qwebirc-classicui .qwebirc-embeddedwizard input[type="number"],
+.qwebirc-classicui .qwebirc-embeddedwizard input[type="password"],
+.qwebirc-classicui .qwebirc-embeddedwizard textarea,
+.qwebirc-classicui .qwebirc-embeddedwizard select,
+.qwebirc-classicui div.qwebirc-embeddedwizard input,
+.qwebirc-classicui div.qwebirc-embeddedwizard textarea,
+.qwebirc-classicui div.qwebirc-embeddedwizard select {
+  background: #ffffff;
+  color: #111214;
+  border: 1px solid #c8d2dc;
+  border-radius: 6px;
+  padding: 6px 10px;
+  box-shadow: none;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard input:focus,
+.qwebirc-classicui div.qwebirc-embeddedwizard input:focus,
+.qwebirc-classicui .qwebirc-embeddedwizard textarea:focus,
+.qwebirc-classicui div.qwebirc-embeddedwizard textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #7a6ff033;
+  border-color: #7a6ff0;
+}
+.qwebirc-classicui .qwebirc-embeddedwizard .wizardcontrols input,
+.qwebirc-classicui .qwebirc-embeddedwizard input[type="submit"],
+.qwebirc-classicui .qwebirc-embeddedwizard input[type="button"],
+.qwebirc-classicui .qwebirc-embeddedwizard button,
+.qwebirc-classicui div.qwebirc-embeddedwizard button {
+  background: linear-gradient(90deg, #7a6ff0 0%, #5a5fcf 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px #0002;
+}
+
+/* PRIVACY POLICY PANE */
+.qwebirc-classicui .qwebirc-privacypolicypane {
+  font-size: 1em !important;
+}
+
+.qwebirc-classicui .qwebirc-privacypolicypane .mainbody {
+  font-size: 0.8em;
+  text-align: center;
+  padding: 5px;
+}
+
+.qwebirc-classicui .qwebirc-privacypolicypane table {
+  display: inline-block;
+}
+
+.qwebirc-classicui .qwebirc-privacypolicypane div.header {
+  padding-top: 5px;
+}
+
+.qwebirc-classicui .qwebirc-privacypolicypane .header {
+  background: white;
+  text-align: center;
+  border-bottom: 1px solid gray;
+  padding-bottom: 5px;
+}
+
+.qwebirc-classicui .qwebirc-privacypolicypane .header .title {
+  font-size: 3em;
+}
+
+.qwebirc-classicui .qwebirc-privacypolicypane .header .subtitle {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.qwebirc-classicui .qwebirc-privacypolicypane .monospace {
+  font-family: Consolas, "Lucida Console", monospace;
+}
+
+/* FEEDBACK */
+.qwebirc-classicui .qwebirc-feedbackpane {
+  font-size: 1em !important;
+}
+
+.qwebirc-classicui .qwebirc-feedbackpane .mainbody {
+  font-size: 0.8em;
+  text-align: center;
+  padding: 5px;
+}
+
+.qwebirc-classicui .qwebirc-feedbackpane table {
+  display: inline-block;
+}
+
+.qwebirc-classicui .qwebirc-feedbackpane div.header {
+  padding-top: 5px;
+}
+
+.qwebirc-classicui .qwebirc-feedbackpane .header {
+  background: white;
+  text-align: center;
+  border-bottom: 1px solid gray;
+  padding-bottom: 5px;
+}
+
+.qwebirc-classicui .qwebirc-feedbackpane .header .title {
+  font-size: 3em;
+}
+
+.qwebirc-classicui .qwebirc-feedbackpane .header .subtitle {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.qwebirc-classicui .qwebirc-feedbackpane .monospace {
+  font-family: Consolas, "Lucida Console", monospace;
+}
+
+/* FAQ */
+.qwebirc-classicui .qwebirc-faqpane {
+  font-size: 1em !important;
+}
+
+.qwebirc-classicui .qwebirc-faqpane .mainbody {
+  font-size: 0.8em;
+  text-align: center;
+  padding: 5px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.qwebirc-classicui .qwebirc-faqpane table {
+  display: inline-block;
+}
+
+.qwebirc-classicui .qwebirc-faqpane div.header {
+  padding-top: 5px;
+}
+
+.qwebirc-classicui .qwebirc-faqpane .header {
+  background: white;
+  text-align: center;
+  border-bottom: 1px solid gray;
+  padding-bottom: 5px;
+}
+
+.qwebirc-classicui .qwebirc-faqpane .header .title {
+  font-size: 3em;
+}
+
+.qwebirc-classicui .qwebirc-faqpane .header .subtitle {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.qwebirc-classicui .qwebirc-faqpane .monospace {
+  font-family: Consolas, "Lucida Console", monospace;
+}
+
+.qwebirc-classicui .qwebirc .loading {
+  padding-left: 4px;
+  padding-top: 3px;
+  font-size: 0.8em;
+}
+
+/* Classic theme: prefer dark text on light panes */
+.qwebirc-classicui .qwebirc-aboutpane,
+.qwebirc-classicui .qwebirc-privacypolicypane,
+.qwebirc-classicui .qwebirc-feedbackpane,
+.qwebirc-classicui .qwebirc-faqpane,
+.qwebirc-classicui .qwebirc-optionspane,
+.qwebirc-classicui .qwebirc-embeddedwizard,
+.qwebirc-classicui div.qwebirc-embeddedwizard {
+  /* Force light pane background and dark text in classic theme for
+     improved readability. Some embeds may inherit dark backgrounds, so
+     explicitly set background and color here. */
+  background: #fbfbfe;
+  color: #222428;
+  /* Use QUI wizard font schema for Classic embedded wizard (size, spacing, family)
+    while preserving the Classic color scheme above. */
+  font-size: 1.08em;
+  line-height: 1.25;
+  font-family: 'Segoe UI', 'Verdana', 'Arial', sans-serif;
+  border-radius: 8px;
+  border: 1px solid #e8eef6;
+}
+.qwebirc-classicui .qwebirc-aboutpane .mainbody,
+.qwebirc-classicui .qwebirc-privacypolicypane .mainbody,
+.qwebirc-classicui .qwebirc-feedbackpane .mainbody,
+.qwebirc-classicui .qwebirc-faqpane .mainbody,
+.qwebirc-classicui .qwebirc-optionspane .mainbody,
+.qwebirc-classicui .qwebirc-embeddedwizard .mainbody,
+.qwebirc-classicui div.qwebirc-embeddedwizard .mainbody {
+  color: #333333;
+}
+
+/* Make textual content in classic panes more readable by forcing a
+   darker color for most descendants. Preserve interactive controls and
+   links so their styles remain usable. */
+.qwebirc-classicui .qwebirc-aboutpane *,
+.qwebirc-classicui .qwebirc-privacypolicypane *,
+.qwebirc-classicui .qwebirc-feedbackpane *,
+.qwebirc-classicui .qwebirc-faqpane *,
+.qwebirc-classicui .qwebirc-optionspane *,
+.qwebirc-classicui .qwebirc-embeddedwizard *,
+.qwebirc-classicui div.qwebirc-embeddedwizard * {
+  color: #1b1d1e !important;
+}
+.qwebirc-classicui .qwebirc-aboutpane a,
+.qwebirc-classicui .qwebirc-privacypolicypane a,
+.qwebirc-classicui .qwebirc-feedbackpane a,
+.qwebirc-classicui .qwebirc-faqpane a,
+.qwebirc-classicui .qwebirc-optionspane a,
+.qwebirc-classicui .qwebirc-embeddedwizard a,
+.qwebirc-classicui div.qwebirc-embeddedwizard a {
+  /* keep links visible and recognizable */
+  color: #297fff !important;
+}
+/* Keep form controls readable by not forcing their text color here. */
+.qwebirc-classicui .qwebirc-aboutpane input,
+.qwebirc-classicui .qwebirc-aboutpane textarea,
+.qwebirc-classicui .qwebirc-aboutpane select,
+.qwebirc-classicui .qwebirc-aboutpane button,
+.qwebirc-classicui .qwebirc-privacypolicypane input,
+.qwebirc-classicui .qwebirc-privacypolicypane textarea,
+.qwebirc-classicui .qwebirc-privacypolicypane select,
+.qwebirc-classicui .qwebirc-privacypolicypane button,
+.qwebirc-classicui .qwebirc-feedbackpane input,
+.qwebirc-classicui .qwebirc-feedbackpane textarea,
+.qwebirc-classicui .qwebirc-feedbackpane select,
+.qwebirc-classicui .qwebirc-feedbackpane button,
+.qwebirc-classicui .qwebirc-faqpane input,
+.qwebirc-classicui .qwebirc-faqpane textarea,
+.qwebirc-classicui .qwebirc-faqpane select,
+.qwebirc-classicui .qwebirc-faqpane button,
+.qwebirc-classicui .qwebirc-optionspane input,
+.qwebirc-classicui .qwebirc-optionspane textarea,
+.qwebirc-classicui .qwebirc-optionspane select,
+.qwebirc-classicui .qwebirc-optionspane button,
+.qwebirc-classicui .qwebirc-embeddedwizard input,
+.qwebirc-classicui .qwebirc-embeddedwizard textarea,
+.qwebirc-classicui .qwebirc-embeddedwizard select,
+.qwebirc-classicui .qwebirc-embeddedwizard button,
+.qwebirc-classicui div.qwebirc-embeddedwizard input,
+.qwebirc-classicui div.qwebirc-embeddedwizard textarea,
+.qwebirc-classicui div.qwebirc-embeddedwizard select,
+.qwebirc-classicui div.qwebirc-embeddedwizard button {
+  color: inherit !important;
+}
+
 

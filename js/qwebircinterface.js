@@ -159,6 +159,33 @@ qwebirc.ui.Interface = new Class({
         }
       }
   
+      // Load persisted options from the existing opt1 Hash.Cookie (MooTools)
+      try {
+        if(typeof Hash !== 'undefined' && typeof Hash.Cookie !== 'undefined') {
+          try {
+            var __optc = new Hash.Cookie('opt1', {duration:3650, autoSave:false});
+            var __h = __optc.hash || {};
+            // Option id 11 = STYLE_HUE (see DEFAULT_OPTIONS)
+            if(__h.hasOwnProperty('11')) {
+              var huev = Number(__h['11']);
+              if(!isNaN(huev)) this.options.hue = huev;
+            }
+            // Option id 21 = FRONTEND_UI -> if stored, try to prefer it (string like 'qui'/'classicui')
+            if(__h.hasOwnProperty('21') && typeof __h['21'] === 'string' && __h['21'].length > 0) {
+              try {
+                // If the stored frontend differs from the current page, redirect to the stored frontend
+                var cur = window.location.pathname.replace(/[^\/]*$/, '');
+                var target = __h['21'] + '.html';
+                if(!window.location.pathname.endsWith(target)) {
+                  window.location = cur + target + window.location.search + window.location.hash;
+                  return; // navigation will reload page
+                }
+              } catch(e) {}
+            }
+          } catch(e) {}
+        }
+      } catch(e) {}
+
       var ui_ = new ui($(element), new qwebirc.ui.Theme(this.options.theme), this.options);
 
       var usingAutoNick = !$defined(nick);

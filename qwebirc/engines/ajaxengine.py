@@ -219,8 +219,20 @@ class RequestChannel(object):
     self.request = request
 
   def write(self, data, seqNo):
+    # Ensure we send JSON as UTF-8 and set a content-type so browsers
+    # treat the payload correctly (avoid � replacement characters).
     self.request.setHeader("n", str(seqNo))
-    self.request.write(data)
+    # If data is a str, encode as utf-8. If bytes, send as-is.
+    if isinstance(data, str):
+      payload = data.encode("utf-8")
+    else:
+      payload = data
+    try:
+      # Set explicit content-type for JSON payloads
+      self.request.setHeader("content-type", "application/json; charset=utf-8")
+    except Exception:
+      pass
+    self.request.write(payload)
     self.request.finish()
     return False
     
@@ -442,8 +454,10 @@ if has_websocket:
       # Debug logging for WebSocket protocol troubleshooting
       state = self.__state
       message_type, message = msg[:1], msg[1:]
+      # Decode using the IRC decoding helper that prefers utf-8 and
+      # falls back to iso-8859-1 without inserting replacement chars.
       if isinstance(message, bytes):
-        message = message.decode("utf-8", "replace")
+        message = ircclient.irc_decode(message)
       if state == self.AWAITING_AUTH:
         if message_type == b"s":  # subscribe
           tokens = message.split(",", 1)

@@ -59,7 +59,33 @@ qwebirc.config.DEFAULT_OPTIONS = [
     applyChanges: function(value, ui) {
       ui.setSideTabs(value);
     }
-  }]
+  }],
+  // UI/Frontend selection: allow choosing between available static frontends
+  // optionId chosen as 21 (next free id), default 0 -> qui
+  [21, "FRONTEND_UI", "Interface", 0, {
+    applyChanges: function(value, ui) {
+      // Only persist and reload when the selected frontend actually changed.
+      try {
+        if(this.parentObject && this.parentObject.optionObject) {
+          var opts = this.parentObject.optionObject;
+          var current = opts['FRONTEND_UI'];
+          // Normalize to string for comparison
+          if(typeof current !== 'undefined' && String(current) === String(value)) {
+            // nothing changed -> no flush, no reload
+            return;
+          }
+          // persist new value and flush
+          opts.setValue(this.option, value);
+          if(typeof opts.flush === 'function')
+            opts.flush();
+        }
+      } catch(e) {}
+      try {
+        var base = window.location.pathname.replace(/[^\/]*$/, '');
+        window.location = base + value + '.html' + window.location.search + window.location.hash;
+      } catch(e) {}
+    }
+  }, [ ["QUI","qui"], ["Classic","classicui"] ]]
 ];
 
 qwebirc.config.QUAKENET_OPTIONS = [
@@ -364,6 +390,27 @@ qwebirc.ui.Options = new Class({
       var extras = x[5];
 
       var stype = typeof(default_);
+      // If this is the FRONTEND_UI option and default is numeric index, prefer
+      // detecting the current frontend from the path (qui.html / classicui.html)
+      if(prefix === 'FRONTEND_UI' && typeof(default_) === 'number') {
+        try {
+          var path = window && window.location && window.location.pathname || '';
+          if(path.indexOf('classicui') !== -1) {
+            // find index of classicui in options list
+            for(var zz=0; zz<options.length; zz++) {
+              if(options[zz][1] && options[zz][1].toLowerCase().indexOf('classic') !== -1) {
+                default_ = zz; break;
+              }
+            }
+          } else if(path.indexOf('qui') !== -1) {
+            for(var zz2=0; zz2<options.length; zz2++) {
+              if(options[zz2][1] && options[zz2][1].toLowerCase().indexOf('qui') !== -1) {
+                default_ = zz2; break;
+              }
+            }
+          }
+        } catch(e) {}
+      }
       if(prefix === "LANGUAGE") {
         // extras ist hier die Optionsliste, nicht das extras-Objekt
         return new qwebirc.config.RadioOption(optionId, prefix, label, default_, moreextras, extras);
@@ -418,6 +465,23 @@ qwebirc.ui.OptionsPane = new Class({
     this.optionObject = optionObject;
   // Host element for positioning the close button
   try { this.parentElement.addClass('pane-host'); } catch(e) {}
+  // Ensure that when running Classic UI the pane host also carries the
+  // classic UI root class so scoped CSS selectors like
+  // `.qwebirc-classicui .qwebirc-optionspane` will match when panes are
+  // attached to nodes outside the main UI root.
+  try {
+    if(typeof this.parentElement !== 'undefined' && this.parentElement) {
+      var node = this.parentElement;
+      var foundRoot = false;
+      while(node && node !== document.documentElement) {
+        try { if(node.classList && node.classList.contains('qwebirc-classicui')) { foundRoot = true; break; } } catch(e) {}
+        node = node.parentNode;
+      }
+      if(foundRoot) {
+        try { this.parentElement.addClass('qwebirc-classicui'); } catch(e) {}
+      }
+    }
+  } catch(e) {}
   this.__injectCloseButton();
     this.createElements();
   // Listener for language change
@@ -580,7 +644,20 @@ qwebirc.ui.CookieOptions = new Class({
     this._setup();
     
     this.getOptionList().forEach(function(x) {
-      this.__cookie.set(x.optionId, x.value);
+      var v = x.value;
+      // Normalize important option types: 11 = STYLE_HUE should be a number,
+      // 21 = FRONTEND_UI should be a string (frontend id)
+      try {
+        if(String(x.optionId) === '11') {
+          v = Number(v);
+          if(isNaN(v)) v = 0;
+        }
+        if(String(x.optionId) === '21') {
+          // store as short string id when possible
+          if(typeof v !== 'string') v = String(v);
+        }
+      } catch(e) {}
+      this.__cookie.set(x.optionId, v);
     }.bind(this));
     this.__cookie.save();
   }

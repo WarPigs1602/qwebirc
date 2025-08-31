@@ -44,6 +44,20 @@ qwebirc.ui.ConnectPane = new Class({
       btn.style.cssText = 'background:#3b82f6;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;';
       btn.addEventListener('click', function(){ ov.style.display='none'; });
       box.appendChild(msg); box.appendChild(btn); ov.appendChild(box); document.body.appendChild(ov);
+      // If the connect pane was created inside the Classic UI, mark the
+      // global alert overlay so Classic-scoped CSS selectors will match it.
+      try {
+        var a = parent;
+        while (a) {
+          if (a.classList && a.classList.contains('qwebirc-classicui')) {
+            if (!ov.className || ov.className.indexOf('qwebirc-classicui') === -1) {
+              ov.className = (ov.className + ' qwebirc-classicui').trim();
+            }
+            break;
+          }
+          a = a.parentNode;
+        }
+      } catch (e) {}
     }
     var selfAlert = this;
     window.qwebirc = window.qwebirc || {}; window.qwebirc.__lastAlert = window.qwebirc.__lastAlert || null;

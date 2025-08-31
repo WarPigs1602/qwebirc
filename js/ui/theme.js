@@ -121,6 +121,7 @@ qwebirc.ui.Theme = new Class({
     this.__ccmaph["("] = this.message("HILIGHT", {}, this.__ccmap);
     this.__ccmaph[")"] = this.message("HILIGHTEND", {}, this.__ccmap);
     this.__ccmaph["{"] = this.__ccmaph["}"] = "";
+  // Theme persistence is handled via the central opt1 Hash.Cookie (see qwebircinterface)
   },
   __dollarSubstitute: function(x, h, mapper) {
     var msg = [];

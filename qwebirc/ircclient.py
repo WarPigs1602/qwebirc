@@ -83,9 +83,13 @@ class QWebIRCClient(basic.LineReceiver):
     basic.LineReceiver.dataReceived(self, data.replace(b"\r", b""))
 
   def lineReceived(self, line):
+    # Prefer the custom irc_decode which tries utf-8 first and falls back
+    # to iso-8859-1 without inserting replacement characters. Avoid
+    # decoding with 'replace' which turns invalid sequences into U+FFFD (�).
     if isinstance(line, bytes):
-      line = line.decode("utf-8", "replace")
-    line = irc_decode(irc.lowDequote(line))
+      line = irc_decode(line)
+    # Ensure lowDequote is applied on a str
+    line = irc.lowDequote(line)
 
     tags = None
     # Parse IRCv3 message-tags if present (including draft/message-tags)
