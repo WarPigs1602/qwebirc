@@ -86,13 +86,13 @@ def producehtml(name, debug):
   css = csslist(name, debug, gen=True)
   gid = getgitid()
 
-  # Locales-JSON-Dateien als preload verlinken
+  # Locales-JSON-Dateien als prefetch verlinken (hintergrund/idle fetch statt sofortiges preload)
   locales_dir = os.path.join(os.path.dirname(__file__), "..", "locales")
   preload_locales = ""
   if os.path.exists(locales_dir):
     for fname in os.listdir(locales_dir):
       if fname.endswith(".json"):
-        preload_locales += '  <link rel="preload" href="%slocales/%s" as="fetch" type="application/json" crossorigin>\n' % (config.STATIC_BASE_URL, fname)
+        preload_locales += '  <link rel="prefetch" href="%slocales/%s" as="fetch" type="application/json" crossorigin>\n' % (config.STATIC_BASE_URL, fname)
 
   csshtml = "\n".join("  <link rel=\"stylesheet\" href=\"%s%s\" type=\"text/css\"/>" % (config.STATIC_BASE_URL, x) for x in css)
   # Global bundle usage removed: keep per-UI CSS links only

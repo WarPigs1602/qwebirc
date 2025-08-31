@@ -167,10 +167,10 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 .qwebirc-loginbox input#confirm_sasl_username,
 .qwebirc-loginbox input#confirm_sasl_password {
   width: 200px;
-  border: 1.5px solid #c8d2dc;
+  border: 1.5px solid var(--qwebirc-pane-fg, #c8d2dc);
   border-radius: 6px;
-  background: #ffffff;
-  color: #111214;
+  background: var(--qwebirc-pane-bg, #ffffff);
+  color: var(--qwebirc-pane-fg, #111214);
   padding: 6px 2.6em 6px 10px; /* extra right space for icon */
   font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
@@ -188,7 +188,7 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 
 /* Modernisierte Labels */
 .qwebirc-loginbox label {
-  color: #333333; /* dunkle Schrift für Connect-Formular */
+  color: var(--qwebirc-pane-fg, #333333); /* an Theme-Farbe anpassen */
   font-size: 1em;
   font-weight: 500;
   margin-bottom: 4px;
@@ -209,6 +209,44 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 .qwebirc-loginbox input::placeholder {
   color: #888;
   opacity: 1;
+}
+/* QUI / Dark theme: ensure Connect dialog (loginbox) is readable */
+.qwebirc-qui .qwebirc-loginbox form {
+  background: var(--qwebirc-pane-bg, #232634);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0004;
+  border: 1.5px solid #3a3f4b;
+  padding: 24px 18px;
+}
+.qwebirc-qui .qwebirc-loginbox label {
+  color: var(--qwebirc-pane-fg, #e0e0e0);
+}
+.qwebirc-qui .qwebirc-loginbox input#loginnickname,
+.qwebirc-qui .qwebirc-loginbox input#loginchannels,
+.qwebirc-qui .qwebirc-loginbox input#sasl_username,
+.qwebirc-qui .qwebirc-loginbox input#sasl_password,
+.qwebirc-qui .qwebirc-loginbox input#confirm_sasl_username,
+.qwebirc-qui .qwebirc-loginbox input#confirm_sasl_password,
+.qwebirc-qui .qwebirc-loginbox input.text,
+.qwebirc-qui .qwebirc-loginbox textarea,
+.qwebirc-qui .qwebirc-loginbox select {
+  background: var(--qwebirc-pane-bg, #232634);
+  color: var(--qwebirc-pane-fg, #e0e0e0);
+  border: 1.5px solid #3a3f4b;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px #0003;
+}
+.qwebirc-qui .qwebirc-loginbox input#loginnickname:focus,
+.qwebirc-qui .qwebirc-loginbox input#loginchannels:focus,
+.qwebirc-qui .qwebirc-loginbox input#sasl_username:focus,
+.qwebirc-qui .qwebirc-loginbox input#sasl_password:focus,
+.qwebirc-qui .qwebirc-loginbox input#confirm_sasl_username:focus,
+.qwebirc-qui .qwebirc-loginbox input#confirm_sasl_password:focus,
+.qwebirc-qui .qwebirc-loginbox textarea:focus,
+.qwebirc-qui .qwebirc-loginbox select:focus {
+  border: 1.5px solid #7a6ff0;
+  box-shadow: 0 0 0 2px #7a6ff033;
+  outline: none;
 }
 /**************** LOGIN BOX *******************/
 
@@ -274,10 +312,10 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 /* Modernisiertes Login-Input */
 .qwebirc-loginbox input#loginnickname, .qwebirc-loginbox input#loginchannels {
   width: 200px;
-  border: 1.5px solid #c8d2dc;
+  border: 1.5px solid var(--qwebirc-pane-fg, #c8d2dc);
   border-radius: 6px;
-  background: #ffffff;
-  color: #111214;
+  background: var(--qwebirc-pane-bg, #ffffff);
+  color: var(--qwebirc-pane-fg, #111214);
   padding: 6px 10px;
   font-size: 1em;
   transition: border 0.2s, box-shadow 0.2s;
@@ -312,10 +350,10 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
 }
 /* Modernisiertes Login-Formular */
 .qwebirc-loginbox form {
-  background: #ffffff; /* helles Formular für Connect */
+  background: transparent; /* Formular transparent, Pane-Hintergrund sichtbar */
   border-radius: 12px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
-  border: 1px solid #e8eef6;
+  box-shadow: none;
+  border: none;
   padding: 24px 18px;
 }
 
@@ -347,6 +385,21 @@ body:not(.qwebirc-connectpane):not(.qwebirc-chatpane) {
   box-shadow: 0 1px 6px rgba(0,0,0,0.04);
   border: 1px solid #dfe7ee;
   padding: 14px 12px;
+}
+
+/* Make the version string more visible in QUI (dark) theme */
+.qwebirc-qui .qwebirc-aboutpane .version {
+  /* stronger badge: darker background and white text for clear contrast */
+  background: rgba(0,0,0,0.65);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.98em;
+  margin-top: 6px;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.45);
 }
 
 .qwebirc-aboutpane .mainbody {

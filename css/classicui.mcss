@@ -113,9 +113,30 @@ body {
   color: $(tab_selected_text);
   position: relative;
 }
-.qwebirc-classicui .qwebirc-typing-bar .typing-dots { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; vertical-align: middle; }
-.qwebirc-classicui .qwebirc-typing-bar .typing-dot { display: inline-block; width: 8px; height: 8px; margin: 0 2px; border-radius: 50%; background: $(tabbar_text); opacity: 0.32; animation: typing-bounce 1.2s infinite; }
-@keyframes typing-bounce { 0%, 80%, 100% { opacity: 0.3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-4px); } }
+.qwebirc-classicui .qwebirc-typing-bar .typing-dots { display: inline-flex; align-items: center; gap: 2px; margin-left: 4px; vertical-align: middle; }
+.qwebirc-classicui .qwebirc-typing-bar .typing-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 2px;
+  border-radius: 50%;
+  background: $(tabbar_text);
+  opacity: 0.3;
+  animation: typing-bounce 1.2s infinite;
+}
+.qwebirc-classicui .qwebirc-typing-bar .typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+.qwebirc-classicui .qwebirc-typing-bar .typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.qwebirc-classicui .qwebirc-typing-bar .typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes typing-bounce {
+  0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-5px); }
+}
 .qwebirc-classicui .qwebirc-typing-bar.paused { opacity: 0.85; }
 
 /* Embed iframe code styling to match options pane */
