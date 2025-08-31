@@ -154,25 +154,62 @@ qwebirc.ui.ConnectPane = new Class({
               captchaRow.className = 'captcha-row';
               var td = document.createElement('td');
               td.colSpan = 2;
+
+              // Reuse existing containers if present so widget state survives
+              var existingRecaptcha = document.getElementById('recaptcha-container');
+              var existingTurnstile = document.getElementById('turnstile-container');
+
               if (captchaType === 'recaptcha') {
-                td.innerHTML = '<div id="recaptcha-container"></div>';
-                var script = document.createElement('script');
-                script.src = 'https://www.google.com/recaptcha/api.js';
-                script.async = true;
-                script.defer = true;
-                document.body.appendChild(script);
-                window.renderRecaptcha = function() {
-                  if (window.grecaptcha) {
-                    window.grecaptcha.render('recaptcha-container', {
-                      'sitekey': captchaSiteKey
-                    });
-                  }
-                };
-                script.onload = function() { setTimeout(window.renderRecaptcha, 100); };
+                if (existingRecaptcha) {
+                  // Move existing container into this pane so it remains visible
+                  td.appendChild(existingRecaptcha);
+                } else {
+                  td.innerHTML = '<div id="recaptcha-container"></div>';
+                }
+
+                // Load grecaptcha only if not already available or loading
+                if (!window.grecaptcha && !window.__recaptchaScriptLoading && !window.__recaptchaScriptLoaded) {
+                  window.__recaptchaScriptLoading = true;
+                  var script = document.createElement('script');
+                  script.src = 'https://www.google.com/recaptcha/api.js';
+                  script.async = true;
+                  script.defer = true;
+                  script.onload = function() {
+                    window.__recaptchaScriptLoaded = true;
+                    window.__recaptchaScriptLoading = false;
+                    setTimeout(function() {
+                      try {
+                        if (window.grecaptcha) {
+                          // render and save widget id if returned
+                          var id = window.grecaptcha.render('recaptcha-container', { 'sitekey': captchaSiteKey });
+                          if (typeof id !== 'undefined') window.recaptchaWidgetId = id;
+                        }
+                      } catch(e) {}
+                    }, 100);
+                  };
+                  script.onerror = function() {
+                    window.__recaptchaFailed = true;
+                    window.__recaptchaScriptLoading = false;
+                    console.warn('[captcha] recaptcha script failed to load; continuing without CAPTCHA enforcement.');
+                  };
+                  document.body.appendChild(script);
+                } else {
+                  // If grecaptcha already exists, ensure widget is rendered and id stored
+                  try {
+                    if (window.grecaptcha) {
+                      var maybeId = window.grecaptcha.render('recaptcha-container', { 'sitekey': captchaSiteKey });
+                      if (typeof maybeId !== 'undefined') window.recaptchaWidgetId = maybeId;
+                    }
+                  } catch(e) {}
+                }
               } else if (captchaType === 'turnstile') {
-                // Use stable container id so we can preserve widget across language changes
-                td.innerHTML = '<div id="turnstile-container"><div class="cf-turnstile" data-sitekey="' + captchaSiteKey + '"></div></div>';
-                // Only load script once
+                if (existingTurnstile) {
+                  td.appendChild(existingTurnstile);
+                } else {
+                  td.innerHTML = '<div id="turnstile-container"><div class="cf-turnstile" data-sitekey="' + captchaSiteKey + '"></div></div>';
+                }
+
+                // Only load script once (existing flags preserved in prior code)
                 if(!window.__turnstileScriptLoading && !window.__turnstileScriptLoaded) {
                   var script = document.createElement('script');
                   script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
@@ -188,7 +225,6 @@ qwebirc.ui.ConnectPane = new Class({
                         if(window.turnstile && !window.turnstileWidgetId) {
                           var el = document.querySelector('#turnstile-container .cf-turnstile');
                           if(el) {
-                            // turnstile.render returns id if manual; here we try to get via dataset
                             window.turnstileWidgetId = el.getAttribute('data-widget-id') || null;
                           }
                         }
@@ -201,8 +237,21 @@ qwebirc.ui.ConnectPane = new Class({
                     console.warn('[captcha] turnstile script failed to load; continuing without CAPTCHA enforcement.');
                   };
                   document.body.appendChild(script);
+                } else {
+                  // If already loaded, try to capture widget id now
+                  setTimeout(function(){
+                    try {
+                      if(window.turnstile && !window.turnstileWidgetId) {
+                        var el = document.querySelector('#turnstile-container .cf-turnstile');
+                        if(el) {
+                          window.turnstileWidgetId = el.getAttribute('data-widget-id') || null;
+                        }
+                      }
+                    } catch(e) {}
+                  }, 300);
                 }
               }
+
               captchaRow.appendChild(td);
               var table = loginForm.querySelector('table');
               if (table) {
