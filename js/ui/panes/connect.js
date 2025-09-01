@@ -467,8 +467,18 @@ qwebirc.ui.ConnectPane = new Class({
       try {
         var r = document.getElementById('recaptcha-container');
         var t = document.getElementById('turnstile-container');
-        if (r && r.parentNode && r.parentNode !== document.body) document.body.appendChild(r);
-        if (t && t.parentNode && t.parentNode !== document.body) document.body.appendChild(t);
+        var park = function(el) {
+          if(!el) return;
+          try {
+            // find nearest table row and hide it to avoid leaving an empty white row
+            var p = el.parentNode;
+            while(p && p.nodeName && p.nodeName.toUpperCase() !== 'TR') p = p.parentNode;
+            if(p && p.style) { p.style.display = 'none'; p.setAttribute('data-captcha-parked', '1'); }
+            if (el.parentNode && el.parentNode !== document.body) document.body.appendChild(el);
+          } catch(e) {}
+        };
+        park(r);
+        park(t);
       } catch(e) {}
     });
 
@@ -484,17 +494,35 @@ qwebirc.ui.ConnectPane = new Class({
         var existingTurnstile = document.getElementById('turnstile-container');
 
         if (existingRecaptcha && !rootElement.contains(existingRecaptcha)) {
-          // Insert before connectbutton row
-          var rows = table.getElementsByTagName('tr');
-          var inserted = false;
-          for (var i = 0; i < rows.length; i++) {
-            if (rows[i].getAttribute('name') === 'connectbutton') {
-              rows[i].parentNode.insertBefore(existingRecaptcha.parentNode ? existingRecaptcha.parentNode : existingRecaptcha, rows[i]);
-              inserted = true;
-              break;
+          // Prefer existing captcha-row if present
+          var captchaRow = table.querySelector('tr.captcha-row') || table.querySelector('tr[data-captcha-parked="1"]');
+          if (!captchaRow) {
+            captchaRow = document.createElement('tr');
+            captchaRow.className = 'captcha-row';
+            var tdnew = document.createElement('td');
+            tdnew.colSpan = 2;
+            captchaRow.appendChild(tdnew);
+            // insert before connectbutton row if possible
+            var rows = table.getElementsByTagName('tr');
+            var inserted = false;
+            for (var i = 0; i < rows.length; i++) {
+              if (rows[i].getAttribute('name') === 'connectbutton') {
+                rows[i].parentNode.insertBefore(captchaRow, rows[i]);
+                inserted = true;
+                break;
+              }
             }
+            if (!inserted) table.appendChild(captchaRow);
           }
-          if (!inserted) table.appendChild(existingRecaptcha.parentNode ? existingRecaptcha.parentNode : existingRecaptcha);
+          // Put the widget into the captchaRow's first td
+          try {
+            var td = captchaRow.querySelector('td');
+            if(!td) { td = document.createElement('td'); td.colSpan = 2; captchaRow.appendChild(td); }
+            // clear existing contents and append element
+            td.innerHTML = '';
+            td.appendChild(existingRecaptcha);
+            captchaRow.style.display = '';
+          } catch(e) {}
 
           // Try to reflow/reset/render
           try {
@@ -507,16 +535,30 @@ qwebirc.ui.ConnectPane = new Class({
         }
 
         if (existingTurnstile && !rootElement.contains(existingTurnstile)) {
-          var rows2 = table.getElementsByTagName('tr');
-          var inserted2 = false;
-          for (var j = 0; j < rows2.length; j++) {
-            if (rows2[j].getAttribute('name') === 'connectbutton') {
-              rows2[j].parentNode.insertBefore(existingTurnstile.parentNode ? existingTurnstile.parentNode : existingTurnstile, rows2[j]);
-              inserted2 = true;
-              break;
+          var captchaRow2 = table.querySelector('tr.captcha-row') || table.querySelector('tr[data-captcha-parked="1"]');
+          if (!captchaRow2) {
+            captchaRow2 = document.createElement('tr');
+            captchaRow2.className = 'captcha-row';
+            var tdnew2 = document.createElement('td');
+            tdnew2.colSpan = 2;
+            captchaRow2.appendChild(tdnew2);
+            var rowsb = table.getElementsByTagName('tr');
+            var ins = false;
+            for (var k = 0; k < rowsb.length; k++) {
+              if (rowsb[k].getAttribute('name') === 'connectbutton') {
+                rowsb[k].parentNode.insertBefore(captchaRow2, rowsb[k]);
+                ins = true; break;
+              }
             }
+            if (!ins) table.appendChild(captchaRow2);
           }
-          if (!inserted2) table.appendChild(existingTurnstile.parentNode ? existingTurnstile.parentNode : existingTurnstile);
+          try {
+            var td2 = captchaRow2.querySelector('td');
+            if(!td2) { td2 = document.createElement('td'); td2.colSpan = 2; captchaRow2.appendChild(td2); }
+            td2.innerHTML = '';
+            td2.appendChild(existingTurnstile);
+            captchaRow2.style.display = '';
+          } catch(e) {}
 
           try {
             if (window.turnstile && typeof window.turnstile.render === 'function') {
