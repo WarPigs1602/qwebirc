@@ -163,6 +163,19 @@ qwebirc.ui.ConnectPane = new Class({
                 if (existingRecaptcha) {
                   // Move existing container into this pane so it remains visible
                   td.appendChild(existingRecaptcha);
+                  // After moving, ensure grecaptcha reflows / is reset so it displays correctly
+                  (function ensureRecaptchaVisible() {
+                    try {
+                      if (window.grecaptcha && typeof window.grecaptcha.reset === 'function' && typeof window.recaptchaWidgetId !== 'undefined') {
+                        try { window.grecaptcha.reset(window.recaptchaWidgetId); } catch(e) {}
+                      } else if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+                        try {
+                          var maybeId = window.grecaptcha.render('recaptcha-container', { 'sitekey': captchaSiteKey });
+                          if (typeof maybeId !== 'undefined') window.recaptchaWidgetId = maybeId;
+                        } catch(e) {}
+                      }
+                    } catch(e) {}
+                  })();
                 } else {
                   td.innerHTML = '<div id="recaptcha-container"></div>';
                 }
@@ -202,9 +215,41 @@ qwebirc.ui.ConnectPane = new Class({
                     }
                   } catch(e) {}
                 }
+                // Also attempt to reset/render shortly after insertion to handle
+                // cases where the widget was previously rendered in a different
+                // pane and needs a reflow when moved.
+                setTimeout(function() {
+                  try {
+                    if (window.grecaptcha && typeof window.grecaptcha.reset === 'function' && typeof window.recaptchaWidgetId !== 'undefined') {
+                      try { window.grecaptcha.reset(window.recaptchaWidgetId); } catch(e) {}
+                    }
+                  } catch(e) {}
+                }, 150);
               } else if (captchaType === 'turnstile') {
                 if (existingTurnstile) {
                   td.appendChild(existingTurnstile);
+                  // Ensure turnstile is visible / rendered after moving
+                  (function ensureTurnstileVisible(){
+                    try {
+                      if (window.turnstile && typeof window.turnstile.render === 'function') {
+                        var el = document.querySelector('#turnstile-container .cf-turnstile');
+                        // If element lacks data-widget-id try rendering
+                        if (el && !el.getAttribute('data-widget-id')) {
+                          try {
+                            window.turnstile.render(el, { 'sitekey': captchaSiteKey });
+                            setTimeout(function(){
+                              try {
+                                var el2 = document.querySelector('#turnstile-container .cf-turnstile');
+                                if(el2) window.turnstileWidgetId = el2.getAttribute('data-widget-id') || null;
+                              } catch(e) {}
+                            }, 200);
+                          } catch(e) {}
+                        } else if (typeof window.turnstile.reset === 'function' && window.turnstileWidgetId) {
+                          try { window.turnstile.reset(window.turnstileWidgetId); } catch(e) {}
+                        }
+                      }
+                    } catch(e) {}
+                  })();
                 } else {
                   td.innerHTML = '<div id="turnstile-container"><div class="cf-turnstile" data-sitekey="' + captchaSiteKey + '"></div></div>';
                 }
@@ -413,6 +458,81 @@ qwebirc.ui.ConnectPane = new Class({
 
   var rootElement = parent.getElement("[name=connectroot]");
   self.rootElement = rootElement;
+
+  // Ensure CAPTCHA survives tab switching: when this pane is hidden, move
+  // any captcha containers to document.body for safekeeping; when shown,
+  // move them back and attempt a reset/render so widgets display correctly.
+  try {
+    this.addEvent('deselect', function() {
+      try {
+        var r = document.getElementById('recaptcha-container');
+        var t = document.getElementById('turnstile-container');
+        if (r && r.parentNode && r.parentNode !== document.body) document.body.appendChild(r);
+        if (t && t.parentNode && t.parentNode !== document.body) document.body.appendChild(t);
+      } catch(e) {}
+    });
+
+    this.addEvent('select', function() {
+      try {
+        var loginForm = rootElement.querySelector('tr[name=loginbox] form');
+        if (!loginForm) return;
+        var table = loginForm.querySelector('table');
+        if (!table) return;
+
+        // Find existing global containers (moved to body on deselect)
+        var existingRecaptcha = document.getElementById('recaptcha-container');
+        var existingTurnstile = document.getElementById('turnstile-container');
+
+        if (existingRecaptcha && !rootElement.contains(existingRecaptcha)) {
+          // Insert before connectbutton row
+          var rows = table.getElementsByTagName('tr');
+          var inserted = false;
+          for (var i = 0; i < rows.length; i++) {
+            if (rows[i].getAttribute('name') === 'connectbutton') {
+              rows[i].parentNode.insertBefore(existingRecaptcha.parentNode ? existingRecaptcha.parentNode : existingRecaptcha, rows[i]);
+              inserted = true;
+              break;
+            }
+          }
+          if (!inserted) table.appendChild(existingRecaptcha.parentNode ? existingRecaptcha.parentNode : existingRecaptcha);
+
+          // Try to reflow/reset/render
+          try {
+            if (window.grecaptcha && typeof window.grecaptcha.reset === 'function' && typeof window.recaptchaWidgetId !== 'undefined') {
+              try { window.grecaptcha.reset(window.recaptchaWidgetId); } catch(e) {}
+            } else if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+              try { var id = window.grecaptcha.render('recaptcha-container', { 'sitekey': window.CAPTCHA_SITE_KEY }); if (typeof id !== 'undefined') window.recaptchaWidgetId = id; } catch(e) {}
+            }
+          } catch(e) {}
+        }
+
+        if (existingTurnstile && !rootElement.contains(existingTurnstile)) {
+          var rows2 = table.getElementsByTagName('tr');
+          var inserted2 = false;
+          for (var j = 0; j < rows2.length; j++) {
+            if (rows2[j].getAttribute('name') === 'connectbutton') {
+              rows2[j].parentNode.insertBefore(existingTurnstile.parentNode ? existingTurnstile.parentNode : existingTurnstile, rows2[j]);
+              inserted2 = true;
+              break;
+            }
+          }
+          if (!inserted2) table.appendChild(existingTurnstile.parentNode ? existingTurnstile.parentNode : existingTurnstile);
+
+          try {
+            if (window.turnstile && typeof window.turnstile.render === 'function') {
+              var el = document.querySelector('#turnstile-container .cf-turnstile');
+              if (el && !el.getAttribute('data-widget-id')) {
+                try { window.turnstile.render(el, { 'sitekey': window.CAPTCHA_SITE_KEY }); } catch(e) {}
+                setTimeout(function(){ try { var el2 = document.querySelector('#turnstile-container .cf-turnstile'); if(el2) window.turnstileWidgetId = el2.getAttribute('data-widget-id') || null; } catch(e){} }, 200);
+              } else if (typeof window.turnstile.reset === 'function' && window.turnstileWidgetId) {
+                try { window.turnstile.reset(window.turnstileWidgetId); } catch(e) {}
+              }
+            }
+          } catch(e) {}
+        }
+      } catch(e) {}
+    });
+  } catch(e) {}
 
   // After full build ensure last set language is applied
   try {
