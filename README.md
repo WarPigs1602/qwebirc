@@ -1,7 +1,8 @@
 
+
 # mwebirc – Modern Web IRC Client (formerly qwebirc)
 
-![CI](https://github.com/qwebirc/qwebirc/workflows/CI/badge.svg)
+![CI](https://github.com/WarPigs1602/mwebirc/workflows/CI/badge.svg)
 
 mwebirc (formerly qwebirc) is a fast, low-dependency, web-based IRC client written in Python (Twisted) with a compact ES5-style JavaScript frontend. It is designed for:
 
@@ -64,8 +65,8 @@ Sessions buffer outgoing events; subscribers (AJAX poll or WebSocket) drain them
 
 ### 3.1 Clone
 ```
-git clone https://github.com/WarPigs1602/qwebirc.git
-cd qwebirc
+git clone https://github.com/WarPigs1602/mwebirc.git
+cd mwebirc
 ```
 
 ### 3.2 Python Environment (Recommended)
