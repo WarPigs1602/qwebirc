@@ -7,6 +7,26 @@ import config
 from . import sigdebug
 import re
 
+def normalize_ip_string(ip: str) -> str:
+  """Normalize an IP string for sending to the IRC server.
+
+  - Remove surrounding brackets (e.g. "[::1]").
+  - If the string starts with a single ':' (but not '::'), remove that leading ':'.
+  - Leave valid IPv6 strings like '::1' unchanged.
+  """
+  if ip is None:
+    return ip
+
+  if ip.startswith("[") and ip.endswith("]"):
+    ip = ip[1:-1]
+
+  # If the IP starts with ':' (single or double), prefix a '0'.
+  # This ensures addresses like ':1' -> '0:1' and '::1' -> '0::1'.
+  if ip.startswith(":"):
+    ip = "0" + ip
+
+  return ip
+
 class RootResource(resource.Resource):
   def getChild(self, name, request):
   # Empty path internally treated like /qui.html (no redirect, direct mapping)
@@ -56,9 +76,8 @@ class WrappedRequest(server.Request):
     if ip is None:
       return None
 
-    # make absolutely sure that the address doesn't start with : before we
-    # try to use it as a string to the IRC server!
-    return ip.lstrip(":")
+    # normalize and return
+    return normalize_ip_string(ip)
 
 class HTTPChannel(http.HTTPChannel):
   def timeoutConnection(self):
