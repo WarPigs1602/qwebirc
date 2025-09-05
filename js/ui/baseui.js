@@ -666,9 +666,8 @@ qwebirc.ui.QuakeNetUI = new Class({
         v.quit("Logged out");
       }, this);
       
-      /* HACK */
-      var foo = function() { document.location = "/auth?logout=1"; };
-      foo.delay(500);
+  /* HACK: MooTools .delay ersetzt durch native setTimeout */
+  setTimeout(function() { document.location = "/auth?logout=1"; }, 500);
     }
   }
 });

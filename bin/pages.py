@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 IRC_BASE = ["ircconnection", "irclib", "numerics", "baseircclient", "irctracker", "commandparser", "commands", "ircclient", "commandhistory", "nicknamevalidator", "ignorecontroller"]
 PANES = ["connect", "embed", "options", "about", "url"]
-UI_BASE = ["menuitems", "baseui", "baseuiwindow", "colour", "url", "theme", "notifications", "tabcompleter", "style", "xdomain"]
+UI_BASE = ["uiutil", "menuitems", "baseui", "baseuiwindow", "colour", "url", "theme", "notifications", "tabcompleter", "style", "xdomain"]
 UI_BASE.extend(["panes/%s" % x for x in PANES])
 
 DEBUG_BASE = ["qwebirc", "version", "qhash", "jslib", "base64", "crypto", "md5", ["irc/%s" % x for x in IRC_BASE], ["ui/%s" % x for x in UI_BASE], "qwebircinterface", "auth", "sound"]

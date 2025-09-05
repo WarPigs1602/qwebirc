@@ -319,8 +319,10 @@ qwebirc.ui.Window = new Class({
         }
       }
 
-      if(sd && !this.scrollTimer)
-        this.scrolltimer = this.scrollAdd.delay(50, this, [null]);
+      if(sd && !this.scrollTimer) {
+        // MooTools .delay ersetzt durch setTimeout für Burst Scroll
+        this.scrolltimer = setTimeout(function(){ this.scrollAdd(null); }.bind(this), 50);
+      }
     } else {
       this.scrollToBottom();
       this.scrolltimer = null;

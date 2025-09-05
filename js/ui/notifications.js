@@ -71,16 +71,14 @@ qwebirc.ui.Flasher = new Class({
       this.hideFavIcon();
       this.canUpdateTitle = false;
       document.title = "Activity!";
-      
-      this.flasher = flashB.delay(500);
+      this.flasher = setTimeout(flashB, 500);
     }.bind(this);
     
     var flashB = function() {
       this.showFavIcon();
       this.canUpdateTitle = true;
       document.title = this.titleText;
-      
-      this.flasher = flashA.delay(500);
+      this.flasher = setTimeout(flashA, 500);
     }.bind(this);
 
     this.flashing = true;
@@ -164,10 +162,10 @@ qwebirc.ui.Notifier = new Class({
       this.previous.close();
 
     var n = new Notification(title, {body: message, icon: qwebirc.global.staticBaseURL + "images/qwebircsmall.png"});
-    var delay = function() {
+    var delay = setTimeout(function() {
       n.close();
       this.previous = null;
-    }.bind(this).delay(5000);
+    }.bind(this), 5000);
 
     this.previous = n;
     if(callback) {

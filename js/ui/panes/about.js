@@ -2,8 +2,9 @@ qwebirc.ui.AboutPane = new Class({
   Implements: [Events],
   initialize: function(parent) {
   this.type = 'aboutpane';
-    var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
-    var cb = delayfn.delay(500);
+  var delayfn = function() { parent.set("html", "<div class=\"loading\">Loading. . .</div>"); };
+  // MooTools .delay ersetzt durch setTimeout
+  var cb = setTimeout(delayfn, 500);
     
     var r = qwebirc.ui.RequestTransformHTML({url: qwebirc.global.staticBaseURL + "panes/about.html", update: parent, onSuccess: function() {
   try { clearTimeout(cb); } catch(e) {}

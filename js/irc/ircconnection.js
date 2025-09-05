@@ -105,40 +105,7 @@ qwebirc.irc.IRCConnection = new Class({
       url: qwebirc.global.dynamicBaseURL + "e/" + url + "?r=" + this.cacheAvoidance + "&t=" + this.counter++,
       async: asynchronous
     });
-    
-    /* try to minimise the amount of headers */
-    r.headers = new Hash();
-    r.addEvent("request", function() {
-      var kill = ["Accept", "Accept-Language"];
-      var killBit = "";
-
-      // Entfernte MooTools Browser.Engine Abhängigkeit: alter IE Hack nur noch per UA-Heuristik
-      var ua = navigator.userAgent || "";
-      var isLegacyIE = /Trident\//i.test(ua); // IE 8–11
-      if(isLegacyIE) {
-        // Früher wurde ein "?" gesetzt, um Header zu neutralisieren
-        killBit = "?";
-        kill.push("User-Agent");
-        kill.push("Connection");
-      } else if(/Firefox[\/\s]\d+\.\d+/.test(ua)) { /* HACK (bestehend behalten) */
-        killBit = null; // explizit null lassen -> alter Sonderfall
-      }
-
-      for(var i=0;i<kill.length;i++) {
-        try {
-          this.setRequestHeader(kill[i], killBit);
-        } catch(e) {
-        }
-      }
-    }.bind(r.xhr));
-    
-    // Alter IE Workaround (Browser.Engine.trident) entfernt – nur anwenden falls echter alter IE
-    try {
-      var ua2 = navigator.userAgent || "";
-      if(/Trident\//i.test(ua2)) {
-        r.setHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
-      }
-    } catch(e) {}
+    // Entfernt: Header-Minimierungs- und IE-Fallback-Hacks (legacy Browser). Moderne Browser benötigen das nicht.
 
     return r;
   },
@@ -190,11 +157,12 @@ qwebirc.irc.IRCConnection = new Class({
     var handled = false;
     var retryEvent = null;
     if(queued) {
-      var timeout = function() {
-        this.log("timeout for " + data[1] + " fired");
+      var self = this;
+      var timeout = setTimeout(function(){
+        self.log("timeout for " + data[1] + " fired");
         r.cancel();
         retry();
-      }.delay(7500, this);
+      }, 7500);
     }
     r.addEvent("complete", function(o) {
       this.log("complete for " + data[1] + " fired");
@@ -231,7 +199,8 @@ qwebirc.irc.IRCConnection = new Class({
   try { clearTimeout(timeout); } catch(e) {}
         this.log("Unable to send command " + data + "... retrying (attempt " + this.__sendRetries + ")");
         if(this.__sendRetries++ < 3) {
-          retryEvent = this.__send.delay(1500 * this.__sendRetries + Math.random() * 1000, this, [data, queued]);
+          var delayMs = 1500 * this.__sendRetries + Math.random() * 1000;
+          retryEvent = setTimeout(function(){ this.__send(data, queued); }.bind(this), delayMs);
         } else {
           this.disconnect();
           this.__error("Unable to send command after multiple retries.");
@@ -386,11 +355,11 @@ qwebirc.irc.IRCConnection = new Class({
       this.disconnect();
       this.__error("An error occurred: bad message type");
     }.bind(this);
-    var connectionTimeout = function() {
+    var connectionTimeout = setTimeout(function(){
       this.log("Websocket connection timeout...");
-      ws.close();
+      try { ws.close(); } catch(e) {}
       doRetry(this);
-    }.delay(5000, this);
+    }.bind(this), 5000);
     ws.onopen = function() {
       if(retryExecuted || this.disconnected || this.__ws == null)
         return;
@@ -430,7 +399,7 @@ qwebirc.irc.IRCConnection = new Class({
 
     r.addEvent("complete", onComplete.bind(this));
 
-    this.__timeoutId = this.__timeoutEvent.delay(this.__timeout, this);
+  this.__timeoutId = setTimeout(function(){ this.__timeoutEvent(); }.bind(this), this.__timeout);
     r.send("s=" + this.sessionid + "&n=" + this.__subSeqNo);
   },
   connect: function() {
@@ -535,17 +504,13 @@ qwebirc.util.WebSocket = function(callback) {
     return latch(false, "longPoll(forced)");
   }
 
-  var modeSuffix = "";
   if(window.WebSocket) {
     log("WebSocket detected");
     return latch(true, "native");
-  } if(window.MozWebSocket) {
-    log("MozWebSocket detected");
-    window.WebSocket = MozWebSocket;
-    return latch(true, "nativeMoz");
   }
 
-  log("no WebSocket support in browser");
+  // Legacy (MozWebSocket etc.) entfernt – moderner Fallback.
+  log("No native WebSocket available – falling back to longPoll");
   return latch(false, "longPoll");
 };
 

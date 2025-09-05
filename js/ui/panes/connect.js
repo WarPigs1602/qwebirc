@@ -84,7 +84,8 @@ qwebirc.ui.ConnectPane = new Class({
         var la = window.qwebirc.__lastAlert; showI18nAlert(la.key, la.fallback);
       }
     });
-    var cb = delayfn.delay(500);
+  // MooTools .delay ersetzt durch setTimeout
+  var cb = setTimeout(delayfn, 500);
 
   var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
   // Register translator for later language change
@@ -697,11 +698,11 @@ qwebirc.ui.ConnectPane = new Class({
   },
   __connect: function(e) {
     try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
-  // Show status in typing bar
-    if(window.qwebircConnectStatus) window.qwebircConnectStatus.show();
+  // Show status in typing bar (shared connectStatus)
+  try { if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.show(); } catch(_) {}
     var data = this.validate();
     if(data === false) {
-      if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
+  try { if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.hide(); } catch(_) {}
       return;
     }
   // Get CAPTCHA token if enabled
@@ -726,7 +727,7 @@ qwebirc.ui.ConnectPane = new Class({
             var lang2 = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
             var i18n2 = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang2] && window.qwebirc.i18n[lang2].options;
             showI18nAlert('ALERT_CAPTCHA_REQUIRED', 'Please complete the CAPTCHA.');
-            if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
+            try { if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.hide(); } catch(_) {}
             return;
           } else {
             // No site key configured -> treat captcha as disabled; continue without token
@@ -764,10 +765,10 @@ qwebirc.ui.ConnectPane = new Class({
   },
   __loginConnect: function(e) {
     try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
-  // Show status in typing bar
-    if(window.qwebircConnectStatus) window.qwebircConnectStatus.show();
+  // Show status in typing bar (shared connectStatus)
+  try { if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.show(); } catch(_) {}
     if(this.validate() === false) {
-      if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
+  try { if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.hide(); } catch(_) {}
       return;
     }
     this.__performLogin(function() {
@@ -775,7 +776,7 @@ qwebirc.ui.ConnectPane = new Class({
       if(data === false) {
   /* We're logged in -- show the normal join button */
         this.util.exec("[name=connectbutton]", this.util.setVisible(true));
-        if(window.qwebircConnectStatus) window.qwebircConnectStatus.hide();
+  try { if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.hide(); } catch(_) {}
         return;
       }
   this.fireEvent("close");

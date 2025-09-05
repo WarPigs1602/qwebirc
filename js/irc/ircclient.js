@@ -287,7 +287,10 @@ qwebirc.irc.IRCClient = new Class({
       this.exec("/JOIN " + joinList.join(","));
     }
     else {
-  var d = function() { this.newServerInfoLine("CONNECTED", {m:"", __i18nKey:'THEME_CONNECTED', __i18nFallback:'Connected and logged in -- ready to go!'}); }.delay(1000, this);
+      // Alte MooTools .delay(1000, this) -> native setTimeout
+      setTimeout(function() {
+        this.newServerInfoLine("CONNECTED", {m:"", __i18nKey:'THEME_CONNECTED', __i18nFallback:'Connected and logged in -- ready to go!'});
+      }.bind(this), 1000);
     }
 
     this.fireEvent("signedOn");
@@ -556,7 +559,8 @@ qwebirc.irc.IRCClient = new Class({
       if(this.activeTimers.serviceInvite)
     try { clearTimeout(this.activeTimers.serviceInvite); } catch(e) {}
       /* we do this so we can batch the joins, i.e. instead of sending 5 JOIN comands we send 1 with 5 channels. */
-      this.activeTimers.serviceInvite = this.__joinInvited.delay(100, this);
+  // Alte MooTools .delay(100, this) -> native setTimeout für batching von INVITE JOINs
+  this.activeTimers.serviceInvite = setTimeout(function() { this.__joinInvited(); }.bind(this), 100);
       this.inviteChanList.push(channel);
     }
   },

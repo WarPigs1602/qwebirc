@@ -200,9 +200,10 @@ qwebirc.irc.Commands = new Class({
     }.bind(this));
 
     if(warn) {
-      var delayinfo = function() {
+      // Alte MooTools .delay(250) -> native setTimeout
+      setTimeout(function() {
         this.getActiveWindow().infoMessage("Channel names begin with # (corrected automatically).");
-      }.bind(this).delay(250);
+      }.bind(this), 250);
     }
       
     this.send("JOIN " + fchans.join(",") + " " + args.join(" "));

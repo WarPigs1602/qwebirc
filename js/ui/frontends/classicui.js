@@ -1,12 +1,4 @@
-// helper to stop events - works with MooTools Event wrappers and native events
-function _qwebirc_stopEvent(e) {
-  if (!e) return;
-  try {
-    if (e.stop) { e.stop(); return; }
-    if (e.preventDefault) e.preventDefault();
-    if (e.stopPropagation) e.stopPropagation();
-  } catch (ignore) {}
-}
+// Event-Helfer vereinheitlicht: direkte Nutzung von qwebirc.ui.util.stopEvent
 
 qwebirc.ui.CLASSICUI = new Class({
   Extends: qwebirc.ui.RootUI,
@@ -92,19 +84,15 @@ qwebirc.ui.CLASSICUI = new Class({
       } else if(down) {
         this.prevWindow();
       }
-  _qwebirc_stopEvent(event);
+  qwebirc.ui.util.stopEvent(event);
     }.bind(this);
     this.qjsui.left.addEvent("mousewheel", scrollHandler);
     this.qjsui.top.addEvent("mousewheel", scrollHandler);
 
-    this.createInput();
-    this.reflow();
-    for(var i=50;i<1000;i+=50)
-      this.reflow.delay(i, true);
-    for(var i=1000;i<2000;i+=100)
-      this.reflow.delay(i);
-    for(var i=2000;i<15000;i+=500)
-      this.reflow.delay(i);
+  this.createInput();
+  this.reflow();
+  // Gestaffelte Reflows jetzt über gemeinsame Utility
+  try { if(qwebirc.ui.util && qwebirc.ui.util.scheduleReflowBatches) qwebirc.ui.util.scheduleReflowBatches(this, function(full){ this.reflow(full); }); } catch(e) {}
 
     this.setSideTabs(this.uiOptions.SIDE_TABS);
 
@@ -138,9 +126,7 @@ qwebirc.ui.CLASSICUI = new Class({
 
     // Hide connect status in typing bar when signedOn fires (parity with QUI)
     this.addEvent && this.addEvent('signedOn', function() {
-      if(window.qwebircConnectStatus) {
-        window.qwebircConnectStatus.hide();
-      }
+      if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.hide();
     });
 
   },
@@ -185,7 +171,7 @@ qwebirc.ui.CLASSICUI = new Class({
         var label = (typeof x[0] === 'function') ? x[0]() : x[0];
         var fn = x[1];
   var e = new Element("a");
-  e.addEvent("mousedown", function(ev) { _qwebirc_stopEvent(ev); });
+  e.addEvent("mousedown", function(ev) { qwebirc.ui.util.stopEvent(ev); });
         e.addEvent("click", function() {
           dropdownMenu.hide();
           fn();
@@ -240,7 +226,7 @@ qwebirc.ui.CLASSICUI = new Class({
 
     this.outerTabs.appendChild(dropdown);
     dropdownMenu.show = function(x) {
-      _qwebirc_stopEvent(x);
+  qwebirc.ui.util.stopEvent(x);
 
       if(dropdownMenu.visible) { dropdownMenu.hide(); return; }
       dropdownMenu.setStyles && dropdownMenu.setStyles({display: "block", visibility: "hidden"});
@@ -264,7 +250,7 @@ qwebirc.ui.CLASSICUI = new Class({
       dropdownMenu.visible = true;
       document.addEventListener && document.addEventListener("mousedown", hideEvent);
     }.bind(this);
-  dropdown.addEvent("mousedown", function(e) { _qwebirc_stopEvent(e); });
+  dropdown.addEvent("mousedown", function(e) { qwebirc.ui.util.stopEvent(e); });
     dropdown.addEvent("click", dropdownMenu.show);
   },
   createInput: function() {
@@ -291,52 +277,8 @@ qwebirc.ui.CLASSICUI = new Class({
   emojiOverlay.setStyles({ display: "none", position: "absolute", left: "0", bottom: "40px", zIndex: 1000, background: "#fff", border: "1px solid #ccc", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", padding: "8px", minWidth: "220px", maxHeight: "220px", overflowY: "auto", fontSize: "1em" });
   form.appendChild(emojiOverlay);
 
-    // Emoji Kategorien und Emojis (bereinigt: entfernt U+FFFD / '�' Einträge)
-    var emojiCategories = [
-      { nameKey: "EMOJI_CAT_SMILEYS", name: "Smileys & People", icon: "😃", emojis: [
-        "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
-        "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😪",
-        "🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🤯","🤠","🥳","😎","🤓","🧐","😕"
-      ,
-      // Hand emojis with skin tone modifiers
-      "👍","👎","👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","🫵","🫱","🫲","🫳","🫴","👏","🙌","👐","🤲","🙏","✍️","💅","🤳","💪","🦵","🦶","👂","🦻","👃"
-      ] },
-      { nameKey: "EMOJI_CAT_ANIMALS", name: "Animals & Nature", icon: "🐻", emojis: [
-        "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🐔","🐧","🐦","🐤",
-        "🐣","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦓","🦍","🐢","🐍","🦎","🦂","🦀","🦞","🦐","🦑","🐙"
-      ] },
-      { nameKey: "EMOJI_CAT_FOOD", name: "Food & Drink", icon: "🍎", emojis: [
-        "🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥝","🍅","🍆","🥑",
-        "🥦","🥬","🥒","🌶️","🌽","🥕","🧄","🧅","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🥞"
-      ] },
-      { nameKey: "EMOJI_CAT_TRAVEL", name: "Travel & Places", icon: "✈️", emojis: [
-        "🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🚚","🚛","🚜","🛵","🏍️","🚲","🛴","🚨","🚔","🚍",
-        "🚘","🚖","🚡","🚠","🚟","🚃","🚋","🚞","🚝","🚄","🚅","🚈","🚂","🚆","🚇","🚊","🚉","✈️","🛫","🛬",
-        "🛩️","💺","🛰️","🚀","🛸","🚁","⛵","🛶","🚤","🛥️","🛳️","⛴️","🚢","⚓","🪝","⛽","🚧","🚦","🚥","🚏"
-      ] },
-      { nameKey: "EMOJI_CAT_OBJECTS", name: "Objects", icon: "💡", emojis: [
-        "⌚","📱","📲","💻","⌨️","🖥️","🖨️","🖱️","🖲️","🕹️","🗜️","💽","💾","💿","📀","📼","📷","📸","📹","🎥",
-        "📽️","🎞️","📞","☎️","📟","📠","📺","📻","🎙️","🎚️","🎛️","⏱️","⏲️","⏰","🕰️","⌛","⏳","📡","🔋","🔌"
-      ] },
-      { nameKey: "EMOJI_CAT_FLAGS", name: "Flags", icon: "🏳️", emojis: [
-        "🏳️","🏴","🏁","🚩","🏳️‍🌈","🏳️‍⚧️","🇦🇹","🇩🇪","🇨🇭","🇺🇸","🇬🇧","🇫🇷","🇮🇹","🇪🇸","🇵🇱","🇳🇱","🇸🇪","🇳🇴","🇩🇰","🇫🇮",
-        "🇨🇦","🇧🇷","🇦🇷","🇲🇽","🇯🇵","🇨🇳","🇰🇷","🇦🇺","🇳🇿","🇮🇳","🇹🇷","🇷🇺","🇺🇦","🇮🇱","🇪🇬","🇿🇦","🇸🇦","🇦🇪","🇶🇦","🇸🇬"
-      ] },
-      { nameKey: "EMOJI_CAT_SYMBOLS", name: "Symbols", icon: "❤️",
-        emojis: [
-          "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟",
-          "☮️","✝️","☪️","🕉️","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈","♉","♊","♋","♌","♍","♎","♏",
-          "♐","♑","♒","♓","🆔","⚛️","🉑","☢️","☣️","📴","📳","🈶","🈚","🈸","🈺","🈷️","✴️","🆚","💮","🉐",
-          "©️","®️","™️","ℹ️","🔞","🚭","☑️","✅","✔️","❌","❎","➕","➖","➗","➰","➿","🔟","#️⃣","*️⃣","0️⃣",
-          "1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔢","🔣","🔤","🔡","🔠","🔽","🔼","🔺","🔻","🔸","🔹",
-          // Weitere Symbole
-          "⬆️","⬇️","⬅️","➡️","↗️","↘️","↙️","↖️","↩️","↪️","⤴️","⤵️","🔀","🔁","🔂","🔄","🔃","🔚","🔙","🔛",
-          "🔜","🔝","🛑","⏏️","⏩","⏪","⏫","⏬","⏭️","⏮️","⏸️","⏹️","⏺️","⏯️","▪️","▫️","◾","◽","◼️","◻️",
-          "⬛","⬜","🔳","🔲","◉","◯","◐","◑","◒","◓","◔","◕","⚫","⚪","🔘","🔴","🔵","🔺","🔻","🔸","🔹",
-          "🔶","🔷","🔈","🔉","🔊","🔇","🔕","🔔"
-        ]
-      }
-    ];
+  // Gemeinsame Emoji-Kategorien aus Utility (Fallback auf leeres Array)
+  var emojiCategories = (qwebirc.ui.util && qwebirc.ui.util.emojiCategories) ? qwebirc.ui.util.emojiCategories : [];
     var activeCategory = 0;
 
     function __tEmoji(key, fallback) {
@@ -506,12 +448,7 @@ qwebirc.ui.CLASSICUI = new Class({
         var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
         inputbox.placeholder = (i18n && i18n.INPUT_PLACEHOLDER) ? i18n.INPUT_PLACEHOLDER : 'chat here! you can also use commands, like /JOIN';
       } catch(e) { inputbox.placeholder = 'chat here! you can also use commands, like /JOIN'; }
-      var d = function() { inputbox.addClass("input-flash"); }.delay(250);
-      var d = function() { inputbox.removeClass("input-flash"); }.delay(500);
-      var d = function() { inputbox.addClass("input-flash"); }.delay(750);
-      var d = function() { inputbox.removeClass("input-flash"); }.delay(1000);
-      var d = function() { inputbox.addClass("input-flash"); }.delay(1250);
-      var d = function() { inputbox.removeClass("input-flash"); }.delay(1750);
+  (function(box){ var times=[250,500,750,1000,1250,1750]; times.forEach(function(t,i){ setTimeout(function(){ if(!box) return; if(i%2===0) box.addClass('input-flash'); else box.removeClass('input-flash'); }, t); }); })(inputbox);
     });
   form.appendChild(inputbox);
   this.inputbox = inputbox;
@@ -571,7 +508,7 @@ qwebirc.ui.CLASSICUI = new Class({
       inputbox.addClass("keyboard-input");
     }
     
-  form.addEvent("submit", function(e) { _qwebirc_stopEvent(e); sendInput(); });
+  form.addEvent("submit", function(e) { qwebirc.ui.util.stopEvent(e); sendInput(); });
 
     var reset = this.resetTabComplete.bind(this);
     inputbox.addEvent("focus", reset);
@@ -592,7 +529,7 @@ qwebirc.ui.CLASSICUI = new Class({
       } else if(e.key == "tab") {
         this.tabComplete(inputbox, e.shift);
 
-  _qwebirc_stopEvent(e);
+  qwebirc.ui.util.stopEvent(e);
         e.preventDefault();
         return;
       } else {
@@ -605,7 +542,7 @@ qwebirc.ui.CLASSICUI = new Class({
       
       var result = resultfn.bind(this.commandhistory)();
       
-  _qwebirc_stopEvent(e);
+  qwebirc.ui.util.stopEvent(e);
       e.preventDefault();
 
       if(!result)
@@ -788,13 +725,11 @@ qwebirc.ui.CLASSICUI.JSUI = new Class({
     this.bottom = XE("bottom");
   },
   reflow: function(delay) {
-    if(!delay)
-      delay = 1;
-      
-    if(this.reflowevent)
-  try { clearTimeout(this.reflowevent); } catch(e) {}
+    if(!delay) delay = 1;
+    if(this.reflowevent) { try { clearTimeout(this.reflowevent); } catch(e) {} }
     this.__reflow();
-    this.reflowevent = this.__reflow.delay(delay, this);
+    var self = this;
+    this.reflowevent = setTimeout(function(){ self.__reflow(); }, delay);
   },
   __reflow: function() {
     var bottom = this.bottom;
@@ -881,7 +816,7 @@ qwebirc.ui.CLASSICUI.Window = new Class({
       tabclose.set("text", "×");
       tabclose.addClass("tabclose");
       var close = function(e) {
-        _qwebirc_stopEvent(e);
+  qwebirc.ui.util.stopEvent(e);
 
         if(this.closed)
           return;
@@ -912,7 +847,7 @@ qwebirc.ui.CLASSICUI.Window = new Class({
 
     this.tab.appendText(name);
     this.tab.addEvent("click", function(e) {
-      _qwebirc_stopEvent(e);
+  qwebirc.ui.util.stopEvent(e);
       
       if(this.closed)
         return;
@@ -944,7 +879,7 @@ qwebirc.ui.CLASSICUI.Window = new Class({
     this.parentObject.qjsui.applyClasses("middle", this.lines);
     this.lines.addClass("lines");
 
-  // status window: no spinner decoration in Classic theme (spinner handled by MochaUI elsewhere)
+  // status window: no spinner decoration in Classic theme
 
     if(type != qwebirc.ui.WINDOW_CUSTOM && type != qwebirc.ui.WINDOW_CONNECT)
       this.lines.addClass("ircwindow");
@@ -975,88 +910,13 @@ qwebirc.ui.CLASSICUI.Window = new Class({
     
     this.nicksColoured = this.parentObject.uiOptions.NICK_COLOURS;
     this.reflow();
-    // Typing indicator state (portiert aus qui.js)
-    this._typingUsers = {};
-    this._typingTimeouts = {};
-
-    // Helper: render nick (keeps parity with QUI)
-    this._renderNick = function(nick) {
-      try {
-        // if nick is the local user, emphasize
-        if (this.client && this.client.nickname && this.client.nickname.toLowerCase() === nick.toLowerCase()) {
-          return '<strong>' + nick + '</strong>';
-        }
-      } catch(e) {}
-      return nick;
-    };
-
-    this._updateTypingBar = function() {
-      try {
-        if(!this._typingBar) {
-          var inputForm = document.querySelectorAll('.input form')[0];
-          if (inputForm) {
-            var typingBar = new Element('div', {'class': 'qwebirc-typing-bar'});
-            typingBar.inject(inputForm, 'before');
-            this._typingBar = typingBar;
-          }
-        }
-        if (!this._typingBar) return;
-
-        var nicks = Object.keys(this._typingUsers).filter(function(nick) {
-          return this._typingUsers[nick] === 'active';
-        }.bind(this));
-
-        if (nicks.length === 0) {
-          this._typingBar.set('text', '');
-          this._typingBar.removeClass('active');
-          this._typingBar.removeClass('paused');
-          this._typingBar.addClass('qwebirc-typing-bar');
-          return;
-        }
-
-        var nickHtml = nicks.map(this._renderNick.bind(this)).join(', ');
-        var text = nickHtml + ' <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>';
-        this._typingBar.set('html', text);
-        this._typingBar.removeClass('paused');
-        this._typingBar.addClass('qwebirc-typing-bar');
-        this._typingBar.addClass('active');
-      } catch(e) {}
-    };
-
-    // Hauptfunktion: Event-Verarbeitung für eingehende TAGMSGs
-    this.showTypingBar = function(event) {
-      try {
-        if (!event.tags || !event.tags.typing) return;
-        var typingState = event.tags.typing;
-        var nick = event.user ? event.user.split('!')[0] : null;
-        if(!nick) return;
-
-        var hideDelay = 5000;
-        if (this._typingTimeouts[nick]) {
-          clearTimeout(this._typingTimeouts[nick]);
-        }
-        if (typingState === 'active') {
-          this._typingUsers[nick] = 'active';
-          this._typingTimeouts[nick] = setTimeout(function() {
-            delete this._typingUsers[nick];
-            this._updateTypingBar();
-          }.bind(this), hideDelay);
-        } else if (typingState === 'paused') {
-          this._typingUsers[nick] = 'paused';
-          this._typingTimeouts[nick] = setTimeout(function() {
-            delete this._typingUsers[nick];
-            this._updateTypingBar();
-          }.bind(this), hideDelay);
-        } else if (typingState === 'done') {
-          delete this._typingUsers[nick];
-          if (this._typingTimeouts[nick]) {
-            clearTimeout(this._typingTimeouts[nick]);
-            delete this._typingTimeouts[nick];
-          }
-        }
-        this._updateTypingBar();
-      } catch(e) {}
-    };
+    // Gemeinsamer TypingBarManager ersetzt lokale Implementierung
+    try {
+      if(qwebirc.ui && qwebirc.ui.util && qwebirc.ui.util.TypingBarManager) {
+        this.__typingManager = new qwebirc.ui.util.TypingBarManager(this);
+        this.showTypingBar = function(event){ this.__typingManager.handleTag(event); };
+      }
+    } catch(_) {}
   },
   rename: function(name) {
     var newNode = document.createTextNode(name);
@@ -1100,9 +960,9 @@ qwebirc.ui.CLASSICUI.Window = new Class({
   },
   onResize: function() {
     if(this.scrolleddown) {
-      this.scrollToBottom.delay(5, this);
+      var self=this; setTimeout(function(){ self.scrollToBottom(); },5);
     } else if(this.scrollpos != null) {
-      this.getScrollParent().scrollTo.delay(5, this, [this.scrollpos.x, this.scrollpos.y]);
+      var self=this; setTimeout(function(){ try { self.getScrollParent().scrollTo(self.scrollpos.x, self.scrollpos.y); } catch(e) {} },5);
     }
   },
   createMenu: function(nick, parent) {
@@ -1126,7 +986,7 @@ qwebirc.ui.CLASSICUI.Window = new Class({
   try { e2.__menuItem = x; } catch(e) {}
 
       e2.addEvent("focus", function() { this.blur() }.bind(e2));
-  e2.addEvent("click", function(ev) { _qwebirc_stopEvent(ev); this.menuClick(x.fn); }.bind(this));
+  e2.addEvent("click", function(ev) { qwebirc.ui.util.stopEvent(ev); this.menuClick(x.fn); }.bind(this));
     }.bind(this));
     return e;
   },
@@ -1184,7 +1044,7 @@ qwebirc.ui.CLASSICUI.Window = new Class({
       e.addClass("selected");
       this.moveMenuClass();
       e.menu = this.createMenu(e.realNick, e);
-  _qwebirc_stopEvent(x);
+  qwebirc.ui.util.stopEvent(x);
     }.bind(this));
     
     e.addEvent("focus", function() { this.blur() }.bind(e));
@@ -1380,7 +1240,7 @@ qwebirc.ui.CLASSICUI.Window.prototype._ensureTabClose = function(type, originalN
   } catch(e) { var alreadyBound = tabclose.__qwebircCloseBound; }
   if(!alreadyBound) {
     var closeHandler = function(e) {
-      _qwebirc_stopEvent(e);
+  qwebirc.ui.util.stopEvent(e);
       try { if(this.closed) return; } catch(_) {}
       try { if(this.type == qwebirc.ui.WINDOW_CHANNEL && this.client) this.client.exec('/PART ' + (originalName || this.name)); } catch(_) {}
       try { this.close(); } catch(_) {}
@@ -1399,45 +1259,7 @@ qwebirc.ui.CLASSICUI.Window.prototype._ensureTabClose = function(type, originalN
   } catch(e) {}
 };
 
-// Connect status object (export) – minimal implementation similar to qui.js
-var connectStatus = {
-  interval: null,
-  step: 0,
-  typingBar: null,
-  show: function() {
-    if (this.interval) return;
-    var typingBar = document.querySelector('.qwebirc-typing-bar');
-    if (!typingBar) {
-      var inputForm = $$('.input form')[0];
-      if (inputForm) {
-  typingBar = new Element('div', {'class': 'qwebirc-typing-bar active'});
-  // mark this bar as the connect-status bar so it can be removed safely
-  try { typingBar.setAttribute('data-connect-status', '1'); } catch(e) {}
-  typingBar.inject(inputForm, 'before');
-      }
-    }
-    if (!typingBar) return;
-    this.typingBar = typingBar;
-    typingBar.addClass && typingBar.addClass('active');
-    var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
-    var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
-    var lbl = (i18n && i18n.TRYING_TO_CONNECT) ? i18n.TRYING_TO_CONNECT : 'Trying to connect server';
-    typingBar.set && typingBar.set('html', lbl + ' <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>');
-  },
-  hide: function() {
-    if (this.interval) { clearInterval(this.interval); this.interval = null; }
-    // Only remove typing bars that were created for connect status. Regular
-    // typing-indicator bars (from other clients) should not be removed here.
-    var bars = document.querySelectorAll('.qwebirc-typing-bar[data-connect-status]');
-    bars.forEach(function(bar) {
-      try { bar.classList && bar.classList.remove('active'); } catch(e) {}
-      try { bar.style && (bar.style.display = 'none'); } catch(e) {}
-      if (bar.parentNode) try { bar.parentNode.removeChild(bar); } catch(e) {}
-    });
-    this.typingBar = null;
-  }
-};
-window.qwebircConnectStatus = connectStatus;
+// ConnectStatus wird nur noch indirekt über qwebirc.ui.util.connectStatus verwendet
 
 /* Backwards compatibility: older code expects qwebirc.ui.QUI */
 qwebirc.ui.QUI = qwebirc.ui.CLASSICUI;
