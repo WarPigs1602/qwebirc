@@ -6,7 +6,8 @@ qwebirc.ui.AboutPane = new Class({
     var cb = delayfn.delay(500);
     
     var r = qwebirc.ui.RequestTransformHTML({url: qwebirc.global.staticBaseURL + "panes/about.html", update: parent, onSuccess: function() {
-      $clear(cb);
+  try { clearTimeout(cb); } catch(e) {}
+  try { clearTimeout(cb); } catch(e) {}
       var oldClose = parent.getElement("input[class=close]");
       var closeBtn = null;
       if(oldClose) {
@@ -50,7 +51,10 @@ qwebirc.ui.AboutPane = new Class({
         window.qwebirc.registerTranslator(applyTranslations);
       }
       window.addEventListener('qwebirc:languageChanged', function(){ applyTranslations(); });
-      if(closeBtn) closeBtn.addEvent('click', function(e){ new Event(e).stop(); this.fireEvent('close'); }.bind(this));
+      if(closeBtn) closeBtn.addEvent('click', function(e){
+        try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
+        this.fireEvent('close');
+      }.bind(this));
     }.bind(this)});
     r.get();
   }

@@ -100,7 +100,7 @@ qwebirc.ui.Colourise = function(line, entity, execfn, cmdfn, window) {
           var text = emitEndToken();
           
           var c = text.toHSBColour(window.client);
-          if($defined(c))
+          if(c != null)
             e.style.color = c.rgbToHex();
           capturingNick = autoNickColour = false;
         }

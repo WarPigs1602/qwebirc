@@ -36,7 +36,7 @@ qwebirc.ui.urlificate = function(element, text, execfn, cmdfn, window) {
     var a = new Element("span");
     a.addClass("hyperlink-channel");
     a.addEvent("click", function(e) {
-      new Event(e).stop();
+      try { if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); } catch(_) {}
       execfn("/JOIN " + newtext);
     });
     a.appendChild(document.createTextNode(newtext));
@@ -103,8 +103,8 @@ qwebirc.ui.urlificate = function(element, text, execfn, cmdfn, window) {
     a.appendChild(document.createTextNode(disptext));
     
     element.appendChild(a);
-    if($defined(fn))
-      a.addEvent("click", function(e) { new Event(e).stop(); fn(disptext); });
+  if(fn != null)
+      a.addEvent("click", function(e) { try { if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); } catch(_) {} fn(disptext); });
     
     return punct;
   };

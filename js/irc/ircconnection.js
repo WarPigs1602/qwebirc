@@ -112,12 +112,16 @@ qwebirc.irc.IRCConnection = new Class({
       var kill = ["Accept", "Accept-Language"];
       var killBit = "";
 
-      if(Browser.Engine.trident) {
+      // Entfernte MooTools Browser.Engine Abhängigkeit: alter IE Hack nur noch per UA-Heuristik
+      var ua = navigator.userAgent || "";
+      var isLegacyIE = /Trident\//i.test(ua); // IE 8–11
+      if(isLegacyIE) {
+        // Früher wurde ein "?" gesetzt, um Header zu neutralisieren
         killBit = "?";
         kill.push("User-Agent");
         kill.push("Connection");
-      } else if(/Firefox[\/\s]\d+\.\d+/.test(navigator.userAgent)) { /* HACK */
-        killBit = null;
+      } else if(/Firefox[\/\s]\d+\.\d+/.test(ua)) { /* HACK (bestehend behalten) */
+        killBit = null; // explizit null lassen -> alter Sonderfall
       }
 
       for(var i=0;i<kill.length;i++) {
@@ -128,8 +132,13 @@ qwebirc.irc.IRCConnection = new Class({
       }
     }.bind(r.xhr));
     
-    if(Browser.Engine.trident)
-      r.setHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
+    // Alter IE Workaround (Browser.Engine.trident) entfernt – nur anwenden falls echter alter IE
+    try {
+      var ua2 = navigator.userAgent || "";
+      if(/Trident\//i.test(ua2)) {
+        r.setHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
+      }
+    } catch(e) {}
 
     return r;
   },
@@ -190,12 +199,12 @@ qwebirc.irc.IRCConnection = new Class({
     r.addEvent("complete", function(o) {
       this.log("complete for " + data[1] + " fired");
       if(queued) {
-        $clear(timeout);
+  try { clearTimeout(timeout); } catch(e) {}
         this.__sendQueueActive = false;
       }
       if(retryEvent) {
         this.log("cleared retry event");
-        $clear(retryEvent);
+  try { clearTimeout(retryEvent); } catch(e) {}
       }
       this.__sendRetries = 0;
       this.__sendQueue.shift();
@@ -219,7 +228,7 @@ qwebirc.irc.IRCConnection = new Class({
         if(handled)
           return;
         handled = true;
-        $clear(timeout);
+  try { clearTimeout(timeout); } catch(e) {}
         this.log("Unable to send command " + data + "... retrying (attempt " + this.__sendRetries + ")");
         if(this.__sendRetries++ < 3) {
           retryEvent = this.__send.delay(1500 * this.__sendRetries + Math.random() * 1000, this, [data, queued]);
@@ -250,15 +259,15 @@ qwebirc.irc.IRCConnection = new Class({
     return true;
   },
   __cancelTimeout: function() {
-    if($defined(this.__timeoutId)) {
-      $clear(this.__timeoutId);
+  if(this.__timeoutId != null) {
+    try { clearTimeout(this.__timeoutId); } catch(e) {}
       this.__timeoutId = null;
     }
   },
   __timeoutEvent: function() {
     this.__timeoutId = null;
 
-    if(!$defined(this.__activeRequest))
+  if(this.__activeRequest == null)
       return;
       
     this.__activeRequest.__replaced = true;
@@ -385,14 +394,14 @@ qwebirc.irc.IRCConnection = new Class({
     ws.onopen = function() {
       if(retryExecuted || this.disconnected || this.__ws == null)
         return;
-      $clear(connectionTimeout);
+  try { clearTimeout(connectionTimeout); } catch(e) {}
       this.log("websocket connected");
       ws.send("s" + this.__subSeqNo + "," + this.sessionid);
     }.bind(this);
   },
   __recvLongPoll: function() {
     var r = this.newRequest("s", true);
-    if(!$defined(r))
+  if(!r)
       return;
 
     this.__activeRequest = r;
@@ -450,7 +459,7 @@ qwebirc.irc.IRCConnection = new Class({
     }.bind(this));
 
     var postdata = "nick=" + encodeURIComponent(this.initialNickname);
-    if($defined(this.options.serverPassword))
+  if(this.options.serverPassword != null)
       postdata+="&password=" + encodeURIComponent(this.options.serverPassword);
   // ALWAYS append SASL fields (even if empty)
     postdata += "&sasl_username=" + encodeURIComponent(this.options.sasl_username || "");
@@ -487,12 +496,12 @@ qwebirc.irc.IRCConnection = new Class({
     }.bind(this));
   },
   __cancelRequests: function() {
-    if($defined(this.__activeRequest)) {
+  if(this.__activeRequest != null) {
       this.__activeRequest.__replaced = true;
       this.__activeRequest.cancel();
       this.__activeRequest = null;
     }
-    if($defined(this.__ws)) {
+  if(this.__ws != null) {
       this.__ws.close();
       this.__ws = null;
     }
@@ -509,13 +518,13 @@ qwebirc.util.WebSocket = function(callback) {
   var log = qwebirc.util.log;
   var state = qwebirc.util.__WebSocketState;
   var fire = latch = function(x, y) {
-    if($defined(x)) {
+    if(x != null) {
       state.result = [x, y];
     }
     callback(state.result[0], state.result[1]);
   };
 
-  if($defined(state.result))
+  if(state.result != null)
     return fire();
 
   if(state.loading)

@@ -6,7 +6,7 @@ qwebirc.ui.TabCompleterFactory = new Class({
   tabComplete: function(textBox, backwards) {
     var text = textBox.value;
     
-    if(!$defined(this.obj)) {
+  if(this.obj == null) {
       this.incr = 1;
       
       var w = this.ui.getActiveWindow();
@@ -15,7 +15,7 @@ qwebirc.ui.TabCompleterFactory = new Class({
         
       var startingWord = qwebirc.util.getEnclosedWord(text, qwebirc.util.getCaretPos(textBox));
       var preword = "", word = "", postword = "";
-      if($defined(startingWord)) {
+  if(startingWord != null) {
         var preword = text.substring(0, startingWord[0]);
         var word = startingWord[1];
         var postword = text.substring(startingWord[0] + word.length);
@@ -50,12 +50,12 @@ qwebirc.ui.TabCompleterFactory = new Class({
         postword = " ";
       
       this.obj = new obj(preword, word, postword, w);
-      if(!$defined(this.obj))
+  if(this.obj == null)
         return;
     }
       
     var r = this.obj.get(backwards);
-    if(!$defined(r))
+  if(r == null)
       return;
       
     textBox.value = r[1];
@@ -69,7 +69,7 @@ qwebirc.ui.TabCompleterFactory = new Class({
 qwebirc.ui.TabIterator = new Class({
   initialize: function(client, prefix, list) {
     this.prefix = prefix;
-    if(!$defined(list) || list.length == 0) {
+  if(list == null || list.length == 0) {
       this.list = null;
     } else {
       var l = [];
@@ -94,7 +94,7 @@ qwebirc.ui.TabIterator = new Class({
      * ideally next would do the list gubbins recursively, but no JS engine currently
      * support tail recursion :(
      */
-    if(!$defined(this.list) || this.list.length == 0)
+  if(this.list == null || this.list.length == 0)
       return null;
     
     this.pos = this.pos + 1;
@@ -104,7 +104,7 @@ qwebirc.ui.TabIterator = new Class({
     return this.list[this.pos];
   },
   prev: function() {
-    if(!$defined(this.list) || this.list.length == 0)
+  if(this.list == null || this.list.length == 0)
       return null;
 
     this.pos = this.pos - 1;
@@ -124,7 +124,7 @@ qwebirc.ui.BaseTabCompleter = new Class({
   },
   get: function(backwards) {
     var n = backwards ? this.iterator.prev() : this.iterator.next();
-    if(!$defined(n))
+  if(n == null)
       return null;
       
     var p = this.prefix + n;
@@ -156,7 +156,7 @@ qwebirc.ui.ChannelNameTabCompleter = new Class({
       var w = wa.get(c);
       
       /* redundant? */
-      if($defined(w))
+  if(w != null)
         w = w.lastSelected;
         
       return [w, c];

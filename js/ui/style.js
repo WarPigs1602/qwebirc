@@ -75,7 +75,7 @@ qwebirc.ui.style.ModifiableStylesheet.implement({
     return {cssText: cssLines.join("\n"), rules: rules};
   },
   set: function(mutator) {
-    if(!$defined(mutator))
+  if(mutator == null)
       mutator = function(x) { return x; };
     var text = this.__cssText;
     for(var key in this.rules) {

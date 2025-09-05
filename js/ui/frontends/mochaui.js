@@ -43,7 +43,7 @@ qwebirc.ui.MochaUI = new Class({
     inputbox.addClass("input");
   
     form.addEvent("submit", function(e) {
-      new Event(e).stop();
+      try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
     
       this.getActiveWindow().client.exec(inputbox.value);
       inputbox.value = "";
@@ -79,7 +79,7 @@ qwebirc.ui.MochaUI.Window = new Class({
       }.bind(this));
     
       this.form.addEvent("submit", function(e) {
-        new Event(e).stop();
+        try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
       
         this.client.exec(this.inputbox.value);
         this.inputbox.value = "";

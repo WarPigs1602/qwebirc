@@ -27,27 +27,10 @@ qwebirc.ui.BaseUI = new Class({
     
     this.windowFocused = true;
 
-    if(Browser.Engine.trident) {
-      var checkFocus = function() {
-        var hasFocus = document.hasFocus();
-        if(hasFocus != this.windowFocused) {
-          this.windowFocused = hasFocus;
-          this.focusChange(hasFocus);
-        }
-      }
-
-      checkFocus.periodical(100, this);
-    } else {
-      var blur = function() { if(this.windowFocused) { this.windowFocused = false; this.focusChange(false); } }.bind(this);
-      var focus = function() { if(!this.windowFocused) { this.windowFocused = true; this.focusChange(true); } }.bind(this);
-
-      /* firefox requires both */
-
-      document.addEvent("blur", blur);
-      window.addEvent("blur", blur);
-      document.addEvent("focus", focus);
-      window.addEvent("focus", focus);
-    }
+  var blur = function() { if(this.windowFocused) { this.windowFocused = false; this.focusChange(false); } }.bind(this);
+  var focus = function() { if(!this.windowFocused) { this.windowFocused = true; this.focusChange(true); } }.bind(this);
+  window.addEventListener('blur', blur, true);
+  window.addEventListener('focus', focus, true);
 
     qwebirc.util.__log = function(x) {
       if(QWEBIRC_DEBUG) {
@@ -150,7 +133,7 @@ qwebirc.ui.BaseUI = new Class({
   },
   newWindow: function(client, type, name) {
     var w = this.getWindow(client, type, name);
-    if($defined(w))
+  if(w != null)
       return w;
       
     var wId = this.getWindowIdentifier(client, type, name);
@@ -162,7 +145,7 @@ qwebirc.ui.BaseUI = new Class({
   },
   getWindow: function(client, type, name) {
     var c = this.windows.get(this.getClientId(client));
-    if(!$defined(c))
+  if(c == null)
       return null;
       
     return c.get(this.getWindowIdentifier(client, type, name));
@@ -304,7 +287,7 @@ qwebirc.ui.BaseUI = new Class({
   },
   focusChange: function(newValue) {
     var window_ = this.getActiveWindow();
-    if($defined(window_))
+  if(window_ != null)
       window_.focusChange(newValue);
   },
   oobMessage: function(message) {
@@ -324,7 +307,7 @@ qwebirc.ui.BaseUI = new Class({
     var args = d[1];
     if(command == "SAY") {
       var w = this.getActiveIRCWindow();
-      if($defined(w) && (w.type == qwebirc.ui.WINDOW_CHANNEL || w.type == qwebirc.ui.WINDOW_QUERY)) {
+    if(w != null && (w.type == qwebirc.ui.WINDOW_CHANNEL || w.type == qwebirc.ui.WINDOW_QUERY)) {
         w.client.exec("/SAY " + args);
         return;
       }
@@ -340,7 +323,7 @@ qwebirc.ui.StandardUI = new Class({
     this.UICommands = this.__build_menu_items(options);
 
     this.__styleValues = {hue: qwebirc.ui.DEFAULT_HUE, saturation: 0, lightness: 0, textHue: null, textSaturation: null, textLightness: null};
-    if($defined(this.options.hue)) this.__styleValues.hue = this.options.hue;
+  if(this.options.hue != null) this.__styleValues.hue = this.options.hue;
     this.tabCompleter = new qwebirc.ui.TabCompleterFactory(this);
   this.uiOptions = new qwebirc.ui.DefaultOptionsClass(this, options.uiOptionsArg);
   // Make globally available for persistence (LANGUAGE cookie)
@@ -358,18 +341,18 @@ qwebirc.ui.StandardUI = new Class({
   if (typeof afterOptionsInit === "function") afterOptionsInit();
     this.customWindows = new QHash();
 
-    if($defined(this.options.saturation)) this.__styleValues.saturation = this.options.saturation;
-    if($defined(this.options.lightness)) this.__styleValues.lightness = this.options.lightness;
-    if($defined(this.options.tsaturation)) this.__styleValues.textSaturation = this.options.tsaturation;
-    if($defined(this.options.tlightness)) this.__styleValues.textLightness = this.options.tlightness;
+  if(this.options.saturation != null) this.__styleValues.saturation = this.options.saturation;
+  if(this.options.lightness != null) this.__styleValues.lightness = this.options.lightness;
+  if(this.options.tsaturation != null) this.__styleValues.textSaturation = this.options.tsaturation;
+  if(this.options.tlightness != null) this.__styleValues.textLightness = this.options.tlightness;
 
-    if($defined(this.options.hue)) { /* overridden in url */
+  if(this.options.hue != null) { /* overridden in url */
       /* ugh... this will go away when we add proper options for hue/sat/light for text and background */
       this.uiOptions.setValueByPrefix("STYLE_HUE", this.__styleValues.hue);
     } else {
       this.__styleValues.hue = this.uiOptions.STYLE_HUE; /* otherwise copy from serialised store */
     }
-    this.__styleValues.textHue = $defined(this.options.thue) ? this.options.thue : this.__styleValues.hue;
+  this.__styleValues.textHue = (this.options.thue != null) ? this.options.thue : this.__styleValues.hue;
 
     // Ensure the modifiable stylesheet for this UI is loaded so STYLE_* options
     // are applied on standard pages as well (classic UI frontends already call this).
@@ -459,8 +442,7 @@ qwebirc.ui.StandardUI = new Class({
     }
 
     if(success) {
-      new Event(x).stop();
-      x.preventDefault();
+      try { if(x.preventDefault) x.preventDefault(); if(x.stopPropagation) x.stopPropagation(); } catch(_) {}
     }
   },
   getInputFocused: function(x) {
@@ -483,7 +465,7 @@ qwebirc.ui.StandardUI = new Class({
     return w;
   },
   addCustomWindow: function(windowName, class_, cssClass, options, type) {
-    if(!$defined(options))
+  if(options == null)
       options = {};
       
     if(this.customWindows.contains(windowName)) {
@@ -590,12 +572,12 @@ qwebirc.ui.StandardUI = new Class({
     for (var k in values)
       this.__styleValues[k] = values[k];
 
-    if (!$defined(this.__styleSheet))
+  if (this.__styleSheet == null)
       return;
 
     var back = {hue: this.__styleValues.hue, lightness: this.__styleValues.lightness, saturation: this.__styleValues.saturation};
     var front;
-    if (!$defined(this.__styleValues.textHue) && !$defined(this.__styleValues.textLightness) && !$defined(this.__styleValues.textSaturation)) {
+  if (this.__styleValues.textHue == null && this.__styleValues.textLightness == null && this.__styleValues.textSaturation == null) {
       front = back;
     } else {
       front = {hue: Number(this.__styleValues.textHue), lightness: Number(this.__styleValues.textLightness), saturation: Number(this.__styleValues.textSaturation)}
@@ -664,7 +646,7 @@ qwebirc.ui.QuakeNetUI = new Class({
   urlDispatcher: function(name, window) {
     if(name == "qwhois") {
       return ["span", function(auth) {
-        if($defined(this.parentObject.options.accountWhoisCommand))
+  if(this.parentObject.options.accountWhoisCommand != null)
           this.client.exec(this.parentObject.options.accountWhoisCommand + auth);
       }.bind(window)];
     }
@@ -709,7 +691,7 @@ qwebirc.ui.RequestTransformHTML = function(options) {
     if(HREF_ELEMENTS[tagName]) {
       var attr = node.getAttribute("transform_attr");
       var value = node.getAttribute("transform_value");
-      if($defined(attr) && $defined(value)) {
+  if(attr != null && value != null) {
         node.removeAttribute("transform_attr");
         node.removeAttribute("transform_value");
         node.setAttribute(attr, qwebirc.global.staticBaseURL + value);

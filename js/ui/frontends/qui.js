@@ -29,7 +29,7 @@ qwebirc.ui.QUI = new Class({
     this.qjsui = new qwebirc.ui.QUI.JSUI("qwebirc-qui", this.parentElement);
     this.qjsui.addEvent("reflow", function() {
       var w = this.getActiveWindow();
-      if($defined(w))
+  if(w != null)
         w.onResize();
     }.bind(this));
     this.qjsui.top.addClass("outertabbar");
@@ -60,7 +60,12 @@ qwebirc.ui.QUI = new Class({
     this.reflow = this.qjsui.reflow.bind(this.qjsui);
 
     var scrollHandler = function(x) {
-      var event = new Event(x);
+      var event = x || window.event;
+      // Normalisieren des Mausrad-Werts falls MooTools Wrapper fehlt
+      if(event && event.wheel == null) {
+        if(typeof event.wheelDelta !== 'undefined') event.wheel = event.wheelDelta;
+        else if(typeof event.deltaY !== 'undefined') event.wheel = -event.deltaY;
+      }
       var up, down;
       if(this.sideTabs) {
         var p = this.qjsui.left;
@@ -76,12 +81,9 @@ qwebirc.ui.QUI = new Class({
         down = event.wheel < 0;
       }
 
-      if(up) {
-        this.nextWindow();
-      } else if(down) {
-        this.prevWindow();
-      }
-      event.stop();
+  if(up) this.nextWindow();
+  else if(down) this.prevWindow();
+  try { if(event.preventDefault) event.preventDefault(); if(event.stopPropagation) event.stopPropagation(); } catch(e) {}
     }.bind(this);
     this.qjsui.left.addEvent("mousewheel", scrollHandler);
     this.qjsui.top.addEvent("mousewheel", scrollHandler);
@@ -162,7 +164,7 @@ qwebirc.ui.QUI = new Class({
         var label = (typeof x[0] === 'function') ? x[0]() : x[0];
         var fn = x[1];
         var e = new Element("a");
-        e.addEvent("mousedown", function(ev) { new Event(ev).stop(); });
+  e.addEvent("mousedown", function(ev) { try { if(ev && ev.preventDefault) ev.preventDefault(); if(ev && ev.stopPropagation) ev.stopPropagation(); } catch(_) {} });
         e.addEvent("click", function() {
           dropdownMenu.hide();
           fn();
@@ -202,7 +204,7 @@ qwebirc.ui.QUI = new Class({
 
     this.outerTabs.appendChild(dropdown);
     dropdownMenu.show = function(x) {
-      new Event(x).stop();
+  try { if(x && x.preventDefault) x.preventDefault(); if(x && x.stopPropagation) x.stopPropagation(); } catch(_) {}
 
       if(dropdownMenu.visible) {
         dropdownMenu.hide();
@@ -236,7 +238,7 @@ qwebirc.ui.QUI = new Class({
       
       document.addEvent("mousedown", hideEvent);
     }.bind(this);
-    dropdown.addEvent("mousedown", function(e) { new Event(e).stop(); });
+  dropdown.addEvent("mousedown", function(e) { try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {} });
     dropdown.addEvent("click", dropdownMenu.show);
   },
   createInput: function() {
@@ -649,7 +651,7 @@ qwebirc.ui.QUI = new Class({
     }
     
     form.addEvent("submit", function(e) {
-      new Event(e).stop();
+  try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
   sendInput();
   emojiOverlay.setStyle("display", "none");
     });
@@ -673,7 +675,7 @@ qwebirc.ui.QUI = new Class({
       } else if(e.key == "tab") {
         this.tabComplete(inputbox, e.shift);
 
-        new Event(e).stop();
+  try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
         e.preventDefault();
         return;
       } else {
@@ -686,7 +688,7 @@ qwebirc.ui.QUI = new Class({
       
       var result = resultfn.bind(this.commandhistory)();
       
-      new Event(e).stop();
+  try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
       e.preventDefault();
 
       if(!result)
@@ -702,7 +704,7 @@ qwebirc.ui.QUI = new Class({
     this.qjsui.middle = this.lines = lines;
   },
   setChannelItems: function(nicklist, topic) {
-    if(!$defined(nicklist)) {
+  if(nicklist == null) {
       nicklist = this.orignicklist;
       topic = this.origtopic;
     }
@@ -743,7 +745,7 @@ qwebirc.ui.QUI.JSUI = new Class({
   Implements: [Events],
   initialize: function(class_, parent, sizer) {
     this.parent = parent;
-    this.sizer = $defined(sizer)?sizer:parent;
+  this.sizer = (sizer != null) ? sizer : parent;
 
     this.class_ = class_;
     this.create();
@@ -779,8 +781,7 @@ qwebirc.ui.QUI.JSUI = new Class({
     if(!delay)
       delay = 1;
       
-    if(this.reflowevent)
-      $clear(this.reflowevent);
+  if(this.reflowevent) { clearTimeout(this.reflowevent); this.reflowevent = null; }
     this.__reflow();
     this.reflowevent = this.__reflow.delay(delay, this);
   },
@@ -1083,7 +1084,7 @@ qwebirc.ui.QUI.Window = new Class({
       } catch(err) {}
     }).bind(this)();
     this.tab.addEvent("click", function(e) {
-      new Event(e).stop();
+      try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
       
       if(this.closed)
         return;
@@ -1242,17 +1243,10 @@ window.qwebircConnectStatus = connectStatus;
   },
   onResize: function() {
     if(this.scrolleddown) {
-      if(Browser.Engine.trident) {
-        this.scrollToBottom.delay(5, this);
-      } else {
-        this.scrollToBottom();
-      }
-    } else if($defined(this.scrollpos)) {
-      if(Browser.Engine.trident) {
-        this.getScrollParent().scrollTo(this.scrollpos.x, this.scrollpos.y);
-      } else {
-        this.getScrollParent().scrollTo.delay(5, this, [this.scrollpos.x, this.scrollpos.y]);
-      }
+      // kleiner Delay für Layout Stabilität
+      this.scrollToBottom.delay(5, this);
+    } else if(this.scrollpos != null) {
+      this.getScrollParent().scrollTo.delay(5, this, [this.scrollpos.x, this.scrollpos.y]);
     }
   },
   createMenu: function(nick, parent) {
@@ -1274,7 +1268,7 @@ window.qwebircConnectStatus = connectStatus;
   e2.__menuItem = x; // for later re-translation
 
       e2.addEvent("focus", function() { this.blur() }.bind(e2));
-      e2.addEvent("click", function(ev) { new Event(ev.stop()); this.menuClick(x.fn); }.bind(this));
+  e2.addEvent("click", function(ev) { try { if(ev && ev.preventDefault) ev.preventDefault(); if(ev && ev.stopPropagation) ev.stopPropagation(); } catch(_) {} this.menuClick(x.fn); }.bind(this));
     }.bind(this));
     return e;
   },
@@ -1341,7 +1335,7 @@ window.qwebircConnectStatus = connectStatus;
     var span = new Element("span");
     if(this.parentObject.uiOptions.NICK_COLOURS) {
       var colour = realNick.toHSBColour(this.client);
-      if($defined(colour))
+  if(colour != null)
         span.setStyle("color", colour.rgbToHex());
     }
     span.set("text", realNick);
@@ -1359,7 +1353,7 @@ window.qwebircConnectStatus = connectStatus;
       e.addClass("selected");
       this.moveMenuClass();
       e.menu = this.createMenu(e.realNick, e);
-      new Event(x).stop();
+  try { if(x && x.preventDefault) x.preventDefault(); if(x && x.stopPropagation) x.stopPropagation(); } catch(_) {}
     }.bind(this));
     
     e.addEvent("focus", function() { this.blur() }.bind(e));
@@ -1407,7 +1401,7 @@ window.qwebircConnectStatus = connectStatus;
     this.parentObject.setLines(this.lines);
     this.parentObject.setChannelItems(this.nicklist, this.topic);
     this.parentObject.qjsui.showInput(inputVisible);
-    this.parentObject.qjsui.showChannel($defined(this.nicklist), this.parentObject.uiOptions.SHOW_NICKLIST);
+  this.parentObject.qjsui.showChannel((this.nicklist != null), this.parentObject.uiOptions.SHOW_NICKLIST);
 
     this.reflow();
     
@@ -1424,7 +1418,7 @@ window.qwebircConnectStatus = connectStatus;
         for(var i=0;i<nodes.length;i++) {
           var e = nodes[i], span = e.firstChild;
           var colour = e.realNick.toHSBColour(this.client);
-          if($defined(colour))
+          if(colour != null)
             span.setStyle("color", colour.rgbToHex());
         };
       } else {

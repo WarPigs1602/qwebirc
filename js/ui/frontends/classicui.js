@@ -40,7 +40,7 @@ qwebirc.ui.CLASSICUI = new Class({
   this.qjsui = new qwebirc.ui.CLASSICUI.JSUI("qwebirc-classicui", this.parentElement);
     this.qjsui.addEvent("reflow", function() {
       var w = this.getActiveWindow();
-      if($defined(w))
+  if(w != null)
         w.onResize();
     }.bind(this));
   this.qjsui.top.addClass("outertabbar");
@@ -714,7 +714,7 @@ qwebirc.ui.CLASSICUI = new Class({
     this.qjsui.middle = this.lines = lines;
   },
   setChannelItems: function(nicklist, topic) {
-    if(!$defined(nicklist)) {
+  if(nicklist == null) {
       nicklist = this.orignicklist;
       topic = this.origtopic;
     }
@@ -755,7 +755,7 @@ qwebirc.ui.CLASSICUI.JSUI = new Class({
   Implements: [Events],
   initialize: function(class_, parent, sizer) {
     this.parent = parent;
-    this.sizer = $defined(sizer)?sizer:parent;
+  this.sizer = (sizer != null)? sizer : parent;
 
   this.class_ = class_;
     this.create();
@@ -792,7 +792,7 @@ qwebirc.ui.CLASSICUI.JSUI = new Class({
       delay = 1;
       
     if(this.reflowevent)
-      $clear(this.reflowevent);
+  try { clearTimeout(this.reflowevent); } catch(e) {}
     this.__reflow();
     this.reflowevent = this.__reflow.delay(delay, this);
   },
@@ -898,8 +898,8 @@ qwebirc.ui.CLASSICUI.Window = new Class({
       this.tab.addEvent("mouseup", function(e) {
         var button = 1;
 
-        if(Browser.Engine.trident)
-          button = 4;
+    // Browser.Engine entfällt – mittlere Taste = 1 (MooTools mapping nicht mehr nötig)
+    // button bleibt 1
 
         if(e.event.button == button)
           close(e);
@@ -1100,17 +1100,9 @@ qwebirc.ui.CLASSICUI.Window = new Class({
   },
   onResize: function() {
     if(this.scrolleddown) {
-      if(Browser.Engine.trident) {
-        this.scrollToBottom.delay(5, this);
-      } else {
-        this.scrollToBottom();
-      }
-    } else if($defined(this.scrollpos)) {
-      if(Browser.Engine.trident) {
-        this.getScrollParent().scrollTo(this.scrollpos.x, this.scrollpos.y);
-      } else {
-        this.getScrollParent().scrollTo.delay(5, this, [this.scrollpos.x, this.scrollpos.y]);
-      }
+      this.scrollToBottom.delay(5, this);
+    } else if(this.scrollpos != null) {
+      this.getScrollParent().scrollTo.delay(5, this, [this.scrollpos.x, this.scrollpos.y]);
     }
   },
   createMenu: function(nick, parent) {
@@ -1173,7 +1165,7 @@ qwebirc.ui.CLASSICUI.Window = new Class({
     var span = new Element("span");
     if(this.parentObject.uiOptions.NICK_COLOURS) {
       var colour = realNick.toHSBColour(this.client);
-      if($defined(colour))
+  if(colour != null)
         span.setStyle("color", colour.rgbToHex());
     }
     span.set("text", nick);
@@ -1242,7 +1234,7 @@ qwebirc.ui.CLASSICUI.Window = new Class({
     this.parentObject.setLines(this.lines);
     this.parentObject.setChannelItems(this.nicklist, this.topic);
     this.parentObject.qjsui.showInput(inputVisible);
-    this.parentObject.qjsui.showChannel($defined(this.nicklist), this.parentObject.uiOptions.SHOW_NICKLIST);
+  this.parentObject.qjsui.showChannel((this.nicklist != null), this.parentObject.uiOptions.SHOW_NICKLIST);
 
     this.reflow();
     
@@ -1259,7 +1251,7 @@ qwebirc.ui.CLASSICUI.Window = new Class({
         for(var i=0;i<nodes.length;i++) {
           var e = nodes[i], span = e.firstChild;
           var colour = e.realNick.toHSBColour(this.client);
-          if($defined(colour))
+          if(colour != null)
             span.setStyle("color", colour.rgbToHex());
         };
       } else {

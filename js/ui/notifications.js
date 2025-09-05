@@ -39,7 +39,7 @@ qwebirc.ui.Flasher = new Class({
     this.titleText = document.title;
 
     var favIcon = this._getFavIcon();
-    if($defined(favIcon)) {
+  if(favIcon != null) {
       this.favIcon = favIcon;
       this.favIconParent = favIcon.parentNode;
       this.favIconVisible = true;
@@ -87,12 +87,12 @@ qwebirc.ui.Flasher = new Class({
     flashA();
   },
   cancelFlash: function() {
-    if(!this.canFlash || !$defined(this.flasher))
+  if(!this.canFlash || this.flasher == null)
       return;
       
     this.flashing = false;
     
-    $clear(this.flasher);
+  try { clearTimeout(this.flasher); } catch(e) {}
     this.flasher = null;
     
     this.showFavIcon();

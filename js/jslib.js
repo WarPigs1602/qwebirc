@@ -156,7 +156,7 @@ qwebirc.ui.insertAt = function(position, parent, element) {
 }
 
 qwebirc.util.setCaretPos = function(obj, pos) {
-  if($defined(obj.selectionStart)) { 
+  if(obj != null && typeof obj.selectionStart === 'number') { 
     obj.focus(); 
     obj.setSelectionRange(pos, pos); 
   } else if(obj.createTextRange) { 
@@ -171,7 +171,7 @@ qwebirc.util.setAtEnd = function(obj) {
 }
 
 qwebirc.util.getCaretPos = function(element) {
-  if($defined(element.selectionStart))
+  if(element != null && typeof element.selectionStart === 'number')
     return element.selectionStart;
     
   if(document.selection) {
@@ -244,19 +244,10 @@ qwebirc.util.importJS = function(name, watchFor, onload) {
   var script = document.createElement("script");
   script.type = "text/javascript";
   script.src = name;
-  
-  if(Browser.Engine.trident) {
-    /* HORRID */
-    var checkFn = function() {
-      if(eval("typeof " + watchFor) != "undefined") {
-        onload();
-      } else {
-        checkFn.delay(100);
-      }
-    }
-    checkFn();
-  } else {
-    script.onload = onload;
+  // Moderne Browser genügen, altes IE-spezifisches Polling entfernt (kein Compat/Shim).
+  if (onload) {
+    script.addEventListener('load', onload, false);
+    script.addEventListener('error', function(){ qwebirc.util.__log('Fehler beim Laden von '+name); }, false);
   }
   document.getElementsByTagName("head")[0].appendChild(script);
 }
@@ -266,42 +257,17 @@ qwebirc.util.createInput = function(type, parent, name, selected, id) {
   var r;
   if (name)
     name = "__input" + name;
-
-  if (Browser.Engine.trident) {
-    var name2;
-    if (name) {
-      name2 = " name=\"" + escape(name) + "\"";
-    } else {
-      name2 = "";
-    }
-    try {
-      var h = "<input type=\"" + type + "\"" + name2 + "/>";
-      r = $(document.createElement(h));
-      if (type == "radio") {
-        r.addEvent("click", function () {
-          $(document.body).getElements("input[name=" + name + "]").forEach(function (x) {
-            x.setAttribute("defaultChecked", x.checked ? "defaultChecked" : "");
-          });
-        });
-      }
-      created = true;
-    } catch (e) {
-      /* fallthough, trying it the proper way... */
-    }
-  }
-
-  if(!created) {
-    r = new Element("input");
-    r.setAttribute("type", type);
-  }
+  // Vereinfachte Erstellung ohne alte IE Hacks.
+  r = new Element("input", { type: type });
   if(name)
     r.setAttribute("name", name);
   if(id)
     r.setAttribute("id", id);
   if(selected) {
     r.setAttribute("checked", "checked");
-    if(type == "radio" && Browser.Engine.trident)
-      r.setAttribute("defaultChecked", "defaultChecked");
+    if(type === 'radio') {
+      r.defaultChecked = true;
+    }
   }
 
   parent.appendChild(r);
@@ -328,14 +294,13 @@ qwebirc.util.invertFn = function(fn) {
 
 qwebirc.util.deviceHasKeyboard = function() {
   var determine = function() {
-    if(Browser.Engine.ipod)
-      return true;
+  // Frühere Browser.Engine.ipod Erkennung entfernt. iPhone/iPod Touch gelten als mobil ohne physische Tastatur.
+  var ua = navigator.userAgent;
+  if (/iPad|Macintosh/.test(ua) && 'ontouchend' in document) return true; // iPad mit echter Tastatur möglich
 
     var MOBILE_UAs = ["Nintendo Wii", " PIE", "BlackBerry", "IEMobile", "Windows CE", "Nokia", "Opera Mini", "Mobile", "mobile", "Pocket", "pocket", "Android"];
     /* safari not included because iphones/ipods send that, and we checked for iphone/ipod specifically above */
     var DESKTOP_UAs = ["Chrome", "Firefox", "Camino", "Iceweasel", "K-Meleon", "Konqueror", "SeaMonkey", "Windows NT", "Windows 9"];
-
-    var ua = navigator.userAgent;
 
     var contains = function(v) {
       return ua.indexOf(v) > -1;

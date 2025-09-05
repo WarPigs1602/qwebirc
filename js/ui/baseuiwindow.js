@@ -96,8 +96,8 @@ qwebirc.ui.Window = new Class({
     this.closed = true;
     try { if(this.__onLanguageChangedBound) window.removeEventListener('qwebirc:languageChanged', this.__onLanguageChangedBound); } catch(e) {}
     
-    if($defined(this.scrolltimer)) {
-      $clear(this.scrolltimer);
+  if(this.scrolltimer != null) {
+    try { clearTimeout(this.scrolltimer); } catch(e) {}
       this.scrolltimer = null;
     }
 
@@ -105,7 +105,7 @@ qwebirc.ui.Window = new Class({
     this.fireEvent("close", this);
   },
   subEvent: function(event) {
-    if($defined(this.subWindow))
+  if(this.subWindow != null)
       this.subWindow.fireEvent(event);
   },
   setSubWindow: function(window) {
@@ -132,8 +132,8 @@ qwebirc.ui.Window = new Class({
     this.subEvent("deselect");
     
     this.setScrollPos();
-    if($defined(this.scrolltimer)) {
-      $clear(this.scrolltimer);
+  if(this.scrolltimer != null) {
+    try { clearTimeout(this.scrolltimer); } catch(e) {}
       this.scrolltimer = null;
     }
 
@@ -145,7 +145,7 @@ qwebirc.ui.Window = new Class({
   resetScrollPos: function() {
     if(this.scrolleddown) {
       this.scrollToBottom();
-    } else if($defined(this.scrollpos)) {
+  } else if(this.scrollpos != null) {
       this.getScrollParent().scrollTo(this.scrollpos.x, this.scrollpos.y);
     }
   },
@@ -164,7 +164,7 @@ qwebirc.ui.Window = new Class({
       hilight = qwebirc.ui.HILIGHT_ACTIVITY;
 
       if(type.match(/(NOTICE|ACTION|MSG)$/)) {
-        var message = $defined(line) ? line["m"] : null;
+  var message = (line != null) ? line["m"] : null;
 
         /* https://dl.dropboxusercontent.com/u/180911/notify.png */
         if(type.match(/^OUR/)) {
@@ -288,7 +288,7 @@ qwebirc.ui.Window = new Class({
   getScrollParent: function() {
     var scrollparent = this.lines;
 
-    if($defined(this.scroller))
+  if(this.scroller != null)
       scrollparent = this.scroller;
     return scrollparent;
   },
@@ -305,7 +305,7 @@ qwebirc.ui.Window = new Class({
     var parent = this.lines;
     
     /* scroll in bursts, else the browser gets really slow */
-    if($defined(element)) {
+  if(element != null) {
       var sd = this.scrolledDown();
       parent.appendChild(element);
       if(parent.childNodes.length > qwebirc.ui.MAXIMUM_LINES_PER_WINDOW) {

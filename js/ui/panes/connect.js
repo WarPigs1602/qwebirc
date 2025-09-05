@@ -454,7 +454,7 @@ qwebirc.ui.ConnectPane = new Class({
             });
           }
         }
-        $clear(cb);
+  try { clearTimeout(cb); } catch(e) {}
 
   var rootElement = parent.getElement("[name=connectroot]");
   self.rootElement = rootElement;
@@ -602,7 +602,7 @@ qwebirc.ui.ConnectPane = new Class({
         }
 
       if(!autoConnect) {
-        if($defined(uiOptions.logoURL)) {
+  if(uiOptions.logoURL != null) {
           var logoBar = parent.getElement("[class=bar-logo]");
           if(uiOptions.logoURL)
             logoBar.setAttribute("style", "background: url(" + uiOptions.logoURL + ") no-repeat center top; _filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + uiOptions.logoURL + "',sizingMethod='crop');");
@@ -696,7 +696,7 @@ qwebirc.ui.ConnectPane = new Class({
     return this.__validate();
   },
   __connect: function(e) {
-    new Event(e).stop();
+    try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
   // Show status in typing bar
     if(window.qwebircConnectStatus) window.qwebircConnectStatus.show();
     var data = this.validate();
@@ -763,7 +763,7 @@ qwebirc.ui.ConnectPane = new Class({
       this.__cancelLoginCallback(noUIModifications);
   },
   __loginConnect: function(e) {
-    new Event(e).stop();
+    try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
   // Show status in typing bar
     if(window.qwebircConnectStatus) window.qwebircConnectStatus.show();
     if(this.validate() === false) {
@@ -784,7 +784,7 @@ qwebirc.ui.ConnectPane = new Class({
     }.bind(this), "loginconnectbutton");
   },
   __login: function(e) {
-    new Event(e).stop();
+    try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
 
     this.__cancelLogin(true);
 
@@ -815,7 +815,7 @@ qwebirc.ui.ConnectPane = new Class({
     var closeCallback = closeDetector.periodical(100);
 
     this.__cancelLoginCallback = function(noUIModifications) {
-      $clear(closeCallback);
+      try { clearInterval(closeCallback); } catch(e) {}
 
       try {
         handle.close();
@@ -941,7 +941,7 @@ qwebirc.ui.LoginBox2 = function(parentElement, callback, initialNickname, initia
   var r = createRow(undefined, connbutton);
   
   form.addEvent("submit", function(e) {
-    new Event(e).stop();
+    try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
 
     var nickname = nick.value;
     var chans = chan.value;
@@ -1019,7 +1019,7 @@ qwebirc.ui.authShowHide = function(checkbox, authRow, usernameBox, usernameRow, 
 
 qwebirc.ui.isAuthRequired = (function() {
   var args = qwebirc.util.parseURI(String(document.location));
-  var value = $defined(args) && args.get("authrequired");
+  var value = (args != null) && args.get("authrequired");
   return function() {
     return value && qwebirc.auth.enabled();
   };
@@ -1027,7 +1027,7 @@ qwebirc.ui.isAuthRequired = (function() {
 
 qwebirc.ui.isHideAuth = (function() {
   var args = qwebirc.util.parseURI(String(document.location));
-  var value = $defined(args) && args.get("hideauth");
+  var value = (args != null) && args.get("hideauth");
   return function() {
     return value;
   };

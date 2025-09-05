@@ -92,14 +92,17 @@ qwebirc.irc.BaseIRCClient = new Class({
       if(!n)
         n = command;
       var o = this["irc_" + n];
-      if(o) {
+      if(typeof o === 'function') {
+        // MooTools Compat entfernte Function.run; direkte Aufrufe mit call() ersetzen.
+        var r;
         if(n === "TAGMSG") {
-          var r = o.run([prefix, sl, tags], this);
+          r = o.call(this, prefix, sl, tags);
         } else {
-          var r = o.run([prefix, sl], this);
+          r = o.call(this, prefix, sl);
         }
-        if(!r)
+        if(!r) {
           this.rawNumeric(command, prefix, sl);
+        }
       } else {
         this.rawNumeric(command, prefix, sl);
       }

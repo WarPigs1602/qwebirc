@@ -18,7 +18,7 @@ qwebirc.irc.Commands = new Class({
   
   newUIWindow: function(property) {
     var p = this.parentObject.ui[property];
-    if(!$defined(p)) {
+  if(p == null) {
       this.getActiveWindow().errorMessage("Current UI does not support that command.");
     } else {
       p.bind(this.parentObject.ui)();

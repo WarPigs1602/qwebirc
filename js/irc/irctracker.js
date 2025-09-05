@@ -126,7 +126,7 @@ qwebirc.irc.IRCTracker = new Class({
   },
   updateLastSpoke: function(nick, channel, time) {
     var nc = this.getNickOnChannel(nick, channel);
-    if($defined(nc))
+  if(nc != null)
       nc.lastSpoke = time;
   },
   __mapAndSortEntries: function(channel, fn, pos) {

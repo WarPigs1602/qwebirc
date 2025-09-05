@@ -1,9 +1,8 @@
 qwebirc.ui.supportsFocus = function() {
   var ua = navigator.userAgent;
-  if(!$defined(ua))
+  if(ua == null)
     return [true];
-      
-  if(Browser.Engine.ipod || ua.indexOf("Konqueror") != -1)
+  if(/iP(hone|od)/.test(ua) || ua.indexOf("Konqueror") != -1)
     return [false, false];
 
   return [true];
@@ -52,8 +51,7 @@ qwebirc.config.DEFAULT_OPTIONS = [
   [14, "SHOW_TIMESTAMPS", "Show timestamps", true], /* we rely on the hue update */
   [15, "SIDE_TABS", "Show tabs on the side", false, {
     enabled: function() {
-      if(Browser.Engine.trident && Browser.Engine.version < 8)
-        return [false, false]; /* [disabled, default_value] */
+  // Früher IE (<8) nicht mehr unterstützt; Feature immer aktivierbar
       return [true];
     },
     applyChanges: function(value, ui) {
@@ -111,14 +109,14 @@ qwebirc.config.Input = new Class({
     this.render();
   },
   createInput: function(type, parent, name, selected, id) {
-    if(!$defined(parent))
+  if(parent == null)
       parent = this.parentElement;
 
     return qwebirc.util.createInput(type, parent, name, selected, this.option.id);
   },
   FE: function(element, parent) {
     var n = new Element(element);
-    if(!$defined(parent))
+  if(parent == null)
       parent = this.parentElement;
       
     parent.appendChild(n);
@@ -134,10 +132,10 @@ qwebirc.config.Input = new Class({
     this.event("applyChanges", [this.get(), this.parentObject.optionObject.ui]);
   },
   event: function(name, x) {
-    if(!$defined(this.option.extras))
+  if(this.option.extras == null)
       return;
     var t = this.option.extras[name];
-    if(!$defined(t))
+  if(t == null)
       return;
       
     t.pass(x, this)();
@@ -173,7 +171,7 @@ qwebirc.config.HueInput = new Class({
     
     var k = new Element("div");
     k.addClass("knob");
-    if(Browser.Engine.trident) {
+  if(document.documentMode) { // alter IE Pfad
       k.setStyle("top", "0px");
       k.setStyle("background-color", "black");
     }
@@ -274,7 +272,7 @@ qwebirc.config.Option = new Class({
     this.optionId = optionId;
     this.extras = extras;
     
-    if($defined(extras) && $defined(extras.enabled)) {
+  if(extras && extras.enabled != null) {
       var enabledResult = extras.enabled();
       this.enabled = enabledResult[0];
       
@@ -284,7 +282,7 @@ qwebirc.config.Option = new Class({
       this.enabled = true;
     }
     
-    if($defined(extras) && $defined(extras.settableByURL)) {
+  if(extras && extras.settableByURL != null) {
       this.settableByURL = extras.settableByURL;
     } else {
       this.settableByURL = true;
@@ -357,7 +355,7 @@ qwebirc.ui.Options = new Class({
   initialize: function(ui) {
     this.ui = ui;
 
-    if(!$defined(qwebirc.config.DefaultOptions))
+  if(qwebirc.config.DefaultOptions == null)
       this.__configureDefaults();
     
     this.optionList = qwebirc.config.DefaultOptions.slice();
@@ -611,7 +609,10 @@ qwebirc.ui.OptionsPane.prototype.__injectCloseButton = function() {
     svg.appendChild(l1); svg.appendChild(l2);
     btn.appendChild(svg);
   } catch(e) { btn.set('text','×'); }
-  btn.addEvent('click', function(e){ new Event(e).stop(); this.fireEvent('close'); }.bind(this));
+  btn.addEvent('click', function(e){
+    try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
+    this.fireEvent('close');
+  }.bind(this));
   host.appendChild(btn);
   // Update translated title on language change
   var updateTitle = function(){
@@ -634,7 +635,7 @@ qwebirc.ui.CookieOptions = new Class({
   },
   _get: function(x) {
     var v = this.__cookie.get(x.optionId);
-    if(!$defined(v))
+  if(v == null)
       return x.default_;
     
     return v;
@@ -668,7 +669,7 @@ qwebirc.ui.SuppliedArgOptions = new Class({
   initialize: function(ui, arg) {
     var p = new QHash();
     
-    if($defined(arg) && arg != "" && arg.length > 2) {
+  if(arg && arg != "" && arg.length > 2) {
       var checksum = arg.substr(arg.length - 2, 2);
       var decoded = qwebirc.util.b64Decode(arg.substr(0, arg.length - 2));
       
@@ -688,7 +689,7 @@ qwebirc.ui.SuppliedArgOptions = new Class({
       return this.parent(x);
 
     var opt = this.parsedOptions.get(String(x.optionId));
-    if(!$defined(opt))
+  if(opt == null)
       return this.parent(x);
       
     return opt;

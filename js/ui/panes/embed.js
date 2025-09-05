@@ -22,7 +22,7 @@ qwebirc.ui.EmbedWizardStep = new Class({
     while(this.parent.middleRow.childNodes.length > 0)
       this.parent.middleRow.removeChild(this.parent.middleRow.childNodes[0]);
       
-    if($defined(this.options.middle))
+    if(this.options.middle != null)
       this.parent.middleRow.appendChild(this.options.middle);
     
     this.fireEvent("show");
@@ -96,14 +96,14 @@ qwebirc.ui.EmbedWizard = new Class({
     var backBtn = new Element("input");
     backBtn.type = "submit";
     backBtn.value = "< Back";
-    backBtn.addEvent("click", this.back.bind(this));
+  backBtn.addEvent("click", function(e){ try{ if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); }catch(_){} this.back(); }.bind(this));
     nextRow.appendChild(backBtn);
     
     var nextBtn = new Element("input");
     nextBtn.type = "submit";
     nextBtn.value = "Next >";
     nextRow.appendChild(nextBtn);
-    nextBtn.addEvent("click", this.next.bind(this));
+  nextBtn.addEvent("click", function(e){ try{ if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); }catch(_){} this.next(); }.bind(this));
     
     this.nextBtn = nextBtn;
     this.backBtn = backBtn;
@@ -147,17 +147,10 @@ qwebirc.ui.EmbedWizard = new Class({
       self.langBox.value = currentLang;
     });
     var af = function(select) {
-      if(Browser.Engine.trident) {
-        var f = function() {
-          this.focus();
-          if(select)
-            this.select();
-        };
-        f.delay(100, this, []);
-      } else {
+      try {
         this.focus();
-        this.select();
-      }
+        if(select) this.select();
+      } catch(_) {}
     };
   
     var self = this;
@@ -211,7 +204,7 @@ qwebirc.ui.EmbedWizard = new Class({
     var alterButton = new Element("input");
     alterButton.type = "submit";
   alterButton.value = t('EMBED_ALTER','alter');
-    alterButton.addEvent("click", this.options.optionsCallback);
+  alterButton.addEvent("click", function(e){ try{ if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); }catch(_){} if(this.options && this.options.optionsCallback) this.options.optionsCallback(e); }.bind(this));
     changeOptions.firstChild.appendChild(alterButton);
     changeOptions.firstChild.appendChild(document.createTextNode(")."));
     
@@ -417,7 +410,13 @@ qwebirc.ui.EmbedWizard.prototype.__injectCloseButton = function() {
     svg.appendChild(l1); svg.appendChild(l2);
     btn.appendChild(svg);
   } catch(e) { btn.set('text','×'); }
-  btn.addEvent('click', function(e){ new Event(e).stop(); this.fireEvent('close'); }.bind(this));
+  btn.addEvent('click', function(e){
+    try {
+      if(e && e.preventDefault) e.preventDefault();
+      if(e && e.stopPropagation) e.stopPropagation();
+    } catch(_) {}
+    this.fireEvent('close');
+  }.bind(this));
   host.appendChild(btn);
   var updateTitle = function(){
     try { var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en'; var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang]; if(i18n && i18n.options && (i18n.options.EMBED_BTN_CLOSE || i18n.options.CANCEL)) btn.set('title', i18n.options.EMBED_BTN_CLOSE || i18n.options.CANCEL); } catch(err) {}

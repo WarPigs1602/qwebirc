@@ -66,7 +66,7 @@ qwebirc.ui.Interface = new Class({
       dynamicConfiguration: options.dynamicConfiguration,
       staticBaseURL: options.staticBaseURL,
       baseURL: options.baseURL,
-      nicknameValidator: $defined(options.nickValidation) ? new qwebirc.irc.NicknameValidator(options.nickValidation) : new qwebirc.irc.DummyNicknameValidator(),
+  nicknameValidator: (options.nickValidation != null) ? new qwebirc.irc.NicknameValidator(options.nickValidation) : new qwebirc.irc.DummyNicknameValidator(),
       dynamicConfigurationLoaded: false
     };
 
@@ -102,9 +102,9 @@ qwebirc.ui.Interface = new Class({
         var url = args.get("url");
         var chans, nick = args.get("nick");
         
-        if($defined(url)) {
+        if(url != null) {
           ichans = this.parseIRCURL(url);
-          if($defined(chans) && chans != "")
+          if(chans != null && chans != "")
             canAutoConnect = true;
         } else {
           chans = args.get("channels");
@@ -130,18 +130,18 @@ qwebirc.ui.Interface = new Class({
           }
         }
         
-        if($defined(nick))
+  if(nick != null)
           inick = this.randSub(nick);
           
         if(args.contains("randomnick") && args.get("randomnick") == 1)
           inick = this.options.initialNickname;
 
         /* we only consider autoconnecting if the nick hasn't been supplied, or it has and it's not "" */
-        if(canAutoConnect && (!$defined(inick) || ($defined(inick) && (inick != "")))) {
+        if(canAutoConnect && (inick == null || (inick != null && (inick != "")))) {
           var p = args.get("prompt");
           var pdefault = false;
           
-          if(!$defined(p) || p == "") {
+          if(p == null || p == "") {
             pdefault = true;
             p = false;
           } else if(p == "0") {
@@ -151,7 +151,7 @@ qwebirc.ui.Interface = new Class({
           }
           
           /* autoconnect if we have channels and nick but only if prompt != 1 */
-          if($defined(inick) && !p) {
+          if(inick != null && !p) {
             autoConnect = true;
           } else if(!pdefault && !p) { /* OR if prompt=0, but not prompt=(nothing) */
             autoConnect = true;
@@ -188,7 +188,7 @@ qwebirc.ui.Interface = new Class({
 
       var ui_ = new ui($(element), new qwebirc.ui.Theme(this.options.theme), this.options);
 
-      var usingAutoNick = !$defined(nick);
+  var usingAutoNick = (nick == null);
       if(usingAutoNick && autoConnect)
         inick = this.options.initialNickname;
       
@@ -197,7 +197,7 @@ qwebirc.ui.Interface = new Class({
   },
   getHueArg: function(args, t) {
     var hue = args.get(t + "hue");
-    if(!$defined(hue))
+  if(hue == null)
       return null;
     hue = parseInt(hue);
     if(hue > 360 || hue < 0)
@@ -206,7 +206,7 @@ qwebirc.ui.Interface = new Class({
   },
   getSaturationArg: function(args, t) {
     var saturation = args.get(t + "saturation");
-    if(!$defined(saturation))
+  if(saturation == null)
       return null;
     saturation = parseInt(saturation);
     if(saturation > 100 || saturation < -100)
@@ -215,7 +215,7 @@ qwebirc.ui.Interface = new Class({
   },
   getLightnessArg: function(args, t) {
     var lightness = args.get(t + "lightness");
-    if(!$defined(lightness))
+  if(lightness == null)
       return null;
     lightness = parseInt(lightness);
     if(lightness > 100 || lightness < -100)
@@ -279,7 +279,7 @@ qwebirc.ui.Interface = new Class({
       }
     }
 
-    if($defined(queryArgs)) {
+  if(queryArgs != null) {
       queryArgs.each(function(key_, value) {
         if(key_ == "key") {
           key = value;
@@ -291,9 +291,9 @@ qwebirc.ui.Interface = new Class({
     }
     
     if(needkey) {
-      if(!$defined(key))
+  if(key == null)
         key = prompt("Please enter the password for channel " + channel + ":");
-      if($defined(key))
+  if(key != null)
         channel = channel + " " + key;
     }
     

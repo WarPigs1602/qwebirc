@@ -108,7 +108,8 @@ qwebirc.irc.BaseCommandParser = new Class({
         return;
       }
       
-      var ret = fn.run([args], this);
+  // MooTools Function.run (Compat) entfernt -> direkt ausführen
+  var ret = (typeof fn === 'function') ? fn.call(this, args) : undefined;
       if(ret == undefined)
         return;
         

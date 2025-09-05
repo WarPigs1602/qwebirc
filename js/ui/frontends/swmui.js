@@ -31,7 +31,7 @@ qwebirc.ui.SWMUI = new Class({
     }.bind(this));
 
     form.addEvent("submit", function(e) {
-      new Event(e).stop();
+      try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
     
       this.getActiveWindow().client.exec(inputbox.value);
       inputbox.value = "";
@@ -88,7 +88,7 @@ qwebirc.ui.SWMUI.Window = new Class({
       tabclose = new Element("span");
       tabclose.addClass("tabclose");
       tabclose.addEvent("click", function(e) {
-        new Event(e).stop();
+        try { if(e && e.preventDefault) e.preventDefault(); if(e && e.stopPropagation) e.stopPropagation(); } catch(_) {}
         
         if(type == qwebirc.ui.WINDOW_CHANNEL)
           this.client.exec("/PART " + name);

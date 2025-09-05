@@ -64,7 +64,7 @@ qwebirc.irc.IRCClient = new Class({
     if(!extra)
       extra = {};
 
-    if($defined(user)) {
+  if(user != null) {
       extra["n"] = user.hostToNick();
       extra["h"] = user.hostToHost();
     }
@@ -106,7 +106,7 @@ qwebirc.irc.IRCClient = new Class({
     var nh = new QHash();
 
     var n1 = this.tracker.getChannel(channel);
-    if($defined(n1)) {
+  if(n1 != null) {
       n1.each(function (n, nc) {
         var prefix, pri = this.getPrefixPriority(nc.prefixes);
         if(nc.prefixes.length > 0) {
@@ -375,7 +375,7 @@ qwebirc.irc.IRCClient = new Class({
 
     var clist = [];
     var channels = this.tracker.getNick(nick);
-    if($defined(channels)) {
+  if(channels != null) {
       channels.each(function (c) {
         clist.push(c);
         if (!this.ui.uiOptions.HIDE_JOINPARTS) {
@@ -400,7 +400,7 @@ qwebirc.irc.IRCClient = new Class({
     var found = false;
 
     var channels = this.tracker.getNick(newnick);
-    if($defined(channels)) {
+  if(channels != null) {
       channels.each(function (c) {
         found = true;
 
@@ -463,7 +463,7 @@ qwebirc.irc.IRCClient = new Class({
   },
   getNickStatus: function(channel, nick) {
     var n = this.tracker.getNickOnChannel(nick, channel);
-    if(!$defined(n))
+  if(n == null)
       return "";
       
     if(n.prefixes.length == 0)
@@ -504,9 +504,9 @@ qwebirc.irc.IRCClient = new Class({
     this.checkLogin(user, message);
   },
   checkLogin: function(user, message) {
-    if(this.isNetworkService(user) && $defined(this.activeTimers.autojoin)) {
-      if($defined(this.loginRegex) && message.match(this.loginRegex)) {
-        $clear(this.activeTimers.autojoin);
+    if(this.isNetworkService(user) && this.activeTimers.autojoin != null) {
+      if(this.loginRegex != null && message.match(this.loginRegex)) {
+    try { clearTimeout(this.activeTimers.autojoin); } catch(e) {}
         delete this.activeTimers["autojoin"];
         this.ui.getActiveWindow().infoMessage("Joining channels...");
         this.exec("/AUTOJOIN");
@@ -554,7 +554,7 @@ qwebirc.irc.IRCClient = new Class({
     this.newServerLine("INVITE", {"c": channel, "h": host, "n": nick});
     if(this.ui.uiOptions.ACCEPT_SERVICE_INVITES && this.isNetworkService(user)) {
       if(this.activeTimers.serviceInvite)
-        $clear(this.activeTimers.serviceInvite);
+    try { clearTimeout(this.activeTimers.serviceInvite); } catch(e) {}
       /* we do this so we can batch the joins, i.e. instead of sending 5 JOIN comands we send 1 with 5 channels. */
       this.activeTimers.serviceInvite = this.__joinInvited.delay(100, this);
       this.inviteChanList.push(channel);
@@ -605,14 +605,14 @@ qwebirc.irc.IRCClient = new Class({
   },
   nickOnChanHasPrefix: function(nick, channel, prefix) {
     var entry = this.tracker.getNickOnChannel(nick, channel);
-    if(!$defined(entry))
+    if(entry == null)
       return false; /* shouldn't happen */
    
     return entry.prefixes.indexOf(prefix) != -1;
   },
   nickOnChanHasAtLeastPrefix: function(nick, channel, prefix) {
     var entry = this.tracker.getNickOnChannel(nick, channel);
-    if(!$defined(entry))
+    if(entry == null)
       return false; /* shouldn't happen */
    
     /* this array is sorted */
