@@ -38,32 +38,64 @@ qwebirc.ui.BaseUI = new Class({
       }
     }.bind(this);
 
-    // Register translator to update existing window titles when language changes
+  // Register translator to update existing window titles when language changes
     if (window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
       window.qwebirc.registerTranslator(function(){
         try {
+          var snapshotActive = this.active;
+          var snapshotTitle = snapshotActive ? snapshotActive.name : null;
           var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
           var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
-          if(!i18n || !i18n.options) return;
-          var map = i18n.options;
-          // Iterate through windows and apply new labels
-          for (var i=0;i<this.windowArray.length;i++) {
-            var w = this.windowArray[i];
-            if(!w) continue;
-            var key = null;
-            if(w.type == qwebirc.ui.WINDOW_STATUS) key = 'TAB_STATUS';
-            else if(w.identifier == '_Connect' || w.pane && w.pane.type == 'connectpane') key = 'TAB_CONNECT';
-            else if(w.pane && w.pane.type == 'optionspane') key = 'TAB_OPTIONS';
-            else if(w.pane && w.pane.type == 'embeddedwizard') key = 'TAB_EMBED';
-            else if(w.pane && w.pane.type == 'aboutpane') key = 'TAB_ABOUT';
-            if(key && map[key] && w.setTitle) {
-              w.setTitle(map[key]);
-              if(w.active) this.updateTitle(map[key] + ' - ' + this.options.appTitle);
+          if(i18n && i18n.options) {
+            var map = i18n.options;
+            for (var i=0;i<this.windowArray.length;i++) {
+              var w = this.windowArray[i];
+              if(!w) continue;
+              var key = null;
+              if(w.type == qwebirc.ui.WINDOW_STATUS) key = 'TAB_STATUS';
+              else if(w.identifier == '_Connect' || (w.pane && w.pane.type == 'connectpane')) key = 'TAB_CONNECT';
+              else if(w.pane && w.pane.type == 'optionspane') key = 'TAB_OPTIONS';
+              else if(w.pane && w.pane.type == 'embeddedwizard') key = 'TAB_EMBED';
+              else if(w.pane && w.pane.type == 'aboutpane') key = 'TAB_ABOUT';
+              if(key && map[key] && w.setTitle) {
+                // Batch: nur Tabtext aktualisieren, kein document.title jetzt
+                w.setTitle(map[key]);
+              }
             }
           }
+          // Nach Batch aktiven Fenstertitel erzwingen
+          if(snapshotActive) {
+            var finalName = snapshotActive.name || snapshotTitle || '';
+            this.updateTitle(finalName + ' - ' + this.options.appTitle);
+          } else if(this.refreshActiveWindowTitle) {
+            this.refreshActiveWindowTitle();
+          }
+          // Verzögert sicherstellen dass kein späterer Hook (z.B. Connect) den Titel überschreibt
+          var enforce = function(){
+            var aw = this.getActiveWindow();
+            if(!aw) return;
+            var expected = aw.name + ' - ' + this.options.appTitle;
+            if(document.title !== expected) document.title = expected;
+          }.bind(this);
+          setTimeout(enforce, 0);
+          setTimeout(enforce, 50);
         } catch(e) {}
       }.bind(this));
     }
+    // Globaler Sprachwechsel-Event Listener (nicht in onTagmsg platzieren!)
+    try {
+      var enforceEvt = function(){
+        var aw = this.getActiveWindow();
+        if(!aw) return;
+        var expected = aw.name + ' - ' + this.options.appTitle;
+        if(document.title !== expected) document.title = expected;
+      }.bind(this);
+      window.addEventListener('qwebirc:languageChanged', function(){
+        enforceEvt();
+        setTimeout(enforceEvt, 0);
+        setTimeout(enforceEvt, 50);
+      });
+    } catch(e) {}
   },
   // Delegates tagmsg events to the appropriate channel window
     onTagmsg: function(event) {
@@ -194,9 +226,33 @@ qwebirc.ui.BaseUI = new Class({
       this.active.deselect();
     window.select();  /* calls setActiveWindow */
     this.updateTitle(window.name + " - " + this.options.appTitle);
+  // Merke zuletzt aktives Fenster zur Absicherung bei Übersetzungs-Rennen
+  this.lastActiveWindow = window;
   },
   updateTitle: function(text) {
     document.title = text;
+  },
+  // Aktualisiert Dokumenttitel und ggf. Tab-Beschriftung des aktiven Fensters gemäß aktueller Sprache
+  refreshActiveWindowTitle: function() {
+    var w = this.getActiveWindow();
+    if(!w) return;
+    var title = w.name;
+    try {
+      // Falls Fenster eigenen i18n-Key ermitteln kann (Classic/QUI Frontends)
+      if(w._i18nKeyFor) {
+        var key = w._i18nKeyFor();
+        if(key) {
+          var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+          var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang];
+            if(i18n && i18n.options && i18n.options[key]) {
+              if(w.setTitle) w.setTitle(i18n.options[key]);
+              title = i18n.options[key];
+            }
+        }
+      }
+    } catch(e) {}
+    // Fallback: benutze vorhandenen Fensternamen
+    this.updateTitle(title + ' - ' + this.options.appTitle);
   },
   nextWindow: function(direction) {
     if(this.windowArray.length == 0 || !this.active)
