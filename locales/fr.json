@@ -17,6 +17,7 @@
     "QUERY_ON_NICK_CLICK": "Ouvrir une query au clic sur le pseudo",
     "SHOW_NICKLIST": "Afficher la liste des pseudos",
     "SHOW_TIMESTAMPS": "Afficher les horodatages",
+  "FRONTEND_UI": "Interface",
     "SIDE_TABS": "Afficher les onglets sur le côté",
     "SAVE": "Enregistrer",
     "CANCEL": "Annuler",

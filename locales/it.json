@@ -17,6 +17,7 @@
     "QUERY_ON_NICK_CLICK": "Apri query cliccando il nick",
     "SHOW_NICKLIST": "Mostra lista nick",
     "SHOW_TIMESTAMPS": "Mostra timestamp",
+  "FRONTEND_UI": "Interfaccia",
     "SIDE_TABS": "Mostra tab sul lato",
     "SAVE": "Salva",
     "CANCEL": "Annulla",

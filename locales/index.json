@@ -2,5 +2,8 @@
   {"code": "en", "name": "English"},
   {"code": "de", "name": "Deutsch"},
   {"code": "fr", "name": "Français"},
-  {"code": "it", "name": "Italiano"}
+  {"code": "it", "name": "Italiano"},
+  {"code": "es", "name": "Español"},
+  {"code": "sv", "name": "Svenska"},
+  {"code": "tr", "name": "Türkçe"}
 ]
