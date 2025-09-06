@@ -135,7 +135,27 @@ qwebirc.ui.BaseTabCompleter = new Class({
 qwebirc.ui.QueryTabCompleter = new Class({
   Extends: qwebirc.ui.BaseTabCompleter,
   initialize: function(prefix, existingNick, suffix, window) {
-    this.parent(window.client, prefix, existingNick, suffix, window.client.lastNicks);
+    var client = window.client;
+    var list = [];
+    if (client.lastNicks && client.lastNicks.slice) {
+      list = client.lastNicks.slice();
+    }
+    if (window.type == qwebirc.ui.WINDOW_QUERY) {
+      var current = window.name;
+      var lowerCurrent = client.toIRCLower ? client.toIRCLower(current) : current.toLowerCase();
+      for (var i = 0; i < list.length; i++) {
+        var lnick = client.toIRCLower ? client.toIRCLower(list[i]) : list[i].toLowerCase();
+        if (lnick === lowerCurrent) {
+          list.splice(i, 1);
+          break;
+        }
+      }
+      list.sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+      list.unshift(current);
+    } else {
+      list.sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+    }
+    this.parent(client, prefix, existingNick, suffix, list);
   }
 });
 
@@ -150,26 +170,35 @@ qwebirc.ui.QueryNickTabCompleter = new Class({
 qwebirc.ui.ChannelNameTabCompleter = new Class({
   Extends: qwebirc.ui.BaseTabCompleter,
   initialize: function(prefix, existingText, suffix, window) {
+    /* Aktuellen Channel zuerst, Rest alphabetisch (case-insensitive). */
+    var client = window.client;
+    var channels = [];
+    if (client.channels) {
+      if (typeof client.channels.values === 'function') {
+        channels = client.channels.values().slice();
+      } else if (Array.isArray(client.channels)) {
+        channels = client.channels.slice();
+      }
+    }
 
-    var wa = window.parentObject.windows.get(window.parentObject.getClientId(window.client));
-    var l = window.client.channels.map(function(c) {
-      var w = wa.get(c);
-      
-      /* redundant? */
-  if(w != null)
-        w = w.lastSelected;
-        
-      return [w, c];
-    });
-    
-    l.sort(function(a, b) {
-      return b[0] - a[0];
+    var currentLower = client.toIRCLower ? client.toIRCLower(window.name) : window.name.toLowerCase();
+    for (var i = 0; i < channels.length; i++) {
+      var cLower = client.toIRCLower ? client.toIRCLower(channels[i]) : channels[i].toLowerCase();
+      if (cLower === currentLower) {
+        channels.splice(i, 1);
+        break;
+      }
+    }
+
+    channels.sort(function(a, b) {
+      return a.toLowerCase().localeCompare(b.toLowerCase());
     });
 
-    var l2 = [];    
-    for(var i=0;i<l.length;i++)
-      l2.push(l[i][1]);
-    this.parent(window.client, prefix, existingText, suffix, l2);
+    if (client.isChannel(window.name)) {
+      channels.unshift(window.name);
+    }
+
+    this.parent(client, prefix, existingText, suffix, channels);
   }
 });
 
