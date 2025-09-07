@@ -112,7 +112,13 @@ body {
   font-family: Verdana, sans-serif;
   background: #232634;
   color: #e0e0e0;
+  line-height: 1.4; /* bessere Lesbarkeit */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color-scheme: dark; /* System-Darkmode Unterstützung (Form Controls, Keyboard) */
 }
+
+:root { --app-vh: 100vh; }
 
 html {
   overflow: hidden;
@@ -150,29 +156,119 @@ html {
   .qwebirc-optionspane table.qwebirc-options-table td.options-cell { display:block; width:auto !important; }
 }
 
+/* Root IRC UI Container
+ * Vereinheitlicht (duplizierte Definitionen entfernt) und modernisiert.
+ * Standard Desktop: bisheriges Verhalten (absolute, 100%).
+ * Mobile wird weiter unten via Media Query überschrieben (fixed + 100dvh) */
 #ircui {
   position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  height: 100%;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0; /* statt height:100% + width:100% -> robust gegen Elternhöhen */
   width: 100%;
+  height: 100%; /* Desktop / Fallback */
   overflow: hidden;
+  display: block;
 }
 
-html {
-  overflow: hidden;
+/* Hinweis: html Overflow bereits oben definiert – Doppeldefinition entfernt */
+
+/* --- Mobile / Touch Modernisierung --------------------------------------------------
+   Ziel: Kein "Anspringen" beim Ein-/Ausblenden der Browser-Adressleiste, komplette
+   Sichtbarkeit des Chats (inkl. Input) ohne ungewolltes Scrollen des Body.
+   Nutzen von 100dvh (Dynamic Viewport Height) wo verfügbar. */
+@media (max-width: 1024px) {
+  /* Vereinheitlichte mobile Schriftgrößen (zwischen QUI & ClassicUI abgestimmt)
+     Anpassbare Skalierung über Variablen – ermöglicht späteres globales Tuning */
+  :root {
+  --m-lines: 1.08em;       /* Chat-Zeilen minimal größer */
+  --m-ircwindow: 1.02em;   /* Monospace Chat-Inhalte */
+  --m-tabbar: 1.3em;       /* Tabs & Nicklist (Tap-Ziel) */
+  --m-topic: 1.4em;        /* Topic-Leiste (Heading-Charakter) */
+  --m-menu: 1.28em;        /* Dropdown-Menüs / Hints */
+  --m-input: 1.5em;        /* Eingabefeld */
+  --m-select: 1.35em;      /* Formulareingaben / Selects */
+  }
+  html, body {
+    /* 100dvh vermeidet Sprünge bei mobiler URL-Bar; Fallback: 100vh */
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden; /* verhindert Body-Scroll, nur interne Bereiche scrollen */
+    -webkit-text-size-adjust: 100%;
+    padding: 0;
+    margin: 0;
+  /* Safe-Area (iOS Notch) – constant() veraltet, env() primär */
+  padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #ircui {
+    position: fixed; /* stabiler Vollbild-Container */
+    inset: 0; /* top/right/bottom/left:0 */
+    width: 100%;
+    /* Dynamische Höhe per JS (visualViewport) -> --app-vh; Fallback 100dvh/100vh */
+    height: var(--app-vh, 100dvh);
+    max-height: var(--app-vh, 100dvh);
+    display: flex; /* Ermöglicht flexibles Aufteilen (Themenleiste, Chat, Input) */
+    flex-direction: column;
+    overflow: hidden; /* globale Scrollvermeidung */
+    touch-action: manipulation;
+  }
+
+  /* Scrollbare Chat-Zeilen: eigenes Scrolling, Momentum auf iOS */
+  .qwebirc-qui .lines {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Nickliste auf Mobil evtl. etwas mehr Touch-Komfort (kann später erweitert werden) */
+  .qwebirc-qui .nicklist {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Eingabebereich: Safe-Area berücksichtigen */
+  .qwebirc-qui div.input {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 4px);
+  }
+
+  /* Größere Touch-Flächen optional leicht erhöhen (Tabs etc. bleiben kompakt, Anpassung minimal) */
+  .qwebirc-qui a.tab {
+    min-height: 30px;
+  }
+
+  /* Skalierung & Touch-Optimierungen (aus früher separatem Block zusammengeführt) */
+  /* Mobile Schriftgröße analog classicui (dort: .lines ~1.05em, Inhalte erben) */
+  /* Vorher: .lines 1.2em + .ircwindow div 0.8em => effektiv ~0.96em (zu klein) */
+  .qwebirc-qui .lines { font-size: var(--m-lines); }
+  .qwebirc-qui .ircwindow div { font-size: var(--m-ircwindow); }
+  .qwebirc-qui .tabbar { line-height: 36px; min-height: 40px; }
+  .qwebirc-qui .tabbar, .qwebirc-qui .nicklist { font-size: var(--m-tabbar); }
+  .qwebirc-qui a.tab { padding: 6px 14px; font-size: 1em; min-height: 40px; }
+  .qwebirc-qui .topic { font-size: var(--m-topic); }
+  .qwebirc-qui .dropdownmenu a, .qwebirc-qui .dropdownhint { font-size: var(--m-menu); line-height: 1.35; padding: 6px 10px; }
+  .qwebirc-qui .input input.keyboard-input { font-size: var(--m-input); min-height: 44px; padding-top: 6px; padding-bottom: 6px; }
+  .qwebirc-qui input, .qwebirc-qui select { font-size: var(--m-select); }
+  .qwebirc-optionspane table.qwebirc-options-table input[type="text"],
+  .qwebirc-optionspane table.qwebirc-options-table select { font-size: var(--m-select); line-height: 1.35; min-height: 42px; }
+  .qwebirc-qui .tabclose { width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0; }
+  .qwebirc-qui .tabclose svg { width: 24px; height: 24px; stroke-width: 2.8; }
+  .qwebirc-qui .dropdown-tab img { width: 160%; }
+  .qwebirc-qui .outertabbar_top .dropdown-tab,
+  .qwebirc-qui .outertabbar_left .dropdown-tab { padding-right: 13px; }
+  .qwebirc-qui input[type="checkbox"],
+  .qwebirc-qui input[type="radio"] { transform: scale(1.5); }
+  .qwebirc-qui .qwebirc-optionspane div.hue-slider { height: 14px; }
+  .qwebirc-qui .qwebirc-optionspane div.hue-slider .knob { height: 24px; width: 12px; }
 }
 
-#ircui {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
+/* Zusätzliche Absicherung: wenn Browser 100dvh unterstützt, aber kein Breakpoint greift
+   (z.B. Desktop-Browser im Responsive Mode) kann man optional eine Klasse setzen.
+   (Nur Doku – Klasse wird hier nicht automatisch gesetzt) */
+/*
+.supports-dvh #ircui {
+  height: 100dvh;
 }
+*/
 
 .qwebirc-qui .dynamicpanel {
   position: absolute;
@@ -629,7 +725,6 @@ div#noscript {
 
 .qwebirc-qui .hyperlink-whois, .hyperlink-qwhois, .hyperlink-channel {
   cursor: pointer;
-  cursor: hand;
 }
 
 .qwebirc-qui .hyperlink-whois:hover, .hyperlink-qwhois:hover, .hyperlink-channel:hover {
@@ -638,7 +733,6 @@ div#noscript {
 
 .qwebirc-qui .outertabbar .dropdown-tab {
   cursor: pointer;
-  cursor: hand;
   float: left;
   width: 17px;
 }
@@ -667,7 +761,6 @@ div#noscript {
   font-size: 0.8em;
   color: $(menu_text);
   cursor: pointer;
-  cursor: hand;  
   padding-top: 1px;
   padding-left: 3px;
   padding-bottom: 1px;
@@ -700,71 +793,7 @@ iframe {
 
 
 
-@media screen and (max-device-width:1024px) {
-  .qwebirc-qui .lines {
-    font-size: 1.2em;
-  }
-
-  .qwebirc-qui .ircwindow div {
-    font-size: 0.8em;
-  }
-
-  .qwebirc-qui .tabbar {
-    line-height: 35px;
-  }
-
-  .qwebirc-qui .tabbar, .qwebirc-qui .nicklist {
-    font-size: 1.3em;
-  }
-
-  .qwebirc-qui .topic, .qwebirc-qui .dropdownmenu a, .qwebirc-qui .dropdownhint {
-    font-size: 1.4em;
-  }
-
-  .qwebirc-qui .input input.keyboard-input {
-    font-size: 1.6em;
-  }
-
-  .qwebirc-qui input {
-    font-size: 1.6em;
-  }
-
-  .qwebirc-qui .tabclose {
-    color: maroon;
-  }
-
-  .qwebirc-qui .tabclose:before {
-    content: "(";
-  }
-  .qwebirc-qui .tabclose:after {
-    content: ")";
-  }
-
-  .qwebirc-qui .dropdown-tab img {
-    width: 160%;
-  }
-
-  .qwebirc-qui .outertabbar_top .dropdown-tab {
-    padding-right: 13px;
-  }
-
-  .qwebirc-qui .outertabbar_left .dropdown-tab {
-    padding-right: 13px;
-  }
-
-  .qwebirc-qui input[type="checkbox"], input[type="radio"] {
-    transform: scale(1.5);
-  }
-
-  .qwebirc-qui .qwebirc-optionspane div.hue-slider {
-    height: 14px;
-  }
-
-  .qwebirc-qui .qwebirc-optionspane div.hue-slider .knob {
-    height: 24px;
-    width: 12px;
-  }
-}
+/* Zweiter mobiler Block entfernt – Inhalte in den ersten Media Query integriert */
 
 /* Typing Bar Styles */
 .qwebirc-qui .qwebirc-typing-bar {
@@ -815,6 +844,10 @@ iframe {
 @keyframes typing-bounce {
   0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
   40% { opacity: 1; transform: translateY(-5px); }
+}
+.no-motion .qwebirc-typing-bar .typing-dot { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .qwebirc-qui .qwebirc-typing-bar .typing-dot { animation: none; opacity: 0.6; }
 }
 .qwebirc-qui .qwebirc-typing-bar.paused {
   display: block;

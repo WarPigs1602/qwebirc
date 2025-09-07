@@ -96,7 +96,40 @@ qwebirc.ui.QUI = new Class({
 
     this.setSideTabs(this.uiOptions.SIDE_TABS);
 
-  // Live re-translation for open nick menu
+    // --- Dynamische mobile Höhe (verhindert Scroll-Springen bei Tastatur / URL-Bar) ---
+    (function(){
+      try {
+        var self = this;
+        var root = document.documentElement; // :root für --app-vh
+        var supportsVV = typeof window.visualViewport !== 'undefined';
+        var lastVH = null;
+        var updateVH = function(reason){
+          try {
+            var vv = window.visualViewport;
+            var h = (supportsVV && vv) ? vv.height : window.innerHeight;
+            // Rundung zur Verringerung von jitter
+            var rounded = Math.round(h * 100) / 100;
+            if(lastVH === rounded) return; // keine Änderung -> skip
+            lastVH = rounded;
+            root.style.setProperty('--app-vh', rounded + 'px');
+            // kleineren async Reflow anstoßen
+            setTimeout(function(){ try { self.reflow && self.reflow(); } catch(e) {} }, 10);
+          } catch(e) {}
+        };
+        updateVH('init');
+        if(supportsVV) {
+          window.visualViewport.addEventListener('resize', function(){ updateVH('vv-resize'); });
+          window.visualViewport.addEventListener('scroll', function(){ updateVH('vv-scroll'); });
+        } else {
+          window.addEvent('resize', function(){ updateVH('win-resize'); });
+        }
+        // Keyboard Fokus Events (häufige Ursache für Sprung)
+        window.addEventListener('focusin', function(e){ if(e && e.target && e.target.tagName==='INPUT') updateVH('focusin'); });
+        window.addEventListener('orientationchange', function(){ setTimeout(function(){ updateVH('orientation'); }, 60); });
+      } catch(e) {}
+    }).bind(this)();
+
+    // Live re-translation for open nick menu
     if(!this.__nickMenuLangListenerAdded) {
       this.__nickMenuLangListenerAdded = true;
       var self = this;

@@ -46,6 +46,36 @@ qwebirc.ui.CLASSICUI = new Class({
     this.qjsui.topic.addClass("topic");
     this.qjsui.middle.addClass("lines");
     
+    // Dynamische Viewport-Höhenanpassung (Port von QUI)
+    (function(){
+      try {
+        var root = document.documentElement;
+        var lastH = 0;
+        var apply = function(force){
+          var vh;
+          if(window.visualViewport) {
+            vh = window.visualViewport.height;
+          } else {
+            vh = window.innerHeight || root.clientHeight;
+          }
+          if(!vh) return;
+          var rounded = Math.round(vh);
+          if(!force && Math.abs(rounded - lastH) < 1) return;
+          lastH = rounded;
+          root.style.setProperty('--app-vh', rounded + 'px');
+        };
+        apply(true);
+        var schedule = function(){ apply(); /* sofort, Reflow folgt */ try { setTimeout(function(){ if(typeof this.reflow === 'function') this.reflow(); }.bind(this), 35); } catch(e) {} } .bind(this);
+        if(window.visualViewport){
+          window.visualViewport.addEventListener('resize', schedule);
+          window.visualViewport.addEventListener('scroll', schedule);
+        }
+        window.addEventListener('orientationchange', function(){ setTimeout(schedule, 120); });
+        window.addEventListener('resize', schedule);
+        window.addEventListener('focusin', function(){ setTimeout(schedule, 160); });
+      } catch(e) {}
+    }).call(this);
+
     this.outerTabs = new Element("div");
     this.sideTabs = null;
 
