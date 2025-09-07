@@ -159,9 +159,9 @@ qwebirc.ui.CLASSICUI = new Class({
       if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.hide();
     });
 
-    // Touch-Geräte: Manuell einblendbare Nickliste (Toggle-Button)
+    // Manuell einblendbare Nickliste (Toggle-Button) – jetzt für alle Geräte
     try {
-      if(!qwebirc.util.deviceHasKeyboard() && !this.__nicklistToggleAdded) {
+      if(!this.__nicklistToggleAdded) {
         this.__nicklistToggleAdded = true;
         var rootEl = this.parentElement; // Container mit Theme-Klasse
         var self = this;
@@ -175,8 +175,37 @@ qwebirc.ui.CLASSICUI = new Class({
         var toggleBtn = new Element('button', { type: 'button', 'class': 'nicklist-toggle', text: '👥' });
         toggleBtn.set('title', btnTitle());
         toggleBtn.setAttribute && toggleBtn.setAttribute('aria-label', btnTitle());
-        // Im Top-Panel rechts oben platzieren (absolute via CSS)
-        this.qjsui.top.appendChild(toggleBtn);
+        this.__nicklistToggle = toggleBtn;
+        // Helper für Platzierung (abhängig von SideTabs)
+    this.__positionNicklistToggle = function(){
+          try {
+            if(!self.__nicklistToggle) return;
+      // Bei Top-Tabbar inside eigentliche Tab-Leiste (self.tabs) einfügen, damit letzter Tab
+      var host = self.sideTabs ? self.qjsui.left : (self.tabs || self.outerTabs || self.qjsui.top);
+            if(self.__nicklistToggle.parentNode !== host) host.appendChild(self.__nicklistToggle);
+            self.__nicklistToggle.addClass(self.sideTabs ? 'nicklist-toggle-side' : 'nicklist-toggle-top');
+            try { host.appendChild(self.__nicklistToggle); } catch(_) {}
+            if(self.__nicklistToggleObserverHost !== host) {
+              if(self.__nicklistToggleObserver) { try { self.__nicklistToggleObserver.disconnect(); } catch(_) {} }
+              self.__nicklistToggleObserverHost = host;
+              try {
+                self.__nicklistToggleObserver = new MutationObserver(function(){
+                  try {
+                    var btn = self.__nicklistToggle;
+                    if(!btn) return;
+                    var p = btn.parentNode;
+                    if(!p) return;
+                    if(p.lastChild !== btn) {
+                      p.appendChild(btn); // nur wenn nicht bereits letztes Element
+                    }
+                  } catch(e) {}
+                });
+                self.__nicklistToggleObserver.observe(host, {childList:true});
+              } catch(e) {}
+            }
+          } catch(_) {}
+        };
+        this.__positionNicklistToggle();
         var updateState = function(forceReflow){
           var visible = !!self.uiOptions.SHOW_NICKLIST;
           if(toggleBtn) {
@@ -193,6 +222,18 @@ qwebirc.ui.CLASSICUI = new Class({
           } catch(_) {}
           if(forceReflow) self.reflow();
         };
+        // Sichtbarkeit des Buttons nur in Chatfenstern (Channel / Query / Messages mit Nicklist)
+        this.updateNicklistToggleVisibility = function(){
+          try {
+            if(!self.__nicklistToggle) return;
+            var w = self.getActiveWindow && self.getActiveWindow();
+            var show = false;
+            if(w && (w.type == qwebirc.ui.WINDOW_CHANNEL || w.type == qwebirc.ui.WINDOW_QUERY || w.type == qwebirc.ui.WINDOW_MESSAGES)) {
+              if(w.nicklist != null) show = true;
+            }
+            self.__nicklistToggle.setStyle('display', show ? 'inline-flex' : 'none');
+          } catch(e) {}
+        };
         toggleBtn.addEvent('click', function(ev){
           qwebirc.ui.util.stopEvent(ev);
           self.uiOptions.SHOW_NICKLIST = !self.uiOptions.SHOW_NICKLIST;
@@ -201,6 +242,7 @@ qwebirc.ui.CLASSICUI = new Class({
             self.qjsui.showChannel((w.nicklist != null), self.uiOptions.SHOW_NICKLIST);
           }
           updateState(true);
+          self.updateNicklistToggleVisibility && self.updateNicklistToggleVisibility();
         });
         // Sprache ändern -> Title aktualisieren
         var refreshTitle = function(){ try { toggleBtn.set('title', btnTitle()); toggleBtn.setAttribute('aria-label', btnTitle()); } catch(e) {} };
@@ -209,6 +251,16 @@ qwebirc.ui.CLASSICUI = new Class({
         }
         window.addEventListener('qwebirc:languageChanged', function(){ refreshTitle(); });
         updateState(false);
+  this.updateNicklistToggleVisibility && this.updateNicklistToggleVisibility();
+        // Tastatur Shortcut (Alt+L) global
+        try {
+          window.addEventListener('keydown', function(ev){
+            if(ev.altKey && !ev.shiftKey && !ev.metaKey && !ev.ctrlKey && (ev.key === 'l' || ev.key === 'L')) {
+              ev.preventDefault();
+              toggleBtn.fireEvent ? toggleBtn.fireEvent('click', ev) : toggleBtn.click();
+            }
+          });
+        } catch(_) {}
         // Wenn standardmäßig ausgeblendet (Optionen), kein automatisches Einblenden erzwingen
       }
     } catch(e) {}
@@ -769,6 +821,7 @@ qwebirc.ui.CLASSICUI = new Class({
         v2.setSideTabs(value);
       });
     });
+  try { this.__positionNicklistToggle && this.__positionNicklistToggle(); } catch(_) {}
   }
 });
 

@@ -17,6 +17,7 @@
     "QUERY_ON_NICK_CLICK": "Abrir query al hacer clic en un nick en el canal",
     "SHOW_NICKLIST": "Mostrar lista de nicks en el canal",
     "SHOW_TIMESTAMPS": "Mostrar marcas de tiempo",
+  "TOGGLE_NICKLIST": "Mostrar/Ocultar lista de nicks",
   "FRONTEND_UI": "Interfaz",
     "SIDE_TABS": "Mostrar pestañas al lado",
     "SAVE": "Guardar",

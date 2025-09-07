@@ -17,6 +17,7 @@
     "QUERY_ON_NICK_CLICK": "Open query on nickname click in channel",
     "SHOW_NICKLIST": "Show nicklist in channel",
     "SHOW_TIMESTAMPS": "Show timestamps",
+  "TOGGLE_NICKLIST": "Toggle nicklist",
   "FRONTEND_UI": "Interface",
   "SIDE_TABS": "Show tabs on the side",
   "SAVE": "Save",

@@ -17,6 +17,7 @@
     "QUERY_ON_NICK_CLICK": "Kanaldaki takma ada tıklayınca özel mesaj aç",
     "SHOW_NICKLIST": "Kanaldaki kullanıcı listesini göster",
     "SHOW_TIMESTAMPS": "Zaman damgalarını göster",
+  "TOGGLE_NICKLIST": "Kullanıcı listesini aç/kapat",
     "FRONTEND_UI": "Arayüz",
     "SIDE_TABS": "Sekmeleri yanda göster",
     "SAVE": "Kaydet",

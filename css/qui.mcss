@@ -162,23 +162,44 @@ body {
   position: absolute;
   top: 4px;
   right: 6px;
-  z-index: 160;
+  z-index: 200;
   background: #2a2d3acc;
   color: #e0e0e0;
   border: 1px solid #3a3f4b;
   border-radius: 8px;
-  font-size: 0.9em;
+  font-size: 0.85em;
   padding: 6px 10px;
   cursor: pointer;
   line-height: 1;
-  display: none; /* Desktop ausgeblendet */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   backdrop-filter: blur(2px);
-  transition: background 0.18s, border-color 0.18s, transform 0.25s;
+  transition: background 0.18s, border-color 0.18s;
 }
 .qwebirc-qui .nicklist-toggle:hover { background: #353946; }
 .qwebirc-qui .nicklist-toggle.active { background: #3a3f4b; border-color: #556075; }
+.qwebirc-qui .nicklist-toggle-side { right: 8px; top: 6px; }
+@media (pointer: coarse) { .qwebirc-qui .nicklist-toggle { font-size: 1.0em; } }
+
+/* Integriert in QUI Tab-Leiste als letztes Element */
+.qwebirc-qui .outertabbar_top .tabbar > .nicklist-toggle {
+  position: relative;
+  top: auto; right: auto; left: auto; bottom: auto;
+  height: 26px;
+  padding: 0 12px;
+  font-size: 0.9em;
+  line-height: 1;
+  margin: 0 4px 0 4px;
+  flex: 0 0 auto;
+  align-self: center;
+}
 @media (pointer: coarse) {
-  .qwebirc-qui .nicklist-toggle { display: inline-flex; align-items: center; justify-content: center; font-size: 1.05em; }
+  .qwebirc-qui .outertabbar_top .tabbar > .nicklist-toggle {
+    height: 34px;
+    padding: 0 16px;
+    font-size: 1.05em;
+  }
 }
 
 /* Mobile Slide-In Nicklist (wie ClassicUI) */
@@ -542,6 +563,12 @@ html {
 
 .qwebirc-qui .outertabbar_top {
   border-bottom: 1px solid $(tabbar_border);
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Kompakte, lesbare Tabbar - ohne Rahmen und Schatten */
@@ -560,6 +587,8 @@ html {
   min-height: 26px;
   height: 26px;
   border: none;
+  flex: 1 1 auto;
+  white-space: nowrap;
 }
 
 /* Kompakte, lesbare Tabs */

@@ -197,6 +197,8 @@ qwebirc.ui.BaseUI = new Class({
   },  
   __setActiveWindow: function(window) {
     this.active = window;
+  // Hook: allow frontends to react on active window changes (e.g. toggle visibility)
+  try { if(this.updateNicklistToggleVisibility) this.updateNicklistToggleVisibility(); } catch(e) {}
   },
   renameWindow: function(window, name) {
     if(this.getWindow(window.client, window.type, name))

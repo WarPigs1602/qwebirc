@@ -39,22 +39,44 @@ body {
 .qwebirc-classicui .nicklist-toggle {
   position: absolute;
   top: 4px;
-  right: 4px;
-  z-index: 120;
+  right: 6px;
+  z-index: 160;
   background: #ffffffcc;
   border: 1px solid $(tabbar_border);
   border-radius: 6px;
-  font-size: 0.9em;
+  font-size: 0.85em;
   padding: 4px 8px;
   cursor: pointer;
   line-height: 1;
-  display: none; /* standard: Desktop ausgeblendet */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   backdrop-filter: blur(2px);
+  transition: background .18s, border-color .18s;
 }
 .qwebirc-classicui .nicklist-toggle:hover { background: #fff; }
 .qwebirc-classicui .nicklist-toggle.active { background: #e6f0ff; border-color: #8aa6c6; }
+.qwebirc-classicui .nicklist-toggle-side { right: 8px; top: 6px; }
+@media (pointer: coarse) { .qwebirc-classicui .nicklist-toggle { font-size: 1.05em; } }
+
+/* Wenn Toggle in der Tab-Leiste (tabbar) ist: gleiche Höhe wie Tabs, kein Abschneiden */
+.qwebirc-classicui .outertabbar_top .tabbar > .nicklist-toggle {
+  position: relative;
+  top: auto; right: auto; left: auto; bottom: auto;
+  height: 24px;
+  padding: 0 10px;
+  font-size: 0.8em;
+  line-height: 1;
+  margin: 0 4px 0 4px;
+  flex: 0 0 auto;
+  align-self: center;
+}
 @media (pointer: coarse) {
-  .qwebirc-classicui .nicklist-toggle { display: inline-flex; align-items:center; justify-content:center; font-size: 1.05em; }
+  .qwebirc-classicui .outertabbar_top .tabbar > .nicklist-toggle {
+    height: 32px;
+    padding: 0 14px;
+    font-size: 0.9em;
+  }
 }
 
 /* Auf sehr kleinen Bildschirmen Nickliste überlagern statt Breite zu verbrauchen */
@@ -493,6 +515,12 @@ html {
 
 .qwebirc-classicui .outertabbar_top {
   border-bottom: 1px solid $(tabbar_border);
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .qwebirc-classicui .tabbar {
@@ -500,6 +528,11 @@ html {
   color: $(tabbar_text);
   margin-left: 25px;
   line-height: 24px;
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .qwebirc-classicui a.tab {

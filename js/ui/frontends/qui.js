@@ -162,9 +162,9 @@ qwebirc.ui.QUI = new Class({
       if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.hide();
     });
 
-    // Touch Nicklist Toggle (manuell ein-/ausblendbar wie in ClassicUI)
+    // Nicklist Toggle (für alle Geräte inkl. Desktop)
     try {
-      if(!qwebirc.util.deviceHasKeyboard() && !this.__nicklistToggleAdded) {
+      if(!this.__nicklistToggleAdded) {
         this.__nicklistToggleAdded = true;
         var self = this;
         var btnTitle = function(){
@@ -177,7 +177,34 @@ qwebirc.ui.QUI = new Class({
         var toggleBtn = new Element('button', { type: 'button', 'class': 'nicklist-toggle', text: '👥' });
         toggleBtn.set('title', btnTitle());
         toggleBtn.setAttribute && toggleBtn.setAttribute('aria-label', btnTitle());
-        this.qjsui.top.appendChild(toggleBtn);
+        this.__nicklistToggle = toggleBtn;
+    this.__positionNicklistToggle = function(){
+          try {
+      var host = self.sideTabs ? self.qjsui.left : (self.tabs || self.outerTabs || self.qjsui.top);
+            if(self.__nicklistToggle.parentNode !== host) host.appendChild(self.__nicklistToggle);
+            self.__nicklistToggle.addClass(self.sideTabs ? 'nicklist-toggle-side' : 'nicklist-toggle-top');
+            try { host.appendChild(self.__nicklistToggle); } catch(_) {}
+            if(self.__nicklistToggleObserverHost !== host) {
+              if(self.__nicklistToggleObserver) { try { self.__nicklistToggleObserver.disconnect(); } catch(_) {} }
+              self.__nicklistToggleObserverHost = host;
+              try {
+                self.__nicklistToggleObserver = new MutationObserver(function(){
+                  try {
+                    var btn = self.__nicklistToggle;
+                    if(!btn) return;
+                    var p = btn.parentNode;
+                    if(!p) return;
+                    if(p.lastChild !== btn) {
+                      p.appendChild(btn);
+                    }
+                  } catch(e) {}
+                });
+                self.__nicklistToggleObserver.observe(host, {childList:true});
+              } catch(e) {}
+            }
+          } catch(_) {}
+        };
+        this.__positionNicklistToggle();
         var updateState = function(forceReflow){
           var visible = !!self.uiOptions.SHOW_NICKLIST;
             try { toggleBtn.setAttribute('aria-pressed', visible ? 'true' : 'false'); } catch(_) {}
@@ -192,12 +219,24 @@ qwebirc.ui.QUI = new Class({
           } catch(_) {}
           if(forceReflow) self.reflow();
         };
+        this.updateNicklistToggleVisibility = function(){
+          try {
+            if(!self.__nicklistToggle) return;
+            var w = self.getActiveWindow && self.getActiveWindow();
+            var show = false;
+            if(w && (w.type == qwebirc.ui.WINDOW_CHANNEL || w.type == qwebirc.ui.WINDOW_QUERY || w.type == qwebirc.ui.WINDOW_MESSAGES)) {
+              if(w.nicklist != null) show = true;
+            }
+            self.__nicklistToggle.setStyle('display', show ? 'inline-flex' : 'none');
+          } catch(e) {}
+        };
         toggleBtn.addEvent('click', function(e){
           qwebirc.ui.util.stopEvent(e);
           self.uiOptions.SHOW_NICKLIST = !self.uiOptions.SHOW_NICKLIST;
           var w = self.getActiveWindow && self.getActiveWindow();
           if(w) self.qjsui.showChannel((w.nicklist != null), self.uiOptions.SHOW_NICKLIST);
           updateState(true);
+          self.updateNicklistToggleVisibility && self.updateNicklistToggleVisibility();
         });
         var refreshTitle = function(){ try { toggleBtn.set('title', btnTitle()); toggleBtn.setAttribute('aria-label', btnTitle()); } catch(e) {} };
         if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
@@ -205,6 +244,16 @@ qwebirc.ui.QUI = new Class({
         }
         window.addEventListener('qwebirc:languageChanged', function(){ refreshTitle(); });
         updateState(false);
+  this.updateNicklistToggleVisibility && this.updateNicklistToggleVisibility();
+        // Keyboard Shortcut Alt+L
+        try {
+          window.addEventListener('keydown', function(ev){
+            if(ev.altKey && !ev.shiftKey && !ev.metaKey && !ev.ctrlKey && (ev.key === 'l' || ev.key === 'L')) {
+              ev.preventDefault();
+              toggleBtn.fireEvent ? toggleBtn.fireEvent('click', ev) : toggleBtn.click();
+            }
+          });
+        } catch(_) {}
       }
     } catch(e) {}
 

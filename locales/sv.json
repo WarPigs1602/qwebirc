@@ -17,6 +17,7 @@
     "QUERY_ON_NICK_CLICK": "Öppna privat när man klickar på nick i kanal",
     "SHOW_NICKLIST": "Visa nicklista i kanal",
     "SHOW_TIMESTAMPS": "Visa tidsstämplar",
+  "TOGGLE_NICKLIST": "Visa/dölj nicklista",
   "FRONTEND_UI": "Gränssnitt",
     "SIDE_TABS": "Visa flikar på sidan",
     "SAVE": "Spara",

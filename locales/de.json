@@ -17,6 +17,7 @@
     "QUERY_ON_NICK_CLICK": "Query wenn auf Nicknamen im Channel geklickt wird",
     "SHOW_NICKLIST": "Nickliste im Channel anzeigen",
     "SHOW_TIMESTAMPS": "Zeitstempel anzeigen",
+  "TOGGLE_NICKLIST": "Nickliste umschalten",
   "FRONTEND_UI": "Oberfläche",
   "SIDE_TABS": "Tabs an der Seite anzeigen",
   "SAVE": "Speichern",
