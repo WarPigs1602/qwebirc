@@ -192,9 +192,20 @@
     try {
       if(!this._ensureBar()) return;
       var active = Object.keys(this.users).filter(function(n){ return this.users[n]==='active'; }.bind(this));
-      if(active.length===0){ this.bar.set('text',''); this.bar.removeClass('active'); this.bar.removeClass('paused'); return; }
+      if(active.length===0){
+        this.bar.set('text','');
+        this.bar.removeClass('active');
+        this.bar.removeClass('paused');
+        // Reflow nötig, weil sich die Höhe des Bottom-Panels (input) verringert
+        try { if(this.win && this.win.parentObject && this.win.parentObject.reflow) this.win.parentObject.reflow(); } catch(_) {}
+        return;
+      }
       var html = active.join(', ') + ' <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>';
-      this.bar.set('html', html); this.bar.addClass('active'); this.bar.removeClass('paused');
+      this.bar.set('html', html);
+      this.bar.addClass('active');
+      this.bar.removeClass('paused');
+      // Nach dem Einblenden ebenfalls Reflow auslösen, damit middle-Panel Höhe neu berechnet wird
+      try { if(this.win && this.win.parentObject && this.win.parentObject.reflow) this.win.parentObject.reflow(); } catch(_) {}
     } catch(_) {}
   };
   TypingBarManager.prototype.handleTag = function(event){
@@ -238,10 +249,18 @@
             var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
             var lbl = (i18n && i18n.TRYING_TO_CONNECT) ? i18n.TRYING_TO_CONNECT : 'Trying to connect server';
             bar.innerHTML = lbl + ' <span class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>';
+            // Layout aktualisieren (Bottom-Höhe wächst)
+            try { if(window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.ui && window.qwebirc.ui.ui.reflow) window.qwebirc.ui.ui.reflow(); } catch(_) {}
           } catch(_) {}
         },
         hide: function(){
-          try { this._active = false; if(this._bar && this._bar.parentNode) this._bar.parentNode.removeChild(this._bar); this._bar = null; } catch(_) {}
+          try {
+            this._active = false;
+            if(this._bar && this._bar.parentNode) this._bar.parentNode.removeChild(this._bar);
+            this._bar = null;
+            // Layout aktualisieren (Bottom-Höhe schrumpft)
+            try { if(window.qwebirc && window.qwebirc.ui && window.qwebirc.ui.ui && window.qwebirc.ui.ui.reflow) window.qwebirc.ui.ui.reflow(); } catch(_) {}
+          } catch(_) {}
         }
       };
       // Sprache live aktualisieren
