@@ -120,7 +120,8 @@ nicklist_selected_background=c,2a2d3a,back
 .qwebirc-qui .emoji-picker-btn:active { background:#2d313f; }
 
 /* Mobile spezifische Optimierung: Größerer Button, mehr Touch-Fläche ohne Höhe der Zeile zu verändern */
-@media (max-width: 820px), (hover: none) and (pointer: coarse) {
+/* Mobile (nur echte Touch-Geräte) – keine Auslösung bei Desktop-Fenster-Verkleinerung */
+@media (pointer: coarse) {
   .qwebirc-qui .emoji-picker-btn {
     font-size: 1.35em; /* größerer sichtbarer Emoji */
     width: 1.35em;
@@ -132,7 +133,7 @@ nicklist_selected_background=c,2a2d3a,back
 }
 
 /* Wenn sehr kleine Displays: Button nicht zu groß werden lassen */
-@media (max-width: 420px) {
+@media (pointer: coarse) and (max-width: 480px) {
   .qwebirc-qui .emoji-picker-btn {
     font-size: 1.2em;
     width: 1.2em;
@@ -216,7 +217,8 @@ html {
    Ziel: Kein "Anspringen" beim Ein-/Ausblenden der Browser-Adressleiste, komplette
    Sichtbarkeit des Chats (inkl. Input) ohne ungewolltes Scrollen des Body.
    Nutzen von 100dvh (Dynamic Viewport Height) wo verfügbar. */
-@media (max-width: 1024px) {
+/* Layout-/Viewport-Anpassungen nur für Touch, nicht für schmale Desktop-Fenster */
+@media (pointer: coarse) {
   /* Vereinheitlichte mobile Schriftgrößen (zwischen QUI & ClassicUI abgestimmt)
      Anpassbare Skalierung über Variablen – ermöglicht späteres globales Tuning */
   :root {
@@ -663,7 +665,8 @@ html {
 .qwebirc-qui .tab-selected .pane-close svg { stroke: #ff8080; }
 .qwebirc-qui .tab-selected .pane-close:hover svg { stroke: #ffaaaa; }
 
-@media (max-width: 1024px) {
+/* Typographie-/Größen-Anpassungen nur für Touch */
+@media (pointer: coarse) {
   /* Vollständige mobile QUI Overrides (Größen wie ClassicUI) */
   .qwebirc-qui .lines { font-size: var(--m-lines); }
   .qwebirc-qui .ircwindow div { font-size: var(--m-ircwindow); }
@@ -897,7 +900,7 @@ iframe {
   /* Kein Symbol anzeigen, Platz bleibt leer */
 }
 /* --- Touch-Optimierte Dropdown-Menüs (nur echte Touch-/Großzeiger-Geräte) --- */
-@media (max-width: 1024px) and (pointer: coarse) {
+@media (pointer: coarse) {
   /* Größere Klick-/Tapflächen für Accessibility (>= 48px Höhe empfohlen) */
   .qwebirc-qui .dropdownmenu { min-width: 180px; }
   .qwebirc-qui .dropdownmenu a,
@@ -915,7 +918,7 @@ iframe {
 }
 
 /* Mobile Verkleinerung der Chat-Ausgabe speziell für Touch (allgemein kleiner gewünscht) */
-@media (max-width: 1024px) and (pointer: coarse) {
+@media (pointer: coarse) {
   /* Etwas größere mobile Chat-Schrift (vorher 0.75 / 0.9) */
   :root { --m-lines: 0.9em; --m-ircwindow: 1em; }
   .qwebirc-qui .lines { font-size: var(--m-lines); }

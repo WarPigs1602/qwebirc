@@ -348,12 +348,13 @@ html {
 
 .qwebirc-classicui .emoji-picker-btn:active { background: rgba(0,0,0,0.08); }
 
-@media (max-width: 820px), (hover: none) and (pointer: coarse) {
+/* Mobile Emoji-Button / Input-Padding nur auf echten Touch-Geräten (Desktop-Window-Resize bleibt unverändert) */
+@media (pointer: coarse) {
   .qwebirc-classicui .emoji-picker-btn { font-size: 1.3em; width: 1.3em; height: 1.3em; inset-inline-start: 12px; }
   .qwebirc-classicui .input input.keyboard-input,
   .qwebirc-classicui .input input.mobile-input { padding-left: 3.3em; }
 }
-@media (max-width: 420px) {
+@media (pointer: coarse) and (max-width: 480px) {
   .qwebirc-classicui .emoji-picker-btn { font-size: 1.18em; width: 1.18em; height: 1.18em; }
   .qwebirc-classicui .input input.keyboard-input,
   .qwebirc-classicui .input input.mobile-input { padding-left: 2.9em; }
@@ -659,7 +660,8 @@ iframe {
 }
 
 /* Responsive & Mobile (vereinheitlicht, ersetzt alte max-device-width-Queries) */
-@media (max-width: 1024px) {
+/* Mobile Typographie nur bei Touch-Eingabe: Desktop verkleinern löst keine Änderung aus */
+@media (pointer: coarse) {
   /* Mobile Typographie an QUI angeglichen (gemeinsame Variablen in beiden Themes) */
   :root {
   --m-lines: 1.08em;
@@ -693,7 +695,8 @@ iframe {
 }
 
 /* Zusätzliche Vergrößerung nur für echte Touch-Geräte (coarse pointer) */
-@media (max-width: 1024px) and (pointer: coarse) {
+/* Zusätzliche Touch-Vergrößerung (bereits nur coarse -> keine Desktop-Auslösung) */
+@media (pointer: coarse) {
   .qwebirc-classicui .dropdownmenu { min-width: 180px; }
   .qwebirc-classicui .dropdownmenu a,
   .dropdownmenu a { /* global fallback */
@@ -768,7 +771,7 @@ iframe {
 }
 
 /* Eingebetteter Wizard mobil (leicht angepasst) */
-@media (max-width: 1024px) {
+@media (pointer: coarse) {
   .qwebirc-classicui .qwebirc-embeddedwizard .lines { font-size: 1.05em; }
   .qwebirc-classicui .qwebirc-embeddedwizard .tabbar, .qwebirc-classicui .qwebirc-embeddedwizard .nicklist { font-size: 1.15em; }
   .qwebirc-classicui .qwebirc-embeddedwizard .topic, .qwebirc-classicui .qwebirc-embeddedwizard .dropdownmenu a, .qwebirc-classicui .qwebirc-embeddedwizard .dropdownhint { font-size: 1.2em; }
