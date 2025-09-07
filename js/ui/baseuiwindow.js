@@ -197,6 +197,18 @@ qwebirc.ui.Window = new Class({
     if(!this.active && (hilight != qwebirc.ui.HILIGHT_NONE))
       this.setHilighted(hilight);
 
+    // Zusatz: Falls Highlight auf uns (HILIGHT_US) und das UI im Hintergrund (kein windowFocused)
+    // dann auch Sound abspielen, selbst wenn gerade keine Notification angezeigt wird.
+    try {
+      if(hilight == qwebirc.ui.HILIGHT_US && !this.active) {
+        var uiRoot = this.parentObject;
+        if(uiRoot && uiRoot.beep) {
+          // Nur wenn Browser-Window nicht fokussiert oder Tab nicht aktiv (Heuristik windowFocused Flag)
+          if(!uiRoot.windowFocused) uiRoot.beep(true);
+        }
+      }
+    } catch(e) {}
+
     if(type) {
   // If only a plain string was provided (status messages etc.) wrap it into an object
       if(typeof line === 'string') {

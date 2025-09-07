@@ -71,6 +71,16 @@ qwebirc.ui.Interface = new Class({
     };
 
     window.addEvent("domready", function() {
+      // Einmaliger Interaktions-Listener zum Priming der Audio-Objekte (Autoplay Policies)
+      try {
+        var prime = function() {
+          try { if(qwebirc.uiRoot && qwebirc.uiRoot.__beeper && qwebirc.uiRoot.__beeper.soundPlayer) qwebirc.uiRoot.__beeper.soundPlayer.prepare(); } catch(e) {}
+          document.removeEvent('click', prime);
+          document.removeEvent('keydown', prime);
+        };
+        document.addEvent('click', prime);
+        document.addEvent('keydown', prime);
+      } catch(e) {}
       var callback = function(options) {
         var IRC = new qwebirc.irc.IRCClient(options, ui_);
         IRC.connect();
@@ -187,6 +197,10 @@ qwebirc.ui.Interface = new Class({
       } catch(e) {}
 
       var ui_ = new ui($(element), new qwebirc.ui.Theme(this.options.theme), this.options);
+      try {
+        // Globale Referenz bereitstellen für Debug / Scripts
+        if(!qwebirc.uiRoot) qwebirc.uiRoot = ui_;
+      } catch(e) { /* ignore */ }
 
   var usingAutoNick = (nick == null);
       if(usingAutoNick && autoConnect)

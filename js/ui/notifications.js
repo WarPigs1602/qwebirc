@@ -26,7 +26,8 @@ qwebirc.ui.Beeper = new Class({
     if(notification && !this.uiOptions.BEEP_ON_MENTION)
       return;
       
-    this.soundPlayer.play("beep3.mp3");
+  // Ohne Extension: SoundPlayer wählt unterstütztes Format (mp3/wav)
+  this.soundPlayer.play("beep3");
   }
 });
 
