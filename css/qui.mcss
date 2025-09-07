@@ -1,24 +1,56 @@
+/*
+  Theme Farb-/Optionen (müssen ganz oben stehen, bevor reguläres CSS folgt,
+  damit der vorhandene Präprozessor sie korrekt parsen kann).
+*/
+topic_background=c,f2f0ff,back
+lines_background=c,181a20,back
+topic_border=c,232634,front
+tabbar_border=c,232634,front
+tabbar_background=c,232634,back
+tabbar_text=c,e0e0e0,front
+tab_border=c,232634,front
+tab_text=c,e0e0e0,front
+tab_hover=c,232634,back
+tab_selected=c,232634,back
+tab_selected_border=c,3a3f4b,back
+tab_selected_text=c,ffffff,front
+input_border=c,232634,front
+nicklist_border=c,232634,front
+nicklist_background=c,232634,back
+nicklist_text=c,e0e0e0,front
+nicklist_selected_border=c,3a3f4b,front
+menu_border=c,232634,front
+menu_background=c,232634,back
+menu_hover_background=c,2a2d3a,back
+lastpositionbar=c,3a3f4b,front
+timestamp_display=o,SHOW_TIMESTAMPS,inline,none
+timestamp_padding_left=o,SHOW_TIMESTAMPS,7px,11px
+timestamp_text_indent=o,SHOW_TIMESTAMPS,-7px,-9px
+nicklist_text=c,e0e0e0,front
+lines_text=c,e0e0e0,front
+menu_text=c,e0e0e0,front
+nicklist_selected_background=c,2a2d3a,back
+
 /* Emoji Picker Styles */
 .qwebirc-qui .emoji-picker-btn {
   position: absolute;
-  left: 10px;
-  top: 50%;
-  bottom: auto;
+  inset-block-start: 50%; /* top in logical prop */
+  inset-inline-start: 8px; /* left */
   transform: translateY(-50%);
   z-index: 10;
   background: none;
   border: none;
   cursor: pointer;
-  height: 1em;
-  width: 1em;
-  font-size: 1em;
-  line-height: 1em;
+  width: 1.1em;
+  height: 1.1em;
+  font-size: 1.1em; /* Grundgröße; JS passt dynamisch an */
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border-radius: 6px;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
 }
 .qwebirc-qui .emoji-picker-btn:hover {
   background: #232634;
@@ -67,7 +99,8 @@
 .qwebirc-qui .emoji-picker-overlay .emoji-category-bar button.active,
 .qwebirc-qui .emoji-picker-overlay .emoji-category-bar button:focus {
   background: #232634;
-  color: #232634;
+  /* Sichtbare Schriftfarbe statt Hintergrundfarbe */
+  color: #e0e0e0;
   border: 1.5px solid #7a6ff0;
 }
 .qwebirc-qui .emoji-picker-overlay .emoji-grid {
@@ -75,34 +108,39 @@
   flex-wrap: wrap;
   gap: 4px;
 }
-topic_background=c,f2f0ff,back
-lines_background=c,181a20,back
-topic_border=c,232634,front
-tabbar_border=c,232634,front
-tabbar_background=c,232634,back
-tabbar_text=c,e0e0e0,front
-tab_border=c,232634,front
-tab_text=c,e0e0e0,front
-tab_hover=c,232634,back
-tab_selected=c,232634,back
-tab_selected_border=c,3a3f4b,back
-tab_selected_text=c,ffffff,front
-input_border=c,232634,front
-nicklist_border=c,232634,front
-nicklist_background=c,232634,back
-nicklist_text=c,e0e0e0,front
-nicklist_selected_border=c,3a3f4b,front
-menu_border=c,232634,front
-menu_background=c,232634,back
-menu_hover_background=c,2a2d3a,back
-lastpositionbar=c,3a3f4b,front
-timestamp_display=o,SHOW_TIMESTAMPS,inline,none
-timestamp_padding_left=o,SHOW_TIMESTAMPS,7px,11px
-timestamp_text_indent=o,SHOW_TIMESTAMPS,-7px,-9px
-nicklist_text=c,e0e0e0,front
-lines_text=c,e0e0e0,front
-menu_text=c,e0e0e0,front
-nicklist_selected_background=c,2a2d3a,back
+
+/* Container muss relativ sein, damit absolute Positionierung des Emoji-Buttons verlässlich funktioniert */
+.qwebirc-qui .input { position: relative; }
+
+/* Basis-Left-Padding für Eingabefeld, damit Text nicht unter Button läuft (wird bei Bedarf durch JS dynamisch erhöht) */
+.qwebirc-qui .input input.keyboard-input,
+.qwebirc-qui .input input.mobile-input { padding-left: 2.4em; }
+
+/* Hover / Active Feedback stärker auf Touch optimieren */
+.qwebirc-qui .emoji-picker-btn:active { background:#2d313f; }
+
+/* Mobile spezifische Optimierung: Größerer Button, mehr Touch-Fläche ohne Höhe der Zeile zu verändern */
+@media (max-width: 820px), (hover: none) and (pointer: coarse) {
+  .qwebirc-qui .emoji-picker-btn {
+    font-size: 1.35em; /* größerer sichtbarer Emoji */
+    width: 1.35em;
+    height: 1.35em;
+    inset-inline-start: 10px;
+  }
+  .qwebirc-qui .input input.keyboard-input,
+  .qwebirc-qui .input input.mobile-input { padding-left: 3.2em; }
+}
+
+/* Wenn sehr kleine Displays: Button nicht zu groß werden lassen */
+@media (max-width: 420px) {
+  .qwebirc-qui .emoji-picker-btn {
+    font-size: 1.2em;
+    width: 1.2em;
+    height: 1.2em;
+  }
+  .qwebirc-qui .input input.keyboard-input,
+  .qwebirc-qui .input input.mobile-input { padding-left: 2.8em; }
+}
 
 
 body {
@@ -236,29 +274,8 @@ html {
     min-height: 30px;
   }
 
-  /* Skalierung & Touch-Optimierungen (aus früher separatem Block zusammengeführt) */
-  /* Mobile Schriftgröße analog classicui (dort: .lines ~1.05em, Inhalte erben) */
-  /* Vorher: .lines 1.2em + .ircwindow div 0.8em => effektiv ~0.96em (zu klein) */
-  .qwebirc-qui .lines { font-size: var(--m-lines); }
-  .qwebirc-qui .ircwindow div { font-size: var(--m-ircwindow); }
-  .qwebirc-qui .tabbar { line-height: 36px; min-height: 40px; }
-  .qwebirc-qui .tabbar, .qwebirc-qui .nicklist { font-size: var(--m-tabbar); }
-  .qwebirc-qui a.tab { padding: 6px 14px; font-size: 1em; min-height: 40px; }
-  .qwebirc-qui .topic { font-size: var(--m-topic); }
-  .qwebirc-qui .dropdownmenu a, .qwebirc-qui .dropdownhint { font-size: var(--m-menu); line-height: 1.35; padding: 6px 10px; }
-  .qwebirc-qui .input input.keyboard-input { font-size: var(--m-input); min-height: 44px; padding-top: 6px; padding-bottom: 6px; }
-  .qwebirc-qui input, .qwebirc-qui select { font-size: var(--m-select); }
-  .qwebirc-optionspane table.qwebirc-options-table input[type="text"],
-  .qwebirc-optionspane table.qwebirc-options-table select { font-size: var(--m-select); line-height: 1.35; min-height: 42px; }
-  .qwebirc-qui .tabclose { width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0; }
-  .qwebirc-qui .tabclose svg { width: 24px; height: 24px; stroke-width: 2.8; }
-  .qwebirc-qui .dropdown-tab img { width: 160%; }
-  .qwebirc-qui .outertabbar_top .dropdown-tab,
-  .qwebirc-qui .outertabbar_left .dropdown-tab { padding-right: 13px; }
-  .qwebirc-qui input[type="checkbox"],
-  .qwebirc-qui input[type="radio"] { transform: scale(1.5); }
-  .qwebirc-qui .qwebirc-optionspane div.hue-slider { height: 14px; }
-  .qwebirc-qui .qwebirc-optionspane div.hue-slider .knob { height: 24px; width: 12px; }
+  /* Mobile spezifische Schrift- & Touch-Overrides wurden ans Dateiende verschoben
+     (siehe abschließenden Media Query). Hier verbleiben nur Scroll-/Layout-Anpassungen. */
 }
 
 /* Zusätzliche Absicherung: wenn Browser 100dvh unterstützt, aber kein Breakpoint greift
@@ -642,25 +659,34 @@ html {
 .qwebirc-qui .tab-selected .pane-close svg { stroke: #ff8080; }
 .qwebirc-qui .tab-selected .pane-close:hover svg { stroke: #ffaaaa; }
 
-@media screen and (max-device-width:1024px) {
-  .qwebirc-qui .tabclose {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    min-height: 28px;
-    padding: 0;
-  }
-  .qwebirc-qui .tabclose svg {
-    width: 24px;
-    height: 24px;
-    stroke-width: 2.8;
-  }
-  /* Klammern um das X-Symbol in der Mobilansicht entfernen */
+@media (max-width: 1024px) {
+  /* Vollständige mobile QUI Overrides (Größen wie ClassicUI) */
+  .qwebirc-qui .lines { font-size: var(--m-lines); }
+  .qwebirc-qui .ircwindow div { font-size: var(--m-ircwindow); }
+  .qwebirc-qui .tabbar { line-height: 36px; min-height: 40px; height: 40px; font-size: var(--m-tabbar); padding: 0 10px; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .qwebirc-qui .tabbar::-webkit-scrollbar { height: 6px; }
+  .qwebirc-qui .tabbar::-webkit-scrollbar-track { background: transparent; }
+  .qwebirc-qui .tabbar::-webkit-scrollbar-thumb { background: #3a3f4b; border-radius: 3px; }
+  .qwebirc-qui .nicklist { font-size: var(--m-tabbar); }
+  .qwebirc-qui a.tab { padding: 6px 14px; font-size: 1em; min-height: 40px; height: 40px; display: flex; align-items: center; }
+  .qwebirc-qui .outertabbar_left .tab { min-height: 40px; }
+  .qwebirc-qui .topic { font-size: var(--m-topic); }
+  .qwebirc-qui .dropdownmenu a, .qwebirc-qui .dropdownhint { font-size: var(--m-menu); line-height: 1.35; padding: 6px 10px; }
+  .qwebirc-qui .input input.keyboard-input { font-size: var(--m-input); padding-top: 6px; padding-bottom: 6px; min-height: 44px; }
+  .qwebirc-qui input, .qwebirc-qui select { font-size: var(--m-select); }
+  .qwebirc-optionspane table.qwebirc-options-table input[type="text"],
+  .qwebirc-optionspane table.qwebirc-options-table select { font-size: var(--m-select); line-height: 1.35; min-height: 42px; }
+  .qwebirc-qui .tabclose { width: 30px; height: 30px; min-width: 30px; min-height: 30px; padding: 0; }
+  .qwebirc-qui .tabclose svg { width: 24px; height: 24px; stroke-width: 2.6; }
+  .qwebirc-qui .dropdown-tab img { width: 160%; }
+  .qwebirc-qui .outertabbar_top .dropdown-tab,
+  .qwebirc-qui .outertabbar_left .dropdown-tab { padding-right: 13px; }
+  .qwebirc-qui input[type="checkbox"], .qwebirc-qui input[type="radio"] { transform: scale(1.5); }
+  .qwebirc-qui .qwebirc-optionspane div.hue-slider { height: 14px; }
+  .qwebirc-qui .qwebirc-optionspane div.hue-slider .knob { height: 24px; width: 12px; }
+  /* Entfernt dekorative pseudo Elemente bei mobilen Close Buttons */
   .qwebirc-qui .tabclose:before,
-  .qwebirc-qui .tabclose:after {
-    content: none !important;
-    display: none !important;
-  }
+  .qwebirc-qui .tabclose:after { content: none !important; display: none !important; }
 }
 
 .qwebirc-qui a.tab-hilight-activity {
@@ -865,4 +891,29 @@ iframe {
   width: 16px;
   margin-right: 4px;
   /* Kein Symbol anzeigen, Platz bleibt leer */
+}
+/* --- Touch-Optimierte Dropdown-Menüs (nur echte Touch-/Großzeiger-Geräte) --- */
+@media (max-width: 1024px) and (pointer: coarse) {
+  /* Größere Klick-/Tapflächen für Accessibility (>= 48px Höhe empfohlen) */
+  .qwebirc-qui .dropdownmenu { min-width: 180px; }
+  .qwebirc-qui .dropdownmenu a,
+  .dropdownmenu a { /* global Fallback */
+    font-size: calc(var(--m-menu, 1.28em) * 1.1);
+    padding: 10px 18px;
+    line-height: 1.4;
+    min-height: 48px; /* ausreichende Touch-Zielgröße */
+  }
+  /* Hamburger / Dropdown-Tab Icon etwas größer für Finger */
+  .qwebirc-qui .dropdown-tab img { width: 180%; max-width: 32px; }
+  .qwebirc-qui .dropdown-tab { width: 32px; }
+  /* Hint-Tooltip größer lesbar falls eingeblendet */
+  .qwebirc-qui .dropdownhint { font-size: calc(var(--m-menu, 1.28em) * 1.05); }
+}
+
+/* Mobile Verkleinerung der Chat-Ausgabe speziell für Touch (allgemein kleiner gewünscht) */
+@media (max-width: 1024px) and (pointer: coarse) {
+  /* Etwas größere mobile Chat-Schrift (vorher 0.75 / 0.9) */
+  :root { --m-lines: 0.9em; --m-ircwindow: 1em; }
+  .qwebirc-qui .lines { font-size: var(--m-lines); }
+  .qwebirc-qui .ircwindow div { font-size: var(--m-ircwindow); }
 }

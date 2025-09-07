@@ -277,13 +277,13 @@ qwebirc.ui.QUI = new Class({
     // Emoji Picker Button
   var emojiBtn = new Element("button", { type: "button", html: "😊" });
   emojiBtn.addClass("emoji-picker-btn");
-  // Dynamic size: 1em
-  emojiBtn.setStyles({ position: "absolute", left: "5px", bottom: "5px", zIndex: 10, background: "none", border: "none", cursor: "pointer", fontSize: "1em", padding: "0 4px" });
+  // Initial styles; tatsächliche Größe wird nach Messung angepasst
+  emojiBtn.setStyles({ position: "absolute", left: "8px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "1.1em", padding: 0, lineHeight: 1 });
   form.appendChild(emojiBtn);
 
-  // Input box with left padding for emoji button
+  // Input box mit ausreichend linkem Padding (Fallback, wird unten evtl. überschrieben)
     var inputbox = new Element("input");
-    inputbox.setStyle("paddingLeft", "32px");
+    inputbox.setStyle("paddingLeft", "2.4em");
     this.addEvent("signedOn", function(client) {
       this.getStatusWindow(client).lines.removeClass("spinner");
       var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';

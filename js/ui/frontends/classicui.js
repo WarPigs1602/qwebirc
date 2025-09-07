@@ -292,13 +292,13 @@ qwebirc.ui.CLASSICUI = new Class({
   // Emoji Picker Button (full implementation portiert aus qui.js)
   var emojiBtn = new Element("button", { type: "button", html: "😊" });
   emojiBtn.addClass("emoji-picker-btn");
-  // Dynamic size: 1em
-  emojiBtn.setStyles({ position: "absolute", left: "5px", bottom: "5px", zIndex: 10, background: "none", border: "none", cursor: "pointer", fontSize: "1em", padding: "0 4px" });
+  // Grund-Styles – tatsächliche Größe wird dynamisch angepasst
+  emojiBtn.setStyles({ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "1.05em", padding: 0, lineHeight: 1 });
   form.appendChild(emojiBtn);
 
-  // Input box with left padding for emoji button
+  // Input box with left padding for emoji button (Initialwert; dynamisch überschrieben)
   var inputbox = new Element("input");
-  inputbox.setStyle("paddingLeft", "32px");
+  inputbox.setStyle("paddingLeft", "2.6em");
 
   // Emoji Picker Overlay
   var emojiOverlay = new Element("div");
