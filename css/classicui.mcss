@@ -35,6 +35,54 @@ body {
   font-family: var(--qwebirc-ui-font);
 }
 
+/* Nicklist Toggle Button (nur auf Touch-Geräten sichtbar) */
+.qwebirc-classicui .nicklist-toggle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 120;
+  background: #ffffffcc;
+  border: 1px solid $(tabbar_border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  padding: 4px 8px;
+  cursor: pointer;
+  line-height: 1;
+  display: none; /* standard: Desktop ausgeblendet */
+  backdrop-filter: blur(2px);
+}
+.qwebirc-classicui .nicklist-toggle:hover { background: #fff; }
+.qwebirc-classicui .nicklist-toggle.active { background: #e6f0ff; border-color: #8aa6c6; }
+@media (pointer: coarse) {
+  .qwebirc-classicui .nicklist-toggle { display: inline-flex; align-items:center; justify-content:center; font-size: 1.05em; }
+}
+
+/* Auf sehr kleinen Bildschirmen Nickliste überlagern statt Breite zu verbrauchen */
+@media (pointer: coarse) and (max-width: 860px) {
+  .qwebirc-classicui .rightboundpanel.nicklist { /* Basiszustand, Transition vorbereiten */
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    width: 180px; /* leicht breiter für Finger */
+    max-width: 70vw;
+    font-size: 0.95em;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+  /* Geschlossen: Panel rausgeschoben */
+  .qwebirc-classicui .rightboundpanel.nicklist.nicklist-touch-closed {
+    transform: translateX(100%);
+  }
+  /* Geöffnet: sichtbar + Schatten */
+  .qwebirc-classicui .rightboundpanel.nicklist.nicklist-touch-open {
+    transform: translateX(0);
+    box-shadow: -2px 0 10px -2px rgba(0,0,0,0.25);
+    background: $(nicklist_background);
+    position: absolute;
+    right: 0;
+    top: 0; /* JS hält top-Position via reflow aktuell */
+  }
+  /* Größere Klick-Flächen für Nick-Einträge */
+  .qwebirc-classicui .rightboundpanel.nicklist a { padding: 6px 6px 6px 8px; font-size: 1.05em; }
+}
+
 /* expose a theme hue for panes so JS can read it via getComputedStyle(document.documentElement).getPropertyValue('--qwebirc-pane-bg') */
 :root {
   --qwebirc-pane-bg: $(tabbar_background);

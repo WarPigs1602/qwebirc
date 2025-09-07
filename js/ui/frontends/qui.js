@@ -162,6 +162,52 @@ qwebirc.ui.QUI = new Class({
       if(qwebirc.ui.util && qwebirc.ui.util.connectStatus) qwebirc.ui.util.connectStatus.hide();
     });
 
+    // Touch Nicklist Toggle (manuell ein-/ausblendbar wie in ClassicUI)
+    try {
+      if(!qwebirc.util.deviceHasKeyboard() && !this.__nicklistToggleAdded) {
+        this.__nicklistToggleAdded = true;
+        var self = this;
+        var btnTitle = function(){
+          try {
+            var lang = (window.qwebirc && window.qwebirc.config && window.qwebirc.config.LANGUAGE) || 'en';
+            var i18n = window.qwebirc && window.qwebirc.i18n && window.qwebirc.i18n[lang] && window.qwebirc.i18n[lang].options;
+            return (i18n && i18n.TOGGLE_NICKLIST) ? i18n.TOGGLE_NICKLIST : 'Nicklist';
+          } catch(e) { return 'Nicklist'; }
+        };
+        var toggleBtn = new Element('button', { type: 'button', 'class': 'nicklist-toggle', text: '👥' });
+        toggleBtn.set('title', btnTitle());
+        toggleBtn.setAttribute && toggleBtn.setAttribute('aria-label', btnTitle());
+        this.qjsui.top.appendChild(toggleBtn);
+        var updateState = function(forceReflow){
+          var visible = !!self.uiOptions.SHOW_NICKLIST;
+            try { toggleBtn.setAttribute('aria-pressed', visible ? 'true' : 'false'); } catch(_) {}
+            if(visible) toggleBtn.addClass('active'); else toggleBtn.removeClass('active');
+          // Klassen direkt auf nicklist Panel setzen
+          try {
+            var nl = self.qjsui && self.qjsui.right;
+            if(nl) {
+              if(visible) { nl.addClass('nicklist-touch-open'); nl.removeClass('nicklist-touch-closed'); }
+              else { nl.removeClass('nicklist-touch-open'); nl.addClass('nicklist-touch-closed'); }
+            }
+          } catch(_) {}
+          if(forceReflow) self.reflow();
+        };
+        toggleBtn.addEvent('click', function(e){
+          qwebirc.ui.util.stopEvent(e);
+          self.uiOptions.SHOW_NICKLIST = !self.uiOptions.SHOW_NICKLIST;
+          var w = self.getActiveWindow && self.getActiveWindow();
+          if(w) self.qjsui.showChannel((w.nicklist != null), self.uiOptions.SHOW_NICKLIST);
+          updateState(true);
+        });
+        var refreshTitle = function(){ try { toggleBtn.set('title', btnTitle()); toggleBtn.setAttribute('aria-label', btnTitle()); } catch(e) {} };
+        if(window.qwebirc && typeof window.qwebirc.registerTranslator === 'function') {
+          window.qwebirc.registerTranslator(function(){ refreshTitle(); });
+        }
+        window.addEventListener('qwebirc:languageChanged', function(){ refreshTitle(); });
+        updateState(false);
+      }
+    } catch(e) {}
+
   },
   newWindow: function(client, type, name) {
     var w = this.parent(client, type, name);
