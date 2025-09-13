@@ -1,4 +1,4 @@
-
+This repo is now deprecated, please go to https://codeberg.org/WarPigs1602/mwebirc
 
 # mwebirc – Modern Web IRC Client (formerly qwebirc)
 
